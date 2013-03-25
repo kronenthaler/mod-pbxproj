@@ -354,6 +354,10 @@ class PBXVariantGroup(PBXType):
 	pass
 
 
+class PBXTargetDependency(PBXType):
+	pass
+	
+
 class PBXBuildPhase(PBXType):
 	def add_build_file(self, bf):
 		if bf.get('isa') != 'PBXBuildFile':
@@ -1136,7 +1140,7 @@ class XcodeProject(PBXDict):
 					#root.remove('objects') #remove it to avoid problems
 
 					sections = [
-					('PBXBuildFile',False),
+					('PBXBuildFile',False),	
 					('PBXCopyFilesBuildPhase',True),
 					('PBXFileReference',False),
 					('PBXFrameworksBuildPhase',True),
@@ -1147,7 +1151,11 @@ class XcodeProject(PBXDict):
 					('PBXShellScriptBuildPhase',True),
 					('PBXSourcesBuildPhase',True),
 					('XCBuildConfiguration',True),
-					('XCConfigurationList',True)]
+					('XCConfigurationList',True),
+					('PBXTargetDependency', True), 
+					('PBXVariantGroup', True),
+					('PBXReferenceProxy', True),
+					('PBXContainerItemProxy', True)]
 
 					for section in sections:	#iterate over the sections
 						if(self.sections.get(section[0]) == None):
@@ -1241,7 +1249,7 @@ class XcodeProject(PBXDict):
 			data = '""'
 			for node in root.childNodes:
 				if node.nodeType == node.TEXT_NODE:
-					data = '"'+XcodeProject.addslashes(node.data).replace('\n','\\n')+'"'
+					data = '"'+XcodeProject.addslashes(node.data).replace('\n','\\n').replace('\\\'', '\'')+'"'
 					break
 			result += data
 		return result;
@@ -1263,6 +1271,6 @@ class XcodeProject(PBXDict):
 
 		xml = parseString(rawXML);
 		jsonStr = XcodeProject.getJSONFromXML(xml.getElementsByTagName('dict')[0]);
-
+		
 		tree = json.loads(jsonStr)
 		return XcodeProject(tree, path)
