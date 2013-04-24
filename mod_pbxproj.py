@@ -152,6 +152,7 @@ class PBXFileReference(PBXType):
 		'.h': ('sourcecode.c.h', None),
 		'.icns': ('image.icns','PBXResourcesBuildPhase'),
 		'.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
+		'.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
 		'.mm': ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase'),
 		'.nib': ('wrapper.nib', 'PBXResourcesBuildPhase'),
 		'.plist': ('text.plist.xml', 'PBXResourcesBuildPhase'),
@@ -356,7 +357,7 @@ class PBXVariantGroup(PBXType):
 
 class PBXTargetDependency(PBXType):
 	pass
-	
+
 
 class PBXBuildPhase(PBXType):
 	def add_build_file(self, bf):
@@ -852,12 +853,24 @@ class XcodeProject(PBXDict):
 			if(not os.path.exists(finalLib)):
 				os.symlink(srcLib, finalLib);
 
-
 	def remove_group(self, grp):
 		pass
 
-	def remove_file(self, id):
-		pass
+	def remove_file(self, id, recursive=True):
+		if not PBXType.IsGuid(id):
+			id = id.id
+
+		if id in self.objects:
+			self.objects.remove(id)
+
+			if recursive:
+				groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
+
+				for group in groups:
+					if id in group['children']:
+						group.remove_child(id)
+
+			self.modified = True
 
 	def move_file(self, id, dest_grp=None):
 		pass
@@ -1140,7 +1153,7 @@ class XcodeProject(PBXDict):
 					#root.remove('objects') #remove it to avoid problems
 
 					sections = [
-					('PBXBuildFile',False),	
+					('PBXBuildFile',False),
 					('PBXCopyFilesBuildPhase',True),
 					('PBXFileReference',False),
 					('PBXFrameworksBuildPhase',True),
@@ -1152,7 +1165,7 @@ class XcodeProject(PBXDict):
 					('PBXSourcesBuildPhase',True),
 					('XCBuildConfiguration',True),
 					('XCConfigurationList',True),
-					('PBXTargetDependency', True), 
+					('PBXTargetDependency', True),
 					('PBXVariantGroup', True),
 					('PBXReferenceProxy', True),
 					('PBXContainerItemProxy', True)]
@@ -1160,7 +1173,7 @@ class XcodeProject(PBXDict):
 					for section in sections:	#iterate over the sections
 						if(self.sections.get(section[0]) == None):
 							continue;
-							
+
 						out.write('\n/* Begin %s section */'%section[0]);
 						self.sections.get(section[0]).sort(cmp=lambda x,y: cmp(x[0],y[0]))
 						#if(self.sections.get(section[0])=='PBXGroup' and ):	//add the patch to add the missing but existing files.
@@ -1271,6 +1284,6 @@ class XcodeProject(PBXDict):
 
 		xml = parseString(rawXML);
 		jsonStr = XcodeProject.getJSONFromXML(xml.getElementsByTagName('dict')[0]);
-		
+
 		tree = json.loads(jsonStr)
 		return XcodeProject(tree, path)
