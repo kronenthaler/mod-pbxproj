@@ -184,7 +184,7 @@ class PBXFileReference(PBXType):
         'SOURCE_ROOT',
         ]
 
-    def guess_file_type(self, ignore_unknown_type=True):
+    def guess_file_type(self, ignore_unknown_type=False):
         self.remove('explicitFileType')
         self.remove('lastKnownFileType')
 
@@ -212,7 +212,7 @@ class PBXFileReference(PBXType):
         self['explicitFileType'] = ft
 
     @classmethod
-    def Create(cls, os_path, tree='SOURCE_ROOT', ignore_unknown_type=True):
+    def Create(cls, os_path, tree='SOURCE_ROOT', ignore_unknown_type=False):
         if tree not in cls.trees:
             print 'Not a valid sourceTree type: %s' % tree
             return None
@@ -619,7 +619,7 @@ class XcodeProject(PBXDict):
     def get_files_by_os_path(self, os_path, tree='SOURCE_ROOT'):
         files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
                                                      and f.get('path') == os_path
-        and f.get('sourceTree') == tree]
+                                                     and f.get('sourceTree') == tree]
 
         return files
 
@@ -636,7 +636,7 @@ class XcodeProject(PBXDict):
 
     def get_build_files(self, id):
         files = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile'
-        and f.get('fileRef') == id]
+                                                     and f.get('fileRef') == id]
 
         return files
 
@@ -786,7 +786,7 @@ class XcodeProject(PBXDict):
         head, tail = ntpath.split(path)
         return tail or ntpath.basename(head)
 
-    def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=True):
+    def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
         for obj in self.objects.values():
             if 'path' in obj:
                 if self.path_leaf(f_path) == self.path_leaf(obj.get('path')):
@@ -794,7 +794,7 @@ class XcodeProject(PBXDict):
 
         return self.add_file(f_path, parent, tree, create_build_files, weak, ignore_unknown_type=ignore_unknown_type)
 
-    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=True):
+    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
         results = []
         abs_path = ''
 
@@ -829,14 +829,14 @@ class XcodeProject(PBXDict):
                 results.append(build_file)
 
             if abs_path and tree == 'SOURCE_ROOT' \
-               and os.path.isfile(abs_path) \
-               and file_ref.build_phase == 'PBXFrameworksBuildPhase':
+                        and os.path.isfile(abs_path) \
+                        and file_ref.build_phase == 'PBXFrameworksBuildPhase':
                 library_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
                 self.add_library_search_paths([library_path], recursive=False)
 
             if abs_path and tree == 'SOURCE_ROOT' \
-               and not os.path.isfile(abs_path) \
-               and file_ref.build_phase == 'PBXFrameworksBuildPhase':
+                        and not os.path.isfile(abs_path) \
+                        and file_ref.build_phase == 'PBXFrameworksBuildPhase':
                 framework_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
                 self.add_framework_search_paths([framework_path, '$(inherited)'], recursive=False)
 
