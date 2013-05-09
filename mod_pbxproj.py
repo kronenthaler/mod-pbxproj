@@ -194,7 +194,7 @@ class PBXFileReference(PBXType):
             ext = ''
         else:
             ext = os.path.splitext(self.get('name', ''))[1]
-            f_type, build_phase = PBXFileReference.types.get(ext, ('?', None))
+            f_type, build_phase = PBXFileReference.types.get(ext, ('?', 'PBXResourcesBuildPhase'))
 
         self['lastKnownFileType'] = f_type
         self.build_phase = build_phase
