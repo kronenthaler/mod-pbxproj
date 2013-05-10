@@ -443,7 +443,7 @@ class XCBuildConfiguration(PBXType):
                 self[base][key] = PBXList(self[base][key])
 
             if escape:
-                if self[base][key].add('\\"%s\\"' % path):  # '\\"%s\\"' % path
+                if self[base][key].add('"%s"' % path):  # '\\"%s\\"' % path
                     modified = True
             else:
                 if self[base][key].add(path):  # '\\"%s\\"' % path
@@ -458,7 +458,7 @@ class XCBuildConfiguration(PBXType):
         return self.add_search_paths(paths, 'buildSettings', 'LIBRARY_SEARCH_PATHS', recursive=recursive)
 
     def add_framework_search_paths(self, paths, recursive=True):
-        return self.add_search_paths(paths, 'buildSettings', 'FRAMEWORK_SEARCH_PATHS', recursive=recursive, escape=False)
+        return self.add_search_paths(paths, 'buildSettings', 'FRAMEWORK_SEARCH_PATHS', recursive=recursive)
 
     def add_other_cflags(self, flags):
         modified = False
