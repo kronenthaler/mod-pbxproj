@@ -1,16 +1,16 @@
 #  Copyright 2012 Calvin Rien
 #
-#	 Licensed under the Apache License, Version 2.0 (the "License");
-#	 you may not use this file except in compliance with the License.
-#	 You may obtain a copy of the License at
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
 #
-#	   http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#	 Unless required by applicable law or agreed to in writing, software
-#	 distributed under the License is distributed on an "AS IS" BASIS,
-#	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#	 See the License for the specific language governing permissions and
-#	 limitations under the License.
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
 
 #  A pbxproj file is an OpenStep format plist
 #  {} represents dictionary of key=value pairs delimited by ;
@@ -32,1258 +32,1296 @@
 #  the pbxproj file.  Plutil is available in OS X 10.2 and higher
 #  Plutil can't write OpenStep plists, so I save as XML
 
-import re, uuid, sys, os, shutil, subprocess, datetime, json, types, re, ntpath
+import datetime
+import json
+import ntpath
+import os
+import plistlib
+import re
+import shutil
+import subprocess
+import uuid
 
 from UserDict import IterableUserDict
 from UserList import UserList
-from xml.dom.minidom import *
 
 regex = '[a-zA-Z0-9\\._/-]*'
 
+
 class PBXEncoder(json.JSONEncoder):
 
-	def default(self, obj):
-		"""Tests the input object, obj, to encode as JSON."""
+    def default(self, obj):
+        """Tests the input object, obj, to encode as JSON."""
 
-		if isinstance(obj, (PBXList, PBXDict)):
-			return obj.data
+        if isinstance(obj, (PBXList, PBXDict)):
+            return obj.data
 
-		return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class PBXDict(IterableUserDict):
-	def __init__(self, d=None):
-		if d:
-			d = dict([(PBXType.Convert(k),PBXType.Convert(v)) for k,v in d.items()])
+    def __init__(self, d=None):
+        if d:
+            d = dict([(PBXType.Convert(k), PBXType.Convert(v)) for k, v in d.items()])
 
-		IterableUserDict.__init__(self, d)
+        IterableUserDict.__init__(self, d)
 
-	def __setitem__(self, key, value):
-		IterableUserDict.__setitem__(self, PBXType.Convert(key), PBXType.Convert(value))
+    def __setitem__(self, key, value):
+        IterableUserDict.__setitem__(self, PBXType.Convert(key), PBXType.Convert(value))
 
-	def remove(self, key):
-		self.data.pop(PBXType.Convert(key), None)
-
+    def remove(self, key):
+        self.data.pop(PBXType.Convert(key), None)
 
 
 class PBXList(UserList):
-	def __init__(self, l=None):
-		if isinstance(l, basestring):
-			UserList.__init__(self)
-			self.add(l)
-			return
-		elif l:
-			l = [PBXType.Convert(v) for v in l]
+    def __init__(self, l=None):
+        if isinstance(l, basestring):
+            UserList.__init__(self)
+            self.add(l)
+            return
+        elif l:
+            l = [PBXType.Convert(v) for v in l]
 
-		UserList.__init__(self, l)
+        UserList.__init__(self, l)
 
-	def add(self, value):
-		value = PBXType.Convert(value)
+    def add(self, value):
+        value = PBXType.Convert(value)
 
-		if value in self.data:
-			return False
+        if value in self.data:
+            return False
 
-		self.data.append(value)
-		return True
+        self.data.append(value)
+        return True
 
-	def remove(self, value):
-		value = PBXType.Convert(value)
+    def remove(self, value):
+        value = PBXType.Convert(value)
 
-		if value in self.data:
-			self.data.remove(value)
+        if value in self.data:
+            self.data.remove(value)
 
-	def __setitem__(self, key, value):
-		UserList.__setitem__(self, PBXType.Convert(key), PBXType.Convert(value))
+    def __setitem__(self, key, value):
+        UserList.__setitem__(self, PBXType.Convert(key), PBXType.Convert(value))
 
 
 class PBXType(PBXDict):
-	def __init__(self, d=None):
-		PBXDict.__init__(self, d)
+    def __init__(self, d=None):
+        PBXDict.__init__(self, d)
 
-		if not self.has_key('isa'):
-			self['isa'] = self.__class__.__name__
-		self.id = None
+        if 'isa' not in self:
+            self['isa'] = self.__class__.__name__
+        self.id = None
 
-	@staticmethod
-	def Convert(o):
-		if isinstance(o, list):
-			return PBXList(o)
-		elif isinstance(o, dict):
-			isa = o.get('isa')
+    @staticmethod
+    def Convert(o):
+        if isinstance(o, list):
+            return PBXList(o)
+        elif isinstance(o, dict):
+            isa = o.get('isa')
 
-			if not isa:
-				return PBXDict(o)
+            if not isa:
+                return PBXDict(o)
 
-			cls = globals().get(isa)
+            cls = globals().get(isa)
 
-			if cls and issubclass(cls, PBXType):
-				return cls(o)
+            if cls and issubclass(cls, PBXType):
+                return cls(o)
 
-			print 'warning: unknown PBX type: %s' % isa
-			return PBXDict(o)
-		else:
-			return o
+            print 'warning: unknown PBX type: %s' % isa
+            return PBXDict(o)
+        else:
+            return o
 
-	@staticmethod
-	def IsGuid(o):
-		return re.match('^[A-F0-9]{24}$', str(o))
+    @staticmethod
+    def IsGuid(o):
+        return re.match('^[A-F0-9]{24}$', str(o))
 
-	@classmethod
-	def GenerateId(cls):
-		return ''.join(str(uuid.uuid4()).upper().split('-')[1:])
+    @classmethod
+    def GenerateId(cls):
+        return ''.join(str(uuid.uuid4()).upper().split('-')[1:])
 
-	@classmethod
-	def Create(cls, *args, **kwargs):
-		return cls(*args, **kwargs)
+    @classmethod
+    def Create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
 
 
 class PBXFileReference(PBXType):
-	def __init__(self, d=None):
-		PBXType.__init__(self, d)
-		self.build_phase = None
+    def __init__(self, d=None):
+        PBXType.__init__(self, d)
+        self.build_phase = None
 
-	types = {
-		'.a':('archive.ar', 'PBXFrameworksBuildPhase'),
-		'.app': ('wrapper.application', None),
-		'.s': ('sourcecode.asm', 'PBXSourcesBuildPhase'),
-		'.c': ('sourcecode.c.c', 'PBXSourcesBuildPhase'),
-		'.cpp': ('sourcecode.cpp.cpp', 'PBXSourcesBuildPhase'),
-		'.framework': ('wrapper.framework','PBXFrameworksBuildPhase'),
-		'.h': ('sourcecode.c.h', None),
-		'.icns': ('image.icns','PBXResourcesBuildPhase'),
-		'.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
-		'.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
-		'.mm': ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase'),
-		'.nib': ('wrapper.nib', 'PBXResourcesBuildPhase'),
-		'.plist': ('text.plist.xml', 'PBXResourcesBuildPhase'),
-		'.json': ('text.json', 'PBXResourcesBuildPhase'),
-		'.png': ('image.png', 'PBXResourcesBuildPhase'),
-		'.rtf': ('text.rtf', 'PBXResourcesBuildPhase'),
-		'.tiff': ('image.tiff', 'PBXResourcesBuildPhase'),
-		'.txt': ('text', 'PBXResourcesBuildPhase'),
-		'.xcodeproj': ('wrapper.pb-project', None),
-		'.xib': ('file.xib', 'PBXResourcesBuildPhase'),
-		'.strings': ('text.plist.strings', 'PBXResourcesBuildPhase'),
-		'.bundle': ('wrapper.plug-in', 'PBXResourcesBuildPhase'),
-		'.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase')
-	}
+    types = {
+        '.a': ('archive.ar', 'PBXFrameworksBuildPhase'),
+        '.app': ('wrapper.application', None),
+        '.s': ('sourcecode.asm', 'PBXSourcesBuildPhase'),
+        '.c': ('sourcecode.c.c', 'PBXSourcesBuildPhase'),
+        '.cpp': ('sourcecode.cpp.cpp', 'PBXSourcesBuildPhase'),
+        '.framework': ('wrapper.framework', 'PBXFrameworksBuildPhase'),
+        '.h': ('sourcecode.c.h', None),
+        '.icns': ('image.icns', 'PBXResourcesBuildPhase'),
+        '.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
+        '.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
+        '.mm': ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase'),
+        '.nib': ('wrapper.nib', 'PBXResourcesBuildPhase'),
+        '.plist': ('text.plist.xml', 'PBXResourcesBuildPhase'),
+        '.json': ('text.json', 'PBXResourcesBuildPhase'),
+        '.png': ('image.png', 'PBXResourcesBuildPhase'),
+        '.rtf': ('text.rtf', 'PBXResourcesBuildPhase'),
+        '.tiff': ('image.tiff', 'PBXResourcesBuildPhase'),
+        '.txt': ('text', 'PBXResourcesBuildPhase'),
+        '.xcodeproj': ('wrapper.pb-project', None),
+        '.xib': ('file.xib', 'PBXResourcesBuildPhase'),
+        '.strings': ('text.plist.strings', 'PBXResourcesBuildPhase'),
+        '.bundle': ('wrapper.plug-in', 'PBXResourcesBuildPhase'),
+        '.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase')
+    }
 
-	trees = [
-		'<absolute>',
-		'<group>',
-		'BUILT_PRODUCTS_DIR',
-		'DEVELOPER_DIR',
-		'SDKROOT',
-		'SOURCE_ROOT',
-	]
+    trees = [
+        '<absolute>',
+        '<group>',
+        'BUILT_PRODUCTS_DIR',
+        'DEVELOPER_DIR',
+        'SDKROOT',
+        'SOURCE_ROOT',
+        ]
 
-	def guess_file_type(self):
-		self.remove('explicitFileType')
-		self.remove('lastKnownFileType')
-		ext = os.path.splitext(self.get('name', ''))[1]
+    def guess_file_type(self, ignore_unknown_type=False):
+        self.remove('explicitFileType')
+        self.remove('lastKnownFileType')
 
-		f_type, build_phase = PBXFileReference.types.get(ext, ('?', None))
+        if os.path.isdir(self.get('path')):
+            f_type = 'folder'
+            build_phase = None
+            ext = ''
+        else:
+            ext = os.path.splitext(self.get('name', ''))[1]
+            f_type, build_phase = PBXFileReference.types.get(ext, ('?', 'PBXResourcesBuildPhase'))
 
-		self['lastKnownFileType'] = f_type
-		self.build_phase = build_phase
+        self['lastKnownFileType'] = f_type
+        self.build_phase = build_phase
 
-		if f_type == '?':
-			print 'unknown file extension: %s' % ext
-			print 'please add extension and Xcode type to PBXFileReference.types'
+        if f_type == '?' and not ignore_unknown_type:
+            print 'unknown file extension: %s' % ext
+            print 'please add extension and Xcode type to PBXFileReference.types'
 
-		return f_type
+        return f_type
 
-	def set_file_type(self, ft):
-		self.remove('explicitFileType')
-		self.remove('lastKnownFileType')
+    def set_file_type(self, ft):
+        self.remove('explicitFileType')
+        self.remove('lastKnownFileType')
 
-		self['explicitFileType'] = ft
+        self['explicitFileType'] = ft
 
-	@classmethod
-	def Create(cls, os_path, tree='SOURCE_ROOT'):
-		if tree not in cls.trees:
-			print 'Not a valid sourceTree type: %s' % tree
-			return None
+    @classmethod
+    def Create(cls, os_path, tree='SOURCE_ROOT', ignore_unknown_type=False):
+        if tree not in cls.trees:
+            print 'Not a valid sourceTree type: %s' % tree
+            return None
 
-		fr = cls()
-		fr.id = cls.GenerateId()
-		fr['path'] = os_path
-		fr['name'] = os.path.split(os_path)[1]
-		fr['sourceTree'] = '<absolute>' if os.path.isabs(os_path) else tree
-		fr.guess_file_type()
+        fr = cls()
+        fr.id = cls.GenerateId()
+        fr['path'] = os_path
+        fr['name'] = os.path.split(os_path)[1]
+        fr['sourceTree'] = '<absolute>' if os.path.isabs(os_path) else tree
+        fr.guess_file_type(ignore_unknown_type=ignore_unknown_type)
 
-		return fr
+        return fr
+
 
 class PBXBuildFile(PBXType):
-	def set_weak_link(self, weak=False):
-		k_settings = 'settings'
-		k_attributes = 'ATTRIBUTES'
+    def set_weak_link(self, weak=False):
+        k_settings = 'settings'
+        k_attributes = 'ATTRIBUTES'
 
-		s = self.get(k_settings)
+        s = self.get(k_settings)
 
-		if not s:
-			if weak:
-				self[k_settings] = PBXDict({k_attributes:PBXList(['Weak'])})
+        if not s:
+            if weak:
+                self[k_settings] = PBXDict({k_attributes: PBXList(['Weak'])})
 
-			return True
+            return True
 
-		atr = s.get(k_attributes)
+        atr = s.get(k_attributes)
 
-		if not atr:
-			if weak:
-				atr = PBXList()
-			else:
-				return False
+        if not atr:
+            if weak:
+                atr = PBXList()
+            else:
+                return False
 
-		if weak:
-			atr.add('Weak')
-		else:
-			atr.remove('Weak')
+        if weak:
+            atr.add('Weak')
+        else:
+            atr.remove('Weak')
 
-		self[k_settings][k_attributes] = atr
+        self[k_settings][k_attributes] = atr
 
-		return True
+        return True
 
-	def add_compiler_flag(self, flag):
-		k_settings = 'settings'
-		k_attributes = 'COMPILER_FLAGS'
+    def add_compiler_flag(self, flag):
+        k_settings = 'settings'
+        k_attributes = 'COMPILER_FLAGS'
 
-		if not self.has_key(k_settings):
-			self[k_settings] = PBXDict()
+        if k_settings not in self:
+            self[k_settings] = PBXDict()
 
-		if not self[k_settings].has_key(k_attributes):
-			self[k_settings][k_attributes] = flag
-			return True
+        if k_attributes not in self[k_settings]:
+            self[k_settings][k_attributes] = flag
+            return True
 
-		flags = self[k_settings][k_attributes].split(' ')
+        flags = self[k_settings][k_attributes].split(' ')
 
-		if flag in flags:
-			return False
+        if flag in flags:
+            return False
 
-		flags.append(flag)
+        flags.append(flag)
 
-		self[k_settings][k_attributes] = ' '.join(flags)
+        self[k_settings][k_attributes] = ' '.join(flags)
 
-	@classmethod
-	def Create(cls, file_ref, weak=False):
-		if isinstance(file_ref, PBXFileReference):
-			file_ref = file_ref.id
+    @classmethod
+    def Create(cls, file_ref, weak=False):
+        if isinstance(file_ref, PBXFileReference):
+            file_ref = file_ref.id
 
-		bf = cls()
-		bf.id = cls.GenerateId()
-		bf['fileRef'] = file_ref
+        bf = cls()
+        bf.id = cls.GenerateId()
+        bf['fileRef'] = file_ref
 
-		if weak:
-			bf.set_weak_link(True)
+        if weak:
+            bf.set_weak_link(True)
 
-		return bf
+        return bf
+
 
 class PBXGroup(PBXType):
-	def add_child(self, ref):
-		if not isinstance(ref, PBXDict):
-			return None
+    def add_child(self, ref):
+        if not isinstance(ref, PBXDict):
+            return None
 
-		isa = ref.get('isa')
+        isa = ref.get('isa')
 
-		if isa != 'PBXFileReference' and isa != 'PBXGroup':
-			return None
+        if isa != 'PBXFileReference' and isa != 'PBXGroup':
+            return None
 
-		if not self.has_key('children'):
-			self['children'] = PBXList()
+        if 'children' not in self:
+            self['children'] = PBXList()
 
-		self['children'].add(ref.id)
+        self['children'].add(ref.id)
 
-		return ref.id
+        return ref.id
 
-	def remove_child(self, id):
-		if not self.has_key('children'):
-			self['children'] = PBXList()
-			return
+    def remove_child(self, id):
+        if 'children' not in self:
+            self['children'] = PBXList()
+            return
 
-		if not PBXType.IsGuid(id):
-			id = id.id
+        if not PBXType.IsGuid(id):
+            id = id.id
 
-		self['children'].remove(id)
+        self['children'].remove(id)
 
-	def has_child(self, id):
-		if not self.has_key('children'):
-			self['children'] = PBXList()
-			return False
+    def has_child(self, id):
+        if 'children' not in self:
+            self['children'] = PBXList()
+            return False
 
-		if not PBXType.IsGuid(id):
-			id = id.id
+        if not PBXType.IsGuid(id):
+            id = id.id
 
-		return id in self['children']
+        return id in self['children']
 
-	def get_name(self):
-		path_name = os.path.split(self.get('path',''))[1]
-		return self.get('name', path_name)
+    def get_name(self):
+        path_name = os.path.split(self.get('path', ''))[1]
+        return self.get('name', path_name)
 
-	@classmethod
-	def Create(cls, name, path=None, tree='SOURCE_ROOT'):
-		grp = cls()
-		grp.id = cls.GenerateId()
-		grp['name'] = name
-		grp['children'] = PBXList()
+    @classmethod
+    def Create(cls, name, path=None, tree='SOURCE_ROOT'):
+        grp = cls()
+        grp.id = cls.GenerateId()
+        grp['name'] = name
+        grp['children'] = PBXList()
 
-		if path:
-			grp['path'] = path
-			grp['sourceTree'] = tree
-		else:
-			grp['sourceTree'] = '<group>'
+        if path:
+            grp['path'] = path
+            grp['sourceTree'] = tree
+        else:
+            grp['sourceTree'] = '<group>'
 
-		return grp
+        return grp
 
 
 class PBXNativeTarget(PBXType):
-	pass
+    pass
 
 
 class PBXProject(PBXType):
-	pass
+    pass
 
 
 class PBXContainerItemProxy(PBXType):
-	pass
+    pass
 
 
 class PBXReferenceProxy(PBXType):
-	pass
+    pass
 
 
 class PBXVariantGroup(PBXType):
-	pass
+    pass
 
 
 class PBXTargetDependency(PBXType):
-	pass
+    pass
 
 
 class PBXBuildPhase(PBXType):
-	def add_build_file(self, bf):
-		if bf.get('isa') != 'PBXBuildFile':
-			return False
+    def add_build_file(self, bf):
+        if bf.get('isa') != 'PBXBuildFile':
+            return False
 
-		if not self.has_key('files'):
-			self['files'] = PBXList()
+        if 'files' not in self:
+            self['files'] = PBXList()
 
-		self['files'].add(bf.id)
+        self['files'].add(bf.id)
 
-		return True
+        return True
 
-	def remove_build_file(self, id):
-		if not self.has_key('files'):
-			self['files'] = PBXList()
-			return
+    def remove_build_file(self, id):
+        if 'files' not in self:
+            self['files'] = PBXList()
+            return
 
-		self['files'].remove(id)
+        self['files'].remove(id)
 
-	def has_build_file(self, id):
-		if not self.has_key('files'):
-			self['files'] = PBXList()
-			return False
+    def has_build_file(self, id):
+        if 'files' not in self:
+            self['files'] = PBXList()
+            return False
 
-		if not PBXType.IsGuid(id):
-			id = id.id
+        if not PBXType.IsGuid(id):
+            id = id.id
 
-		return id in self['files']
+        return id in self['files']
 
 
 class PBXFrameworksBuildPhase(PBXBuildPhase):
-	pass
+    pass
 
 
 class PBXResourcesBuildPhase(PBXBuildPhase):
-	pass
+    pass
 
 
 class PBXShellScriptBuildPhase(PBXBuildPhase):
-	pass
+    pass
 
 
 class PBXSourcesBuildPhase(PBXBuildPhase):
-	pass
+    pass
 
 
 class PBXCopyFilesBuildPhase(PBXBuildPhase):
-	pass
+    pass
 
 
 class XCBuildConfiguration(PBXType):
-	def add_search_paths(self, paths, base, key, recursive=True, escape=True):
-		modified = False
+    def add_search_paths(self, paths, base, key, recursive=True, escape=True):
+        modified = False
 
-		if not isinstance(paths, list):
-			paths = [paths]
+        if not isinstance(paths, list):
+            paths = [paths]
 
-		if not self.has_key(base):
-			self[base] = PBXDict()
+        if base not in self:
+            self[base] = PBXDict()
 
-		for path in paths:
-			if recursive and not path.endswith('/**'):
-				path = os.path.join(path, '**')
+        for path in paths:
+            if recursive and not path.endswith('/**'):
+                path = os.path.join(path, '**')
 
-			if not self[base].has_key(key):
-				self[base][key] = PBXList()
-			elif isinstance(self[base][key], basestring):
-				self[base][key] = PBXList(self[base][key])
+            if key not in self[base]:
+                self[base][key] = PBXList()
+            elif isinstance(self[base][key], basestring):
+                self[base][key] = PBXList(self[base][key])
 
-			if escape :
-				if self[base][key].add('\\"%s\\"' % path):#'\\"%s\\"' % path
-					modified = True
-			else:
-				if self[base][key].add(path):#'\\"%s\\"' % path
-					modified = True
+            if escape:
+                if self[base][key].add('"%s"' % path):  # '\\"%s\\"' % path
+                    modified = True
+            else:
+                if self[base][key].add(path):  # '\\"%s\\"' % path
+                    modified = True
 
-		return modified
+        return modified
 
-	def add_header_search_paths(self, paths, recursive=True):
-		return self.add_search_paths(paths, 'buildSettings', 'HEADER_SEARCH_PATHS', recursive=recursive)
+    def add_header_search_paths(self, paths, recursive=True):
+        return self.add_search_paths(paths, 'buildSettings', 'HEADER_SEARCH_PATHS', recursive=recursive)
 
-	def add_library_search_paths(self, paths, recursive=True):
-		return self.add_search_paths(paths, 'buildSettings', 'LIBRARY_SEARCH_PATHS', recursive=recursive)
+    def add_library_search_paths(self, paths, recursive=True):
+        return self.add_search_paths(paths, 'buildSettings', 'LIBRARY_SEARCH_PATHS', recursive=recursive)
 
-	def add_framework_search_paths(self, paths, recursive=True):
-		return self.add_search_paths(paths, 'buildSettings', 'FRAMEWORK_SEARCH_PATHS', recursive=recursive, escape = False)
+    def add_framework_search_paths(self, paths, recursive=True):
+        return self.add_search_paths(paths, 'buildSettings', 'FRAMEWORK_SEARCH_PATHS', recursive=recursive)
 
-	def add_other_cflags(self, flags):
-		modified = False
+    def add_other_cflags(self, flags):
+        modified = False
 
-		base = 'buildSettings'
-		key = 'OTHER_CFLAGS'
+        base = 'buildSettings'
+        key = 'OTHER_CFLAGS'
 
-		if isinstance(flags, basestring):
-			flags = PBXList(flags)
+        if isinstance(flags, basestring):
+            flags = PBXList(flags)
 
-		if not self.has_key(base):
-			self[base] = PBXDict()
+        if base not in self:
+            self[base] = PBXDict()
 
-		for flag in flags:
+        for flag in flags:
+            if key not in self[base]:
+                self[base][key] = PBXList()
+            elif isinstance(self[base][key], basestring):
+                self[base][key] = PBXList(self[base][key])
 
-			if not self[base].has_key(key):
-				self[base][key] = PBXList()
-			elif isinstance(self[base][key], basestring):
-				self[base][key] = PBXList(self[base][key])
+            if self[base][key].add(flag):
+                self[base][key] = [e for e in self[base][key] if e]
+                modified = True
 
-			if self[base][key].add(flag):
-				self[base][key] = [e for e in self[base][key] if e]
-				modified = True
+        return modified
 
-		return modified
+    def add_other_ldflags(self, flags):
+        modified = False
 
-	def add_other_ldflags(self, flags):
-		modified = False
+        base = 'buildSettings'
+        key = 'OTHER_LDFLAGS'
 
-		base = 'buildSettings'
-		key = 'OTHER_LDFLAGS'
+        if isinstance(flags, basestring):
+            flags = PBXList(flags)
 
-		if isinstance(flags, basestring):
-			flags = PBXList(flags)
+        if base not in self:
+            self[base] = PBXDict()
 
-		if not self.has_key(base):
-			self[base] = PBXDict()
+        for flag in flags:
+            if key not in self[base]:
+                self[base][key] = PBXList()
+            elif isinstance(self[base][key], basestring):
+                self[base][key] = PBXList(self[base][key])
 
-		for flag in flags:
+            if self[base][key].add(flag):
+                self[base][key] = [e for e in self[base][key] if e]
+                modified = True
 
-			if not self[base].has_key(key):
-				self[base][key] = PBXList()
-			elif isinstance(self[base][key], basestring):
-				self[base][key] = PBXList(self[base][key])
+        return modified
 
-			if self[base][key].add(flag):
-				self[base][key] = [e for e in self[base][key] if e]
-				modified = True
+    def remove_other_ldflags(self, flags):
+        modified = False
 
-		return modified
+        base = 'buildSettings'
+        key = 'OTHER_LDFLAGS'
 
-	def remove_other_ldflags(self, flags):
-		modified = False
+        if isinstance(flags, basestring):
+            flags = PBXList(flags)
 
-		base = 'buildSettings'
-		key = 'OTHER_LDFLAGS'
+        if base in self:  # there are flags, so we can "remove" something
+            for flag in flags:
+                if key not in self[base]:
+                    return False
+                elif isinstance(self[base][key], basestring):
+                    self[base][key] = PBXList(self[base][key])
 
-		if isinstance(flags, basestring):
-			flags = PBXList(flags)
+                if self[base][key].remove(flag):
+                    self[base][key] = [e for e in self[base][key] if e]
+                    modified = True
 
-		if self.has_key(base): #there is flags, so we can "remove" something
-			for flag in flags:
-				if not self[base].has_key(key):
-					return False
-				elif isinstance(self[base][key], basestring):
-					self[base][key] = PBXList(self[base][key])
+        return modified
 
-				if self[base][key].remove(flag):
-					self[base][key] = [e for e in self[base][key] if e]
-					mofified = True
-
-		return modified
 
 class XCConfigurationList(PBXType):
-	pass
+    pass
 
 
 class XcodeProject(PBXDict):
-	plutil_path = 'plutil'
-	special_folders = ['.bundle', '.framework', '.xcodeproj']
+    plutil_path = 'plutil'
+    special_folders = ['.bundle', '.framework', '.xcodeproj']
 
-	def __init__(self, d=None, path=None):
-		if not path:
-			path = os.path.join(os.getcwd(), 'project.pbxproj')
+    def __init__(self, d=None, path=None):
+        if not path:
+            path = os.path.join(os.getcwd(), 'project.pbxproj')
 
-		self.pbxproj_path =os.path.abspath(path)
-		self.source_root = os.path.abspath(os.path.join(os.path.split(path)[0], '..'))
+        self.pbxproj_path = os.path.abspath(path)
+        self.source_root = os.path.abspath(os.path.join(os.path.split(path)[0], '..'))
 
-		IterableUserDict.__init__(self, d)
+        IterableUserDict.__init__(self, d)
 
-		self.data = PBXDict(self.data)
-		self.objects = self.get('objects')
-		self.modified = False
+        self.data = PBXDict(self.data)
+        self.objects = self.get('objects')
+        self.modified = False
 
-		root_id = self.get('rootObject')
-		if root_id:
-			self.root_object = self.objects[root_id]
-			root_group_id = self.root_object.get('mainGroup')
-			self.root_group = self.objects[root_group_id]
-		else:
-			print "error: project has no root object"
-			self.root_object = None
-			self.root_group = None
+        root_id = self.get('rootObject')
 
-		for k,v in self.objects.iteritems():
-			v.id = k
+        if root_id:
+            self.root_object = self.objects[root_id]
+            root_group_id = self.root_object.get('mainGroup')
+            self.root_group = self.objects[root_group_id]
+        else:
+            print "error: project has no root object"
+            self.root_object = None
+            self.root_group = None
 
-	def add_other_cflags(self, flags):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for k, v in self.objects.iteritems():
+            v.id = k
 
-		for b in build_configs:
-			if b.add_other_cflags(flags):
-				self.modified = True
+    def add_other_cflags(self, flags):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-	def add_other_ldflags(self, flags):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for b in build_configs:
+            if b.add_other_cflags(flags):
+                self.modified = True
 
-		for b in build_configs:
-			if b.add_other_ldflags(flags):
-				self.modified = True
+    def add_other_ldflags(self, flags):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-	def remove_other_ldflags(self, flags):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for b in build_configs:
+            if b.add_other_ldflags(flags):
+                self.modified = True
 
-		for b in build_configs:
-			if b.remove_other_ldflags(flags):
-				self.modified = True
+    def remove_other_ldflags(self, flags):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-	def add_header_search_paths(self, paths, recursive=True):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for b in build_configs:
+            if b.remove_other_ldflags(flags):
+                self.modified = True
 
-		for b in build_configs:
-			if b.add_header_search_paths(paths, recursive):
-				self.modified = True
+    def add_header_search_paths(self, paths, recursive=True):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-	def add_framework_search_paths(self, paths, recursive=True):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for b in build_configs:
+            if b.add_header_search_paths(paths, recursive):
+                self.modified = True
 
-		for b in build_configs:
-			if b.add_framework_search_paths(paths, recursive):
-				self.modified = True
+    def add_framework_search_paths(self, paths, recursive=True):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-	def add_library_search_paths(self, paths, recursive=True):
-		build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        for b in build_configs:
+            if b.add_framework_search_paths(paths, recursive):
+                self.modified = True
 
-		for b in build_configs:
-			if b.add_library_search_paths(paths, recursive):
-				self.modified = True
+    def add_library_search_paths(self, paths, recursive=True):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
-		# TODO: need to return value if project has been modified
+        for b in build_configs:
+            if b.add_library_search_paths(paths, recursive):
+                self.modified = True
 
-	def get_obj(self, id):
-		return self.objects.get(id)
+                # TODO: need to return value if project has been modified
 
-	def get_ids(self):
-		return self.objects.keys()
+    def get_obj(self, id):
+        return self.objects.get(id)
 
-	def get_files_by_os_path(self, os_path, tree='SOURCE_ROOT'):
-		files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
-											and f.get('path') == os_path
-											and f.get('sourceTree') == tree]
+    def get_ids(self):
+        return self.objects.keys()
 
-		return files
+    def get_files_by_os_path(self, os_path, tree='SOURCE_ROOT'):
+        files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
+                                                     and f.get('path') == os_path
+                                                     and f.get('sourceTree') == tree]
 
-	def get_files_by_name(self, name, parent=None):
-		if parent:
-			files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
-											and f.get(name) == name
-											and parent.has_child(f)]
-		else:
-			files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
-											and f.get(name) == name]
+        return files
 
-		return files
+    def get_files_by_name(self, name, parent=None):
+        if parent:
+            files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
+                                                         and f.get(name) == name
+                                                         and parent.has_child(f)]
+        else:
+            files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
+                                                         and f.get(name) == name]
 
-	def get_build_files(self, id):
-		files = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile'
-											and f.get('fileRef') == id]
+        return files
 
-		return files
+    def get_build_files(self, id):
+        files = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile'
+                                                     and f.get('fileRef') == id]
 
-	def get_groups_by_name(self, name, parent=None):
-		if parent:
-			groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
-					and g.get_name() == name
-					and parent.has_child(g)]
-		else:
-			groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
-					and g.get_name() == name]
+        return files
 
-		return groups
+    def get_groups_by_name(self, name, parent=None):
+        if parent:
+            groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
+                                                          and g.get_name() == name
+                                                          and parent.has_child(g)]
+        else:
+            groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
+                                                          and g.get_name() == name]
 
-	def get_or_create_group(self, name, path=None, parent=None):
-		if not name:
-			return None
+        return groups
 
-		if not parent:
-			parent = self.root_group
-		elif not isinstance(parent, PBXGroup):
-			# assume it's an id
-			parent = self.objects.get(parent, self.root_group)
+    def get_or_create_group(self, name, path=None, parent=None):
+        if not name:
+            return None
 
-		groups = self.get_groups_by_name(name)
+        if not parent:
+            parent = self.root_group
+        elif not isinstance(parent, PBXGroup):
+            # assume it's an id
+            parent = self.objects.get(parent, self.root_group)
 
-		for grp in groups:
-			if parent.has_child(grp.id):
-				return grp
+        groups = self.get_groups_by_name(name)
 
-		grp = PBXGroup.Create(name, path)
-		parent.add_child(grp)
+        for grp in groups:
+            if parent.has_child(grp.id):
+                return grp
 
-		self.objects[grp.id] = grp
+        grp = PBXGroup.Create(name, path)
+        parent.add_child(grp)
 
-		self.modified = True
+        self.objects[grp.id] = grp
 
-		return grp
+        self.modified = True
 
-	def get_groups_by_os_path(self, path):
-		path = os.path.abspath(path)
+        return grp
 
-		groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
-					and os.path.abspath(g.get('path','/dev/null')) == path]
+    def get_groups_by_os_path(self, path):
+        path = os.path.abspath(path)
 
-		return groups
+        groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup'
+                                                      and os.path.abspath(g.get('path', '/dev/null')) == path]
 
-	def get_build_phases(self, phase_name):
-		phases = [p for p in self.objects.values() if p.get('isa') == phase_name]
+        return groups
 
-		return phases
+    def get_build_phases(self, phase_name):
+        phases = [p for p in self.objects.values() if p.get('isa') == phase_name]
 
-	def get_relative_path(self, os_path):
-		return os.path.relpath(os_path, self.source_root)
+        return phases
 
-	def verify_files(self, file_list, parent=None):
-		# returns list of files not in the current project.
-		if not file_list:
-			return []
+    def get_relative_path(self, os_path):
+        return os.path.relpath(os_path, self.source_root)
 
-		if parent:
-			exists_list = [f.get('name') for f in self.objects.values() if f.get('isa') == 'PBXFileReference' and f.get('name') in file_list and parent.has_child(f)]
-		else:
-			exists_list = [f.get('name') for f in self.objects.values() if f.get('isa') == 'PBXFileReference' and f.get('name') in file_list]
+    def verify_files(self, file_list, parent=None):
+        # returns list of files not in the current project.
+        if not file_list:
+            return []
 
-		return set(file_list).difference(exists_list)
+        if parent:
+            exists_list = [f.get('name') for f in self.objects.values() if f.get('isa') == 'PBXFileReference' and f.get('name') in file_list and parent.has_child(f)]
+        else:
+            exists_list = [f.get('name') for f in self.objects.values() if f.get('isa') == 'PBXFileReference' and f.get('name') in file_list]
 
-	def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
-		if not os.path.isdir(os_path):
-			return []
+        return set(file_list).difference(exists_list)
 
-		if not excludes:
-			excludes = []
+    def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
+        if not os.path.isdir(os_path):
+            return []
 
-		results = []
+        if not excludes:
+            excludes = []
 
-		if not parent:
-			parent = self.root_group
-		elif not isinstance(parent, PBXGroup):
-			# assume it's an id
-			parent = self.objects.get(parent, self.root_group)
+        results = []
 
-		path_dict = {os.path.split(os_path)[0]:parent}
-		special_list = []
+        if not parent:
+            parent = self.root_group
+        elif not isinstance(parent, PBXGroup):
+            # assume it's an id
+            parent = self.objects.get(parent, self.root_group)
 
-		for (grp_path, subdirs, files) in os.walk(os_path):
-			parent_folder, folder_name = os.path.split(grp_path)
-			parent = path_dict.get(parent_folder, parent)
+        path_dict = {os.path.split(os_path)[0]: parent}
+        special_list = []
 
-			if [sp for sp in special_list if parent_folder.startswith(sp)]:
-				continue
+        for (grp_path, subdirs, files) in os.walk(os_path):
+            parent_folder, folder_name = os.path.split(grp_path)
+            parent = path_dict.get(parent_folder, parent)
 
-			if folder_name.startswith('.'):
-				special_list.append(grp_path)
-				continue
+            if [sp for sp in special_list if parent_folder.startswith(sp)]:
+                continue
 
-			if os.path.splitext(grp_path)[1] in XcodeProject.special_folders:
-				# if this file has a special extension (bundle or framework mainly) treat it as a file
-				special_list.append(grp_path)
+            if folder_name.startswith('.'):
+                special_list.append(grp_path)
+                continue
 
-				new_files = self.verify_files([folder_name], parent=parent)
+            if os.path.splitext(grp_path)[1] in XcodeProject.special_folders:
+                # if this file has a special extension (bundle or framework mainly) treat it as a file
+                special_list.append(grp_path)
+                new_files = self.verify_files([folder_name], parent=parent)
 
-				if new_files:
-					results.extend(self.add_file(grp_path, parent, create_build_files=create_build_files))
+                if new_files:
+                    results.extend(self.add_file(grp_path, parent, create_build_files=create_build_files))
 
-				continue
+                continue
 
-			# create group
-			grp = self.get_or_create_group(folder_name, path=self.get_relative_path(grp_path) , parent=parent)
-			path_dict[grp_path] = grp
+            # create group
+            grp = self.get_or_create_group(folder_name, path=self.get_relative_path(grp_path), parent=parent)
+            path_dict[grp_path] = grp
 
-			results.append(grp)
+            results.append(grp)
 
-			file_dict = {}
+            file_dict = {}
 
-			for f in files:
-				if f[0] == '.' or [m for m in excludes if re.match(m,f)]:
-					continue
+            for f in files:
+                if f[0] == '.' or [m for m in excludes if re.match(m, f)]:
+                    continue
 
-				kwds = {
-					'create_build_files': create_build_files,
-					'parent': grp,
-					'name': f
-				}
+                kwds = {
+                    'create_build_files': create_build_files,
+                    'parent': grp,
+                    'name': f
+                }
 
-				f_path = os.path.join(grp_path, f)
+                f_path = os.path.join(grp_path, f)
 
-				file_dict[f_path] = kwds
+                file_dict[f_path] = kwds
 
-			new_files = self.verify_files([n.get('name') for n in file_dict.values()], parent=grp)
+            new_files = self.verify_files([n.get('name') for n in file_dict.values()], parent=grp)
 
-			add_files = [(k,v) for k,v in file_dict.items() if v.get('name') in new_files]
+            add_files = [(k, v) for k, v in file_dict.items() if v.get('name') in new_files]
 
-			for path, kwds in add_files:
-				kwds.pop('name', None)
+            for path, kwds in add_files:
+                kwds.pop('name', None)
 
-				self.add_file(path, **kwds)
+                self.add_file(path, **kwds)
 
-			if not recursive:
-				break
+            if not recursive:
+                break
 
-		for r in results:
-			self.objects[r.id] = r
+        for r in results:
+            self.objects[r.id] = r
 
-		return results
+        return results
 
-	def path_leaf(self,path):
-		head, tail = ntpath.split(path)
-		return tail or ntpath.basename(head)
+    def path_leaf(self, path):
+        head, tail = ntpath.split(path)
+        return tail or ntpath.basename(head)
 
-	def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False):
-		for obj in self.objects.values() :
-			if 'path' in obj :
-				if self.path_leaf(f_path) == self.path_leaf(obj.get('path')):
-					return []
+    def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
+        for obj in self.objects.values():
+            if 'path' in obj:
+                if self.path_leaf(f_path) == self.path_leaf(obj.get('path')):
+                    return []
 
-		return self.add_file(f_path, parent, tree, create_build_files, weak)
+        return self.add_file(f_path, parent, tree, create_build_files, weak, ignore_unknown_type=ignore_unknown_type)
 
-	def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False):
-		results = []
+    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
+        results = []
+        abs_path = ''
 
-		abs_path = ''
+        if os.path.isabs(f_path):
+            abs_path = f_path
 
-		if os.path.isabs(f_path):
-			abs_path = f_path
+            if not os.path.exists(f_path):
+                return results
+            elif tree == 'SOURCE_ROOT':
+                f_path = os.path.relpath(f_path, self.source_root)
+            else:
+                tree = '<absolute>'
 
-			if not os.path.exists(f_path):
-				return results
-			elif tree == 'SOURCE_ROOT':
-				f_path = os.path.relpath(f_path, self.source_root)
-			else:
-				tree = '<absolute>'
+        if not parent:
+            parent = self.root_group
+        elif not isinstance(parent, PBXGroup):
+            # assume it's an id
+            parent = self.objects.get(parent, self.root_group)
 
-		if not parent:
-			parent = self.root_group
-		elif not isinstance(parent, PBXGroup):
-			# assume it's an id
-			parent = self.objects.get(parent, self.root_group)
+        file_ref = PBXFileReference.Create(f_path, tree, ignore_unknown_type=ignore_unknown_type)
+        parent.add_child(file_ref)
+        results.append(file_ref)
 
-		file_ref = PBXFileReference.Create(f_path, tree)
-		parent.add_child(file_ref)
-		results.append(file_ref)
-		# create a build file for the file ref
-		if file_ref.build_phase and create_build_files:
-			phases = self.get_build_phases(file_ref.build_phase)
+        # create a build file for the file ref
+        if file_ref.build_phase and create_build_files:
+            phases = self.get_build_phases(file_ref.build_phase)
 
-			for phase in phases:
-				build_file = PBXBuildFile.Create(file_ref, weak=weak)
+            for phase in phases:
+                build_file = PBXBuildFile.Create(file_ref, weak=weak)
 
-				phase.add_build_file(build_file)
-				results.append(build_file)
+                phase.add_build_file(build_file)
+                results.append(build_file)
 
-			if abs_path and tree == 'SOURCE_ROOT' and os.path.isfile(abs_path)\
-				and file_ref.build_phase == 'PBXFrameworksBuildPhase':
-				library_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
-				self.add_library_search_paths([library_path], recursive=False)
+            if abs_path and tree == 'SOURCE_ROOT' \
+                        and os.path.isfile(abs_path) \
+                        and file_ref.build_phase == 'PBXFrameworksBuildPhase':
+                library_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
+                self.add_library_search_paths([library_path], recursive=False)
 
-			if abs_path and tree == 'SOURCE_ROOT' and not os.path.isfile(abs_path)\
-				and file_ref.build_phase == 'PBXFrameworksBuildPhase':
+            if abs_path and tree == 'SOURCE_ROOT' \
+                        and not os.path.isfile(abs_path) \
+                        and file_ref.build_phase == 'PBXFrameworksBuildPhase':
+                framework_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
+                self.add_framework_search_paths([framework_path, '$(inherited)'], recursive=False)
 
-				framework_path = os.path.join('$(SRCROOT)', os.path.split(f_path)[0])
-				self.add_framework_search_paths([framework_path,'$(inherited)'], recursive=False)
+        for r in results:
+            self.objects[r.id] = r
 
-		for r in results:
-			self.objects[r.id] = r
+        if results:
+            self.modified = True
 
-		if results:
-			self.modified = True
+        return results
 
-		return results
+    def check_and_repair_framework(self, base):
+        name = os.path.basename(base)
 
-	def check_and_repair_framework(self, base):
-		name = os.path.basename(base);
-		if(".framework" in name):
-			basename = name[:-len(".framework")]
+        if ".framework" in name:
+            basename = name[:-len(".framework")]
 
-			finalHeaders = os.path.join(base, "Headers");
-			finalCurrent = os.path.join(base, "Versions/Current");
-			finalLib = os.path.join(base, basename);
-			srcHeaders = "Versions/A/Headers";
-			srcCurrent = "A";
-			srcLib = "Versions/A/"+basename;
+            finalHeaders = os.path.join(base, "Headers")
+            finalCurrent = os.path.join(base, "Versions/Current")
+            finalLib = os.path.join(base, basename)
+            srcHeaders = "Versions/A/Headers"
+            srcCurrent = "A"
+            srcLib = "Versions/A/" + basename
 
-			if(not os.path.exists(finalHeaders)):
-				os.symlink(srcHeaders, finalHeaders);
-			if(not os.path.exists(finalCurrent)):
-				os.symlink(srcCurrent, finalCurrent);
-			if(not os.path.exists(finalLib)):
-				os.symlink(srcLib, finalLib);
+            if not os.path.exists(finalHeaders):
+                os.symlink(srcHeaders, finalHeaders)
+            if not os.path.exists(finalCurrent):
+                os.symlink(srcCurrent, finalCurrent)
+            if not os.path.exists(finalLib):
+                os.symlink(srcLib, finalLib)
 
-	def remove_group(self, grp):
-		pass
+    def remove_group(self, grp):
+        pass
 
-	def remove_file(self, id, recursive=True):
-		if not PBXType.IsGuid(id):
-			id = id.id
+    def remove_file(self, id, recursive=True):
+        if not PBXType.IsGuid(id):
+            id = id.id
 
-		if id in self.objects:
-			self.objects.remove(id)
+        if id in self.objects:
+            self.objects.remove(id)
 
-			if recursive:
-				groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
+            if recursive:
+                groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
-				for group in groups:
-					if id in group['children']:
-						group.remove_child(id)
+                for group in groups:
+                    if id in group['children']:
+                        group.remove_child(id)
 
-			self.modified = True
+            self.modified = True
 
-	def move_file(self, id, dest_grp=None):
-		pass
+    def move_file(self, id, dest_grp=None):
+        pass
 
-	def apply_patch(self, patch_path, xcode_path):
-		if not os.path.isfile(patch_path) or not os.path.isdir(xcode_path):
-			print 'ERROR: couldn\'t apply "%s" to "%s"' % (patch_path, xcode_path)
-			return
+    def apply_patch(self, patch_path, xcode_path):
+        if not os.path.isfile(patch_path) or not os.path.isdir(xcode_path):
+            print 'ERROR: couldn\'t apply "%s" to "%s"' % (patch_path, xcode_path)
+            return
 
-		print 'applying "%s" to "%s"' % (patch_path, xcode_path)
+        print 'applying "%s" to "%s"' % (patch_path, xcode_path)
 
-		return subprocess.call(['patch', '-p1', '--forward', '--directory=%s'%xcode_path, '--input=%s'%patch_path])
+        return subprocess.call(['patch', '-p1', '--forward', '--directory=%s' % xcode_path, '--input=%s' % patch_path])
 
-	def apply_mods(self, mod_dict, default_path=None):
-		if not default_path:
-			default_path = os.getcwd()
+    def apply_mods(self, mod_dict, default_path=None):
+        if not default_path:
+            default_path = os.getcwd()
 
-		keys = mod_dict.keys()
+        keys = mod_dict.keys()
 
-		for k in keys:
-			v = mod_dict.pop(k)
+        for k in keys:
+            v = mod_dict.pop(k)
+            mod_dict[k.lower()] = v
 
-			mod_dict[k.lower()] = v
+        parent = mod_dict.pop('group', None)
 
-		parent = mod_dict.pop('group', None)
+        if parent:
+            parent = self.get_or_create_group(parent)
 
-		if parent:
-			parent = self.get_or_create_group(parent)
+        excludes = mod_dict.pop('excludes', [])
 
-		excludes = mod_dict.pop('excludes', [])
+        if excludes:
+            excludes = [re.compile(e) for e in excludes]
 
-		if excludes:
-			excludes = [re.compile(e) for e in excludes]
+        compiler_flags = mod_dict.pop('compiler_flags', {})
 
-		compiler_flags = mod_dict.pop('compiler_flags', {})
+        for k, v in mod_dict.items():
+            if k == 'patches':
+                for p in v:
+                    if not os.path.isabs(p):
+                        p = os.path.join(default_path, p)
 
-		for k,v in mod_dict.items():
-			if k == 'patches':
-				for p in v:
-					if not os.path.isabs(p):
-						p = os.path.join(default_path, p)
+                    self.apply_patch(p, self.source_root)
+            elif k == 'folders':
+                # get and compile excludes list
+                # do each folder individually
+                for folder in v:
+                    kwds = {}
 
-					self.apply_patch(p, self.source_root)
-			elif k == 'folders':
-				# get and compile excludes list
-				# do each folder individually
-				for folder in v:
-					kwds = {}
+                    # if path contains ':' remove it and set recursive to False
+                    if ':' in folder:
+                        args = folder.split(':')
+                        kwds['recursive'] = False
+                        folder = args.pop(0)
 
-					# if path contains ':' remove it and set recursive to False
-					if ':' in folder:
-						args = folder.split(':')
-						kwds['recursive'] = False
-						folder = args.pop(0)
+                    if os.path.isabs(folder) and os.path.isdir(folder):
+                        pass
+                    else:
+                        folder = os.path.join(default_path, folder)
+                        if not os.path.isdir(folder):
+                            continue
 
-					if os.path.isabs(folder) and os.path.isdir(folder):
-						pass
-					else:
-						folder = os.path.join(default_path, folder)
-						if not os.path.isdir(folder):
-							continue
+                    if parent:
+                        kwds['parent'] = parent
 
-					if parent:
-						kwds['parent'] = parent
+                    if excludes:
+                        kwds['excludes'] = excludes
 
-					if excludes:
-						kwds['excludes'] = excludes
+                    self.add_folder(folder, **kwds)
+            elif k == 'headerpaths' or k == 'librarypaths':
+                paths = []
 
-					self.add_folder(folder, **kwds)
-			elif k == 'headerpaths' or k == 'librarypaths':
-				paths = []
+                for p in v:
+                    if p.endswith('/**'):
+                        p = os.path.split(p)[0]
 
-				for p in v:
-					if p.endswith('/**'):
-						p = os.path.split(p)[0]
+                    if not os.path.isabs(p):
+                        p = os.path.join(default_path, p)
 
-					if not os.path.isabs(p):
-						p = os.path.join(default_path, p)
+                    if not os.path.exists(p):
+                        continue
 
-					if not os.path.exists(p):
-						continue
+                    p = self.get_relative_path(p)
+                    paths.append(os.path.join('$(SRCROOT)', p, "**"))
 
-					p = self.get_relative_path(p)
+                if k == 'headerpaths':
+                    self.add_header_search_paths(paths)
+                else:
+                    self.add_library_search_paths(paths)
+            elif k == 'other_cflags':
+                self.add_other_cflags(v)
+            elif k == 'other_ldflags':
+                self.add_other_ldflags(v)
+            elif k == 'libs' or k == 'frameworks' or k == 'files':
+                paths = {}
 
-					paths.append(os.path.join('$(SRCROOT)', p, "**"))
+                for p in v:
+                    kwds = {}
 
-				if k == 'headerpaths':
-					self.add_header_search_paths(paths)
-				else:
-					self.add_library_search_paths(paths)
-			elif k == 'other_cflags':
-				self.add_other_cflags(v)
-			elif k == 'other_ldflags':
-				self.add_other_ldflags(v)
-			elif k == 'libs' or k == 'frameworks' or k == 'files':
-				paths = {}
+                    if ':' in p:
+                        args = p.split(':')
+                        p = args.pop(0)
 
-				for p in v:
-					kwds = {}
+                        if 'weak' in args:
+                            kwds['weak'] = True
 
-					if ':' in p:
-						args = p.split(':')
-						p = args.pop(0)
+                    file_path = os.path.join(default_path, p)
+                    search_path, file_name = os.path.split(file_path)
 
-						if 'weak' in args:
-							kwds['weak'] = True
+                    if [m for m in excludes if re.match(m, file_name)]:
+                        continue
 
-					file_path = os.path.join(default_path, p)
-					search_path, file_name = os.path.split(file_path)
+                    try:
+                        expr = re.compile(file_name)
+                    except re.error:
+                        expr = None
 
-					if [m for m in excludes if re.match(m,file_name)]:
-						continue
+                    if expr and os.path.isdir(search_path):
+                        file_list = os.listdir(search_path)
 
-					try:
-						expr = re.compile(file_name)
-					except re.error:
-						expr = None
+                        for f in file_list:
+                            if [m for m in excludes if re.match(m, f)]:
+                                continue
 
-					if expr and os.path.isdir(search_path):
-						file_list = os.listdir(search_path)
+                            if re.search(expr, f):
+                                kwds['name'] = f
+                                paths[os.path.join(search_path, f)] = kwds
+                                p = None
 
-						for f in file_list:
-							if [m for m in excludes if re.match(m,f)]:
-								continue
+                    if k == 'libs':
+                        kwds['parent'] = self.get_or_create_group('Libraries', parent=parent)
+                    elif k == 'frameworks':
+                        kwds['parent'] = self.get_or_create_group('Frameworks', parent=parent)
 
-							if re.search(expr,f):
-								kwds['name'] = f
-								paths[os.path.join(search_path, f)] = kwds
-								p = None
+                    if p:
+                        kwds['name'] = file_name
 
-					if k == 'libs':
-						kwds['parent'] = self.get_or_create_group('Libraries', parent=parent)
-					elif k == 'frameworks':
-						kwds['parent'] = self.get_or_create_group('Frameworks', parent=parent)
+                        if k == 'libs':
+                            p = os.path.join('usr', 'lib', p)
+                            kwds['tree'] = 'SDKROOT'
+                        elif k == 'frameworks':
+                            p = os.path.join('System', 'Library', 'Frameworks', p)
+                            kwds['tree'] = 'SDKROOT'
+                        elif k == 'files' and not os.path.exists(file_path):
+                            # don't add non-existent files to the project.
+                            continue
 
-					if p:
-						kwds['name'] = file_name
+                        paths[p] = kwds
 
-						if k == 'libs':
-							p = os.path.join('usr','lib',p)
-							kwds['tree'] = 'SDKROOT'
-						elif k == 'frameworks':
-							p = os.path.join('System','Library','Frameworks',p)
-							kwds['tree'] = 'SDKROOT'
-						elif k == 'files' and not os.path.exists(file_path):
-							# don't add non-existent files to the project.
-							continue
+                new_files = self.verify_files([n.get('name') for n in paths.values()])
+                add_files = [(k, v) for k, v in paths.items() if v.get('name') in new_files]
 
-						paths[p] = kwds
+                for path, kwds in add_files:
+                    kwds.pop('name', None)
 
-				new_files = self.verify_files([n.get('name') for n in paths.values()])
+                    if 'parent' not in kwds and parent:
+                        kwds['parent'] = parent
 
-				add_files = [(k,v) for k,v in paths.items() if v.get('name') in new_files]
+                    self.add_file(path, **kwds)
 
-				for path, kwds in add_files:
-					kwds.pop('name', None)
+        if compiler_flags:
+            for k, v in compiler_flags.items():
+                filerefs = []
 
-					if not kwds.has_key('parent') and parent:
-						kwds['parent'] = parent
+                for f in v:
+                    filerefs.extend([fr.id for fr in self.objects.values() if fr.get('isa') == 'PBXFileReference'
+                                                                              and fr.get('name') == f])
 
-					self.add_file(path, **kwds)
+                buildfiles = [bf for bf in self.objects.values() if bf.get('isa') == 'PBXBuildFile'
+                                                                    and bf.get('fileRef') in filerefs]
 
-		if compiler_flags:
-			for k,v in compiler_flags.items():
-				filerefs = []
+                for bf in buildfiles:
+                    if bf.add_compiler_flag(k):
+                        self.modified = True
 
-				for f in v:
-					filerefs.extend([fr.id for fr in self.objects.values() if fr.get('isa') == 'PBXFileReference'
-											and fr.get('name') == f])
+    def backup(self, file_name=None, backup_name=None):
+        if not file_name:
+            file_name = self.pbxproj_path
 
+        if not backup_name:
+            backup_name = "%s.%s.backup" % (file_name, datetime.datetime.now().strftime('%d%m%y-%H%M%S'))
 
-				buildfiles = [bf for bf in self.objects.values() if bf.get('isa') == 'PBXBuildFile'
-										and bf.get('fileRef') in filerefs]
+        shutil.copy2(file_name, backup_name)
 
-				for bf in buildfiles:
-					if bf.add_compiler_flag(k):
-						self.modified = True
+    def save(self, file_name=None):
+        """Saves in old (xml) format"""
+        if not file_name:
+            file_name = self.pbxproj_path
 
+        # This code is adapted from plistlib.writePlist
+        with open(file_name, "w") as f:
+            writer = PBXWriter(f)
+            writer.writeln("<plist version=\"1.0\">")
+            writer.writeValue(self.data)
+            writer.writeln("</plist>")
 
-	def backup(self, file_name=None):
-		if not file_name:
-			file_name = self.pbxproj_path
+    def saveFormat3_2(self, file_name=None):
+        """Save in Xcode 3.2 compatible (new) format"""
+        if not file_name:
+            file_name = self.pbxproj_path
 
-		backup_name = "%s.%s.backup" % (file_name, datetime.datetime.now().strftime('%d%m%y-%H%M%S'))
+        # process to get the section's info and names
+        objs = self.data.get('objects')
+        sections = dict()
+        uuids = dict()
 
-		shutil.copy2(file_name, backup_name)
+        for key in objs:
+            l = list()
 
-	#old format
-	def save(self, file_name=None):
-		if not file_name:
-			file_name = self.pbxproj_path
+            if objs.get(key).get('isa') in sections:
+                l = sections.get(objs.get(key).get('isa'))
 
-		# JSON serialize the project and convert that json to an xml plist
-		p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', file_name, '-'], stdin=subprocess.PIPE)
-		p.communicate(PBXEncoder().encode(self.data))
+            l.append(tuple([key, objs.get(key)]))
+            sections[objs.get(key).get('isa')] = l
 
-	#save Xcode 3.2 compatible format
-	def saveFormat3_2(self, file_name=None):
-		if not file_name:
-			file_name = self.pbxproj_path
+            if 'name' in objs.get(key):
+                uuids[key] = objs.get(key).get('name')
+            elif 'path' in objs.get(key):
+                uuids[key] = objs.get(key).get('path')
+            else:
+                if objs.get(key).get('isa') == 'PBXProject':
+                    uuids[objs.get(key).get('buildConfigurationList')] = 'Build configuration list for PBXProject "Unity-iPhone"'
+                elif objs.get(key).get('isa')[0:3] == 'PBX':
+                    uuids[key] = objs.get(key).get('isa')[3:-10]
+                else:
+                    uuids[key] = 'Build configuration list for PBXNativeTarget "TARGET_NAME"'
 
-		#process to get the section's info and names
-		objs = self.data.get('objects');
-		sections = dict();
-		uuids = dict();
-		for key in objs:
-			l = list();
-			if objs.get(key).get('isa') in sections:
-				l = sections.get(objs.get(key).get('isa'))
-			l.append(tuple([key, objs.get(key)]))
-			sections[objs.get(key).get('isa')] = l;
+        ro = self.data.get('rootObject')
+        uuids[ro] = 'Project Object'
 
-			if('name' in objs.get(key)):
-				uuids[key] = objs.get(key).get('name')
-			elif('path' in objs.get(key)):
-				uuids[key] = objs.get(key).get('path')
-			else:
-				if(objs.get(key).get('isa')=='PBXProject'):
-					uuids[objs.get(key).get('buildConfigurationList')] = 'Build configuration list for PBXProject "Unity-iPhone"'
-				elif(objs.get(key).get('isa')[0:3] == 'PBX'):
-					uuids[key] = objs.get(key).get('isa')[3:-10]
-				else:
-					uuids[key] = 'Build configuration list for PBXNativeTarget "TARGET_NAME"'
+        for key in objs:
+            # transitive references (used in the BuildFile section)
+            if 'fileRef' in objs.get(key) and objs.get(key).get('fileRef') in uuids:
+                uuids[key] = uuids[objs.get(key).get('fileRef')]
 
-		ro = self.data.get('rootObject')
-		uuids[ro] = 'Project Object'
+            # transitive reference to the target name (used in the Native target section)
+            if objs.get(key).get('isa') == 'PBXNativeTarget':
+                uuids[objs.get(key).get('buildConfigurationList')] = uuids[objs.get(key).get('buildConfigurationList')].replace('TARGET_NAME', uuids[key])
 
-		for key in objs:
-			#transitive references (used in the BuildFile section)
-			if('fileRef' in objs.get(key) and objs.get(key).get('fileRef') in uuids):
-				uuids[key] = uuids[objs.get(key).get('fileRef')]
-			#transitive reference to the target name (used in the Native target section)
-			if(objs.get(key).get('isa') == 'PBXNativeTarget'):
-				uuids[objs.get(key).get('buildConfigurationList')] = uuids[objs.get(key).get('buildConfigurationList')].replace('TARGET_NAME',uuids[key])
+        self.uuids = uuids
+        self.sections = sections
 
-		self.uuids = uuids;
-		self.sections = sections;
-
-		out = open(file_name,'w')
-		out.write('// !$*UTF8*$!\n');
-		self._printNewXCodeFormat(out, self.data, '', enters=True)
-		out.close()
-
-	@classmethod
-	def addslashes(cls,s):
-		d = {'"':'\\"', "'":"\\'", "\0":"\\\0", "\\":"\\\\"}
-		return ''.join(d.get(c, c) for c in s)
-
-	def _printNewXCodeFormat(self, out, root, deep, enters = True):
-		if(isinstance(root,IterableUserDict)):
-			out.write('{')
-			if enters:
-				out.write('\n')
-
-			isa = root.pop('isa','')
-			if(isa!=''): #keep the isa in the first spot
-				if enters:
-					out.write('\t'+deep)
-				out.write('isa = ');
-				self._printNewXCodeFormat(out,isa,'\t'+deep, enters=enters);
-				out.write(';')
-				if enters:
-					out.write('\n')
-				else:
-					out.write(' ');
-
-			for key in sorted(root.iterkeys()): #keep the same order as Apple.
-				if enters:
-					out.write('\t'+deep)
-
-				if re.match(regex,key).group(0) == key:
-					out.write(key+' = ');
-				else:
-					out.write('"'+key+'" = ');
-
-				if key == 'objects':
-					out.write('{');#open the objects section
-					if enters:
-						out.write('\n')
-					#root.remove('objects') #remove it to avoid problems
-
-					sections = [
-					('PBXBuildFile',False),
-					('PBXCopyFilesBuildPhase',True),
-					('PBXFileReference',False),
-					('PBXFrameworksBuildPhase',True),
-					('PBXGroup',True),
-					('PBXNativeTarget',True),
-					('PBXProject',True),
-					('PBXResourcesBuildPhase',True),
-					('PBXShellScriptBuildPhase',True),
-					('PBXSourcesBuildPhase',True),
-					('XCBuildConfiguration',True),
-					('XCConfigurationList',True),
-					('PBXTargetDependency', True),
-					('PBXVariantGroup', True),
-					('PBXReferenceProxy', True),
-					('PBXContainerItemProxy', True)]
-
-					for section in sections:	#iterate over the sections
-						if(self.sections.get(section[0]) == None):
-							continue;
-
-						out.write('\n/* Begin %s section */'%section[0]);
-						self.sections.get(section[0]).sort(cmp=lambda x,y: cmp(x[0],y[0]))
-						#if(self.sections.get(section[0])=='PBXGroup' and ):	//add the patch to add the missing but existing files.
-
-						for pair in self.sections.get(section[0]):
-							key = pair[0]
-							value = pair[1]
-							out.write('\n')
-							if enters:
-								out.write('\t\t'+deep)
-							out.write(key);
-							if(key in self.uuids):
-								out.write(" /* "+self.uuids[key]+" */");
-							out.write(" = ");
-							self._printNewXCodeFormat(out,value,'\t\t'+deep,enters=section[1])
-							out.write(';')
-						out.write('\n/* End %s section */\n'%section[0])
-					out.write(deep+'\t}');#close of the objects section
-				else:
-					self._printNewXCodeFormat(out,root[key],'\t'+deep,enters=enters)
-
-				out.write(';')
-				if enters:
-					out.write('\n')
-				else:
-					out.write(' ')
-			root['isa']=isa; #restore the isa for further calls
-
-			if enters:
-				out.write(deep)
-			out.write('}')
-		elif isinstance(root,UserList):
-			out.write('(')
-			if enters:
-				out.write('\n')
-			for value in (root):
-				if enters:
-					out.write('\t'+deep)
-				self._printNewXCodeFormat(out,value,'\t'+deep,enters=enters)
-				out.write(',')
-				if enters:
-					out.write('\n')
-			if enters:
-				out.write(deep)
-			out.write(')')
-		else:
-			if len(root) > 0 and re.match(regex,root).group(0) == root:
-				out.write(root)
-			else:
-				out.write('"'+XcodeProject.addslashes(root)+'"')
-			if(root in self.uuids):
-				out.write(" /* "+self.uuids[root]+" */");
-
-	@classmethod
-	def getJSONFromXML(cls, root):
-		result = ''
-		if(root.nodeName == 'dict'):
-			result += '{'
-			i=0;
-			for child in root.childNodes:
-				if child.nodeType != Node.ELEMENT_NODE:
-					continue;
-				if(child.nodeName=='key' and i>0):
-					result +=','
-				result += XcodeProject.getJSONFromXML(child);
-				i = i + 1
-			result += '}'
-		elif root.nodeName == 'key':
-			for node in root.childNodes:
-				if node.nodeType == node.TEXT_NODE:
-					result += '"'+node.data+'":'
-					break
-		elif root.nodeName == 'array':
-			result += '['
-			i=0;
-			for child in root.childNodes:
-				if child.nodeType != Node.ELEMENT_NODE:
-					continue;
-
-				if(i>0):
-					result += ","
-				result += XcodeProject.getJSONFromXML(child);
-				i = i+1;
-			result += ']'
-		elif root.nodeName == 'string':
-			data = '""'
-			for node in root.childNodes:
-				if node.nodeType == node.TEXT_NODE:
-					data = '"'+XcodeProject.addslashes(node.data).replace('\n','\\n').replace('\\\'', '\'')+'"'
-					break
-			result += data
-		return result;
-
-	@classmethod
-	def Load(cls, path):
-		cls.plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
-
-		if not os.path.isfile(XcodeProject.plutil_path):
-			cls.plutil_path = 'plutil'
-
-		if subprocess.call([XcodeProject.plutil_path,'-lint','-s',path]):
-			print 'ERROR: not a valid .pbxproj file'
-			return None
-
-		# load project by converting to JSON and parse
-		p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
-		rawXML = p.communicate()[0]
-
-		xml = parseString(rawXML);
-		jsonStr = XcodeProject.getJSONFromXML(xml.getElementsByTagName('dict')[0]);
-
-		tree = json.loads(jsonStr)
-		return XcodeProject(tree, path)
+        out = open(file_name, 'w')
+        out.write('// !$*UTF8*$!\n')
+        self._printNewXCodeFormat(out, self.data, '', enters=True)
+        out.close()
+
+    @classmethod
+    def addslashes(cls, s):
+        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\"}
+        return ''.join(d.get(c, c) for c in s)
+
+    def _printNewXCodeFormat(self, out, root, deep, enters=True):
+        if isinstance(root, IterableUserDict):
+            out.write('{')
+
+            if enters:
+                out.write('\n')
+
+            isa = root.pop('isa', '')
+
+            if isa != '':  # keep the isa in the first spot
+                if enters:
+                    out.write('\t' + deep)
+
+                out.write('isa = ')
+                self._printNewXCodeFormat(out, isa, '\t' + deep, enters=enters)
+                out.write(';')
+
+                if enters:
+                    out.write('\n')
+                else:
+                    out.write(' ')
+
+            for key in sorted(root.iterkeys()):  # keep the same order as Apple.
+                if enters:
+                    out.write('\t' + deep)
+
+                if re.match(regex, key).group(0) == key:
+                    out.write(key.encode("utf-8") + ' = ')
+                else:
+                    out.write('"' + key.encode("utf-8") + '" = ')
+
+                if key == 'objects':
+                    out.write('{')  # open the objects section
+
+                    if enters:
+                        out.write('\n')
+                        #root.remove('objects')  # remove it to avoid problems
+
+                    sections = [
+                        ('PBXBuildFile', False),
+                        ('PBXCopyFilesBuildPhase', True),
+                        ('PBXFileReference', False),
+                        ('PBXFrameworksBuildPhase', True),
+                        ('PBXGroup', True),
+                        ('PBXNativeTarget', True),
+                        ('PBXProject', True),
+                        ('PBXResourcesBuildPhase', True),
+                        ('PBXShellScriptBuildPhase', True),
+                        ('PBXSourcesBuildPhase', True),
+                        ('XCBuildConfiguration', True),
+                        ('XCConfigurationList', True),
+                        ('PBXTargetDependency', True),
+                        ('PBXVariantGroup', True),
+                        ('PBXReferenceProxy', True),
+                        ('PBXContainerItemProxy', True)]
+
+                    for section in sections:  # iterate over the sections
+                        if self.sections.get(section[0]) is None:
+                            continue
+
+                        out.write('\n/* Begin %s section */' % section[0].encode("utf-8"))
+                        self.sections.get(section[0]).sort(cmp=lambda x, y: cmp(x[0], y[0]))
+
+                        for pair in self.sections.get(section[0]):
+                            key = pair[0]
+                            value = pair[1]
+                            out.write('\n')
+
+                            if enters:
+                                out.write('\t\t' + deep)
+
+                            out.write(key.encode("utf-8"))
+
+                            if key in self.uuids:
+                                out.write(" /* " + self.uuids[key].encode("utf-8") + " */")
+
+                            out.write(" = ")
+                            self._printNewXCodeFormat(out, value, '\t\t' + deep, enters=section[1])
+                            out.write(';')
+
+                        out.write('\n/* End %s section */\n' % section[0].encode("utf-8"))
+
+                    out.write(deep + '\t}')  # close of the objects section
+                else:
+                    self._printNewXCodeFormat(out, root[key], '\t' + deep, enters=enters)
+
+                out.write(';')
+
+                if enters:
+                    out.write('\n')
+                else:
+                    out.write(' ')
+
+            root['isa'] = isa  # restore the isa for further calls
+
+            if enters:
+                out.write(deep)
+
+            out.write('}')
+
+        elif isinstance(root, UserList):
+            out.write('(')
+
+            if enters:
+                out.write('\n')
+
+            for value in root:
+                if enters:
+                    out.write('\t' + deep)
+
+                self._printNewXCodeFormat(out, value, '\t' + deep, enters=enters)
+                out.write(',')
+
+                if enters:
+                    out.write('\n')
+
+            if enters:
+                out.write(deep)
+
+            out.write(')')
+
+        else:
+            if len(root) > 0 and re.match(regex, root).group(0) == root:
+                out.write(root.encode("utf-8"))
+            else:
+                out.write('"' + XcodeProject.addslashes(root.encode("utf-8")) + '"')
+
+            if root in self.uuids:
+                out.write(" /* " + self.uuids[root].encode("utf-8") + " */")
+
+    @classmethod
+    def Load(cls, path):
+        cls.plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
+
+        if not os.path.isfile(XcodeProject.plutil_path):
+            cls.plutil_path = 'plutil'
+
+        # load project by converting to xml and then convert that using plistlib
+        p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+
+        # If the plist was malformed, returncode will be non-zero
+        if p.returncode != 0:
+            print stdout
+            return None
+
+        tree = plistlib.readPlistFromString(stdout)
+        return XcodeProject(tree, path)
+
+
+# The code below was adapted from plistlib.py.
+
+class PBXWriter(plistlib.PlistWriter):
+    def writeValue(self, value):
+        if isinstance(value, (PBXList, PBXDict)):
+            plistlib.PlistWriter.writeValue(self, value.data)
+        else:
+            plistlib.PlistWriter.writeValue(self, value)
+
+    def simpleElement(self, element, value=None):
+        """
+        We have to override this method to deal with Unicode text correctly.
+        Non-ascii characters have to get encoded as character references.
+        """
+        if value is not None:
+            value = _escapeAndEncode(value)
+            self.writeln("<%s>%s</%s>" % (element, value, element))
+        else:
+            self.writeln("<%s/>" % element)
+
+
+# Regex to find any control chars, except for \t \n and \r
+_controlCharPat = re.compile(
+    r"[\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f"
+    r"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f]")
+
+
+def _escapeAndEncode(text):
+    m = _controlCharPat.search(text)
+    if m is not None:
+        raise ValueError("strings can't contains control characters; "
+                         "use plistlib.Data instead")
+    text = text.replace("\r\n", "\n")       # convert DOS line endings
+    text = text.replace("\r", "\n")         # convert Mac line endings
+    text = text.replace("&", "&amp;")       # escape '&'
+    text = text.replace("<", "&lt;")        # escape '<'
+    text = text.replace(">", "&gt;")        # escape '>'
+    return text.encode("ascii", "xmlcharrefreplace")  # encode as ascii with xml character references
