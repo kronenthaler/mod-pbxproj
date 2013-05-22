@@ -188,12 +188,12 @@ class PBXFileReference(PBXType):
         self.remove('explicitFileType')
         self.remove('lastKnownFileType')
 
-        if os.path.isdir(self.get('path')):
+        ext = os.path.splitext(self.get('name', ''))[1]
+        if os.path.isdir(self.get('path')) and ext != '.framework':
             f_type = 'folder'
             build_phase = None
             ext = ''
         else:
-            ext = os.path.splitext(self.get('name', ''))[1]
             f_type, build_phase = PBXFileReference.types.get(ext, ('?', 'PBXResourcesBuildPhase'))
 
         self['lastKnownFileType'] = f_type
