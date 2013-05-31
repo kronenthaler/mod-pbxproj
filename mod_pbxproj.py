@@ -626,11 +626,11 @@ class XcodeProject(PBXDict):
     def get_files_by_name(self, name, parent=None):
         if parent:
             files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
-                                                         and f.get(name) == name
+                                                         and f.get('name') == name
                                                          and parent.has_child(f)]
         else:
             files = [f for f in self.objects.values() if f.get('isa') == 'PBXFileReference'
-                                                         and f.get(name) == name]
+                                                         and f.get('name') == name]
 
         return files
 
