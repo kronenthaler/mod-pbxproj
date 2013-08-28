@@ -98,6 +98,8 @@ class PBXList(UserList):
 
         if value in self.data:
             self.data.remove(value)
+            return True
+        return False
 
     def __setitem__(self, key, value):
         UserList.__setitem__(self, PBXType.Convert(key), PBXType.Convert(value))
