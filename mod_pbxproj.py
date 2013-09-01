@@ -375,6 +375,14 @@ class PBXTargetDependency(PBXType):
     pass
 
 
+class PBXAggregateTarget(PBXType):
+	pass
+	
+	
+class PBXHeadersBuildPhase(PBXType):
+	pass
+	
+	
 class PBXBuildPhase(PBXType):
     def add_build_file(self, bf):
         if bf.get('isa') != 'PBXBuildFile':
@@ -706,6 +714,14 @@ class XcodeProject(PBXDict):
 
         return set(file_list).difference(exists_list)
 
+    def add_run_script(self, target, script=None):
+        targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target];
+        # if the list is not empty, create an object for the phase 
+        # insert the uuid in the buildphases array of the object
+        # hope for the best!
+        # return True if the script was added.
+        return []
+
     def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
         if not os.path.isdir(os_path):
             return []
@@ -764,16 +780,13 @@ class XcodeProject(PBXDict):
                 }
 
                 f_path = os.path.join(grp_path, f)
-
                 file_dict[f_path] = kwds
 
             new_files = self.verify_files([n.get('name') for n in file_dict.values()], parent=grp)
-
             add_files = [(k, v) for k, v in file_dict.items() if v.get('name') in new_files]
 
             for path, kwds in add_files:
                 kwds.pop('name', None)
-
                 self.add_file(path, **kwds)
 
             if not recursive:
@@ -1286,6 +1299,11 @@ class XcodeProject(PBXDict):
             return None
 
         tree = plistlib.readPlistFromString(stdout)
+        return XcodeProject(tree, path)
+    
+    @classmethod    
+    def LoadFromXML(cls, path):
+    	tree = plistlib.readPlist(path)
         return XcodeProject(tree, path)
 
 
