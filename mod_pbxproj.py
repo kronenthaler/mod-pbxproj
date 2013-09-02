@@ -49,7 +49,6 @@ regex = '[a-zA-Z0-9\\._/-]*'
 
 
 class PBXEncoder(json.JSONEncoder):
-
     def default(self, obj):
         """Tests the input object, obj, to encode as JSON."""
 
@@ -423,7 +422,19 @@ class PBXResourcesBuildPhase(PBXBuildPhase):
 
 
 class PBXShellScriptBuildPhase(PBXBuildPhase):
-    pass
+    @classmethod
+    def Create(cls, script, shell="/bin/sh", files=[], input_paths=[], output_paths=[], show_in_log = '0'):
+        bf = cls()
+        bf.id = cls.GenerateId()
+        bf['files'] = files
+        bf['inputPaths'] = input_paths
+        bf['outputPaths'] = output_paths
+        bf['runOnlyForDeploymentPostprocessing'] = '0';
+        bf['shellPath'] = shell
+        bf['shellScript'] = script
+        bf['showEnvVarsInLog'] = show_in_log
+
+        return bf
 
 
 class PBXSourcesBuildPhase(PBXBuildPhase):
@@ -716,12 +727,17 @@ class XcodeProject(PBXDict):
         return set(file_list).difference(exists_list)
 
     def add_run_script(self, target, script=None):
+        result = []
         targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target];
-        # if the list is not empty, create an object for the phase 
-        # insert the uuid in the buildphases array of the object
-        # hope for the best!
-        # return True if the script was added.
-        return []
+        if len(targets) != 0 :
+            script_phase = PBXShellScriptBuildPhase.Create(script)
+            for t in targets:
+                t['buildPhases'].add(script_phase.id)
+                
+            self.objects[script_phase.id] = script_phase
+            result = [script_phase]
+            
+        return result
 
     def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
         if not os.path.isdir(os_path):
@@ -1085,7 +1101,17 @@ class XcodeProject(PBXDict):
 
         shutil.copy2(file_name, backup_name)
 
-    def save(self, file_name=None):
+    def save(self, file_name=None, old_format=False):
+        if old_format :
+            self.saveFormatXML(file_name)
+        else:
+            self.saveFormat3_2(file_name)
+    
+    def saveFormat3_2(self, file_name=None):
+        """Alias for backward compatibility"""
+        self.save_new_format(file_name)
+        
+    def save_format_xml(self, file_name=None):
         """Saves in old (xml) format"""
         if not file_name:
             file_name = self.pbxproj_path
@@ -1097,7 +1123,7 @@ class XcodeProject(PBXDict):
             writer.writeValue(self.data)
             writer.writeln("</plist>")
 
-    def saveFormat3_2(self, file_name=None):
+    def save_new_format(self, file_name=None):
         """Save in Xcode 3.2 compatible (new) format"""
         if not file_name:
             file_name = self.pbxproj_path
@@ -1150,7 +1176,7 @@ class XcodeProject(PBXDict):
 
     @classmethod
     def addslashes(cls, s):
-        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\"}
+        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n"}
         return ''.join(d.get(c, c) for c in s)
 
     def _printNewXCodeFormat(self, out, root, deep, enters=True):
@@ -1197,6 +1223,7 @@ class XcodeProject(PBXDict):
                         ('PBXFileReference', False),
                         ('PBXFrameworksBuildPhase', True),
                         ('PBXGroup', True),
+                        ('PBXAggregateTarget', True),
                         ('PBXNativeTarget', True),
                         ('PBXProject', True),
                         ('PBXResourcesBuildPhase', True),
