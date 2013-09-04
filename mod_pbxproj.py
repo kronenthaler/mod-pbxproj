@@ -728,17 +728,40 @@ class XcodeProject(PBXDict):
 
     def add_run_script(self, target, script=None):
         result = []
-        targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target];
+        targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target]
         if len(targets) != 0 :
             script_phase = PBXShellScriptBuildPhase.Create(script)
             for t in targets:
-                t['buildPhases'].add(script_phase.id)
-                
-            self.objects[script_phase.id] = script_phase
-            result = [script_phase]
+                skip = False
+                for buildPhase in t['buildPhases']:
+                    if self.objects[buildPhase].get('isa') == 'PBXShellScriptBuildPhase' and self.objects[buildPhase].get('shellScript') == script:
+                        skip = True
+                        
+                if not skip:
+                    t['buildPhases'].add(script_phase.id)
+                    self.objects[script_phase.id] = script_phase
+                    result.append(script_phase)
             
         return result
-
+    
+    def add_run_script_all_targets(self, script=None):
+        result = []
+        targets = self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget')
+        if len(targets) != 0 :
+            script_phase = PBXShellScriptBuildPhase.Create(script)
+            for t in targets:
+                skip = False
+                for buildPhase in t['buildPhases']:
+                    if self.objects[buildPhase].get('isa') == 'PBXShellScriptBuildPhase' and self.objects[buildPhase].get('shellScript') == script:
+                        skip = True
+                        
+                if not skip:
+                    t['buildPhases'].add(script_phase.id)
+                    self.objects[script_phase.id] = script_phase
+                    result.append(script_phase)
+            
+        return result
+    
     def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
         if not os.path.isdir(os_path):
             return []
