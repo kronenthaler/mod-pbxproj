@@ -1,6 +1,7 @@
 # Python cruft
 *.pyc
 *.pyo
+*.py~
 
 # Mac OS X cruft
 .DS_Store
