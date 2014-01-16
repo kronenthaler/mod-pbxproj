@@ -41,6 +41,7 @@ import re
 import shutil
 import subprocess
 import uuid
+import operator
 
 from UserDict import IterableUserDict
 from UserList import UserList
@@ -1124,15 +1125,15 @@ class XcodeProject(PBXDict):
 
         shutil.copy2(file_name, backup_name)
 
-    def save(self, file_name=None, old_format=False):
+    def save(self, file_name=None, old_format=False, sort_list=False):
         if old_format :
-            self.saveFormatXML(file_name)
+            self.save_format_xml(file_name)
         else:
-            self.saveFormat3_2(file_name)
+            self.saveFormat3_2(file_name, sort_list)
     
-    def saveFormat3_2(self, file_name=None):
+    def saveFormat3_2(self, file_name=None, sort_list=False):
         """Alias for backward compatibility"""
-        self.save_new_format(file_name)
+        self.save_new_format(file_name, sort_list)
         
     def save_format_xml(self, file_name=None):
         """Saves in old (xml) format"""
@@ -1146,7 +1147,7 @@ class XcodeProject(PBXDict):
             writer.writeValue(self.data)
             writer.writeln("</plist>")
 
-    def save_new_format(self, file_name=None):
+    def save_new_format(self, file_name=None, sort_list=False):
         """Save in Xcode 3.2 compatible (new) format"""
         if not file_name:
             file_name = self.pbxproj_path
@@ -1192,17 +1193,46 @@ class XcodeProject(PBXDict):
         self.uuids = uuids
         self.sections = sections
 
+        if sort_list:
+            self.buildSortedFiles()
+            self.buildSortedRefs()
+
         out = open(file_name, 'w')
         out.write('// !$*UTF8*$!\n')
-        self._printNewXCodeFormat(out, self.data, '', enters=True)
+        self._printNewXCodeFormat(out, self.data, '', True,sort_list)
         out.close()
 
+    def buildSortedFiles(self):
+        self.sortedfiles = self.buildSortedListForSection("PBXFileReference")
+
+    def buildSortedRefs(self):
+        self.sortedrefs = self.buildSortedListForSection("PBXBuildFile")
+
+    def buildSortedListForSection(self, skey):
+        nl = list()
+        l = self.sections.get(skey)
+        uuids = self.uuids
+        objs = self.data.get('objects')
+        for pair in l:
+            key = pair[0]
+            nl.append(tuple([key, uuids[key]]))        
+        nl.sort(key=operator.itemgetter(1))
+        kl = list()
+        l = list()
+        for pair in nl:
+            l.append(tuple([pair[0], objs.get(pair[0])]))
+            kl.append(pair[0])
+
+        self.sections["skey"] = l
+        return kl       
+
+        
     @classmethod
     def addslashes(cls, s):
         d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n"}
         return ''.join(d.get(c, c) for c in s)
 
-    def _printNewXCodeFormat(self, out, root, deep, enters=True):
+    def _printNewXCodeFormat(self, out, root, deep, enters=True, sort_list=False):
         if isinstance(root, IterableUserDict):
             out.write('{')
 
@@ -1216,7 +1246,7 @@ class XcodeProject(PBXDict):
                     out.write('\t' + deep)
 
                 out.write('isa = ')
-                self._printNewXCodeFormat(out, isa, '\t' + deep, enters=enters)
+                self._printNewXCodeFormat(out, isa, '\t' + deep, enters, sort_list)
                 out.write(';')
 
                 if enters:
@@ -1280,14 +1310,14 @@ class XcodeProject(PBXDict):
                                 out.write(" /* " + self.uuids[key].encode("utf-8") + " */")
 
                             out.write(" = ")
-                            self._printNewXCodeFormat(out, value, '\t\t' + deep, enters=section[1])
+                            self._printNewXCodeFormat(out, value, '\t\t' + deep, section[1], sort_list)
                             out.write(';')
 
                         out.write('\n/* End %s section */\n' % section[0].encode("utf-8"))
 
                     out.write(deep + '\t}')  # close of the objects section
                 else:
-                    self._printNewXCodeFormat(out, root[key], '\t' + deep, enters=enters)
+                    self._printNewXCodeFormat(out, root[key], '\t' + deep, enters, sort_list)
 
                 out.write(';')
 
@@ -1308,12 +1338,15 @@ class XcodeProject(PBXDict):
 
             if enters:
                 out.write('\n')
-
-            for value in root:
+            nroot = root
+            if sort_list:
+                nroot = self.sortUserList(root)
+            for value in nroot:
+                
                 if enters:
                     out.write('\t' + deep)
 
-                self._printNewXCodeFormat(out, value, '\t' + deep, enters=enters)
+                self._printNewXCodeFormat(out, value, '\t' + deep, enters, sort_list)
                 out.write(',')
 
                 if enters:
@@ -1332,6 +1365,27 @@ class XcodeProject(PBXDict):
 
             if root in self.uuids:
                 out.write(" /* " + self.uuids[root].encode("utf-8") + " */")
+
+    def sortUserList(self, ul):
+        if len(ul) <= 1:
+            return ul
+        
+        sfs = [self.sortedfiles, self.sortedrefs]
+        for fs in sfs:
+            ks = set([])
+            for value in ul:
+                if isinstance(value, str) and value in fs:
+                    ks.add(value)
+                else:
+                    break
+            
+            if len(ul) == len(ks):
+                nl = list()
+                for value in fs:
+                    if value in ks:
+                        nl.append(value)
+                return nl
+        return ul
 
     @classmethod
     def Load(cls, path):
