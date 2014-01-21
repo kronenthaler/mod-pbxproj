@@ -1181,6 +1181,7 @@ class XcodeProject(PBXDict):
         ro = self.data.get('rootObject')
         uuids[ro] = 'Project Object'
 
+        self.inps = dict()
         for key in objs:
             # transitive references (used in the BuildFile section)
             if 'fileRef' in objs.get(key) and objs.get(key).get('fileRef') in uuids:
@@ -1189,13 +1190,25 @@ class XcodeProject(PBXDict):
             # transitive reference to the target name (used in the Native target section)
             if objs.get(key).get('isa') == 'PBXNativeTarget':
                 uuids[objs.get(key).get('buildConfigurationList')] = uuids[objs.get(key).get('buildConfigurationList')].replace('TARGET_NAME', uuids[key])
-
+                bps =  objs.get(key).get("buildPhases")
+                bp2fs = {'PBXFrameworksBuildPhase':'Frameworks', 'PBXHeadersBuildPhase':'Headers', 'PBXResourcesBuildPhase':'Resources', 
+                'PBXSourcesBuildPhase' : 'Sources', 'PBXCopyFilesBuildPhase':'CopyFiles'}
+                for bp in bps:
+                    shortn = objs.get(bp).get('isa')
+                    if shortn in bp2fs:
+                        shortn = bp2fs[shortn]
+                        files = objs.get(bp).get('files')
+                        for f in files:
+                            self.inps[f] = shortn
+                        #self.inps[shortn] = set(files)
+                 
         self.uuids = uuids
         self.sections = sections
 
         if sort_list:
             self.buildSortedFiles()
             self.buildSortedRefs()
+
 
         out = open(file_name, 'w')
         out.write('// !$*UTF8*$!\n')
@@ -1308,7 +1321,10 @@ class XcodeProject(PBXDict):
                             out.write(key.encode("utf-8"))
 
                             if key in self.uuids:
-                                out.write(" /* " + self.uuids[key].encode("utf-8") + " */")
+                                if key in self.inps:
+                                    out.write(" /* {} in {} */".format(self.uuids[key].encode("utf-8"), self.inps[key]))
+                                else:
+                                    out.write(" /* {} */".format(self.uuids[key].encode("utf-8")))
 
                             out.write(" = ")
                             self._printNewXCodeFormat(out, value, '\t\t' + deep, section[1], sort_list)
@@ -1352,6 +1368,8 @@ class XcodeProject(PBXDict):
 
                 if enters:
                     out.write('\n')
+                else:
+                    out.write(' ')
 
             if enters:
                 out.write(deep)
