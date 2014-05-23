@@ -796,7 +796,8 @@ class XcodeProject(PBXDict):
                 special_list.append(grp_path)
                 new_files = self.verify_files([folder_name], parent=parent)
 
-                if new_files:
+                # Ignore this file if it is in excludes
+                if new_files and not [m for m in excludes if re.match(m, grp_path)]:
                     results.extend(self.add_file(grp_path, parent, create_build_files=create_build_files))
 
                 continue
