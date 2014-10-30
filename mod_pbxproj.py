@@ -938,11 +938,11 @@ class XcodeProject(PBXDict):
                     key = buildFile.id
                     PBXRBP = [f for f in self.objects.values() if f.get('isa') == 'PBXResourcesBuildPhase']
                     PBXSBP = [f for f in self.objects.values() if f.get('isa') == 'PBXSourcesBuildPhase']
-	            self.objects.remove(key)
-	            if PBXSBP[0].has_build_file(key):
-	                PBXSBP[0].remove_build_file(key)
-	            if PBXRBP[0].has_build_file(key):
-	                PBXRBP[0].remove_build_file(key)
+                    self.objects.remove(key)
+                    if PBXSBP[0].has_build_file(key):
+                        PBXSBP[0].remove_build_file(key)
+                    if PBXRBP[0].has_build_file(key):
+                        PBXRBP[0].remove_build_file(key)
             if recursive:
                 groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
