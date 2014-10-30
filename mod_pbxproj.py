@@ -935,15 +935,14 @@ class XcodeProject(PBXDict):
             buildFiles = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile']
             for buildFile in buildFiles:
                 if id == buildFile.get('fileRef'):
-                    keysToRemove = [key for key, value in self.objects.iteritems() if value == buildFile]
+                    key = buildFile.id
                     PBXRBP = [f for f in self.objects.values() if f.get('isa') == 'PBXResourcesBuildPhase']
                     PBXSBP = [f for f in self.objects.values() if f.get('isa') == 'PBXSourcesBuildPhase']
-                    for key in keysToRemove:
-                        self.objects.remove(key)
-                        if PBXSBP[0].has_build_file(key):
-                            PBXSBP[0].remove_build_file(key)
-                        if PBXRBP[0].has_build_file(key):
-                            PBXRBP[0].remove_build_file(key)
+	            self.objects.remove(key)
+	            if PBXSBP[0].has_build_file(key):
+	                PBXSBP[0].remove_build_file(key)
+	            if PBXRBP[0].has_build_file(key):
+	                PBXRBP[0].remove_build_file(key)
             if recursive:
                 groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
