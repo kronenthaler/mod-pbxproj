@@ -850,7 +850,7 @@ class XcodeProject(PBXDict):
 
         return self.add_file(f_path, parent, tree, create_build_files, weak, ignore_unknown_type=ignore_unknown_type)
 
-    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
+    def add_file(self, f_path, parent=None, tree='<group>', create_build_files=True, weak=False, ignore_unknown_type=True):
         results = []
         abs_path = ''
 
@@ -924,16 +924,32 @@ class XcodeProject(PBXDict):
             if not os.path.exists(finalLib):
                 os.symlink(srcLib, finalLib)
 
-    def remove_group(self, grp):
-        pass
 
     def remove_file(self, id, recursive=True):
         if not PBXType.IsGuid(id):
             id = id.id
 
         if id in self.objects:
+            print "Removing file " + id
             self.objects.remove(id)
-
+            # Remove from PBXResourcesBuildPhase and PBXSourcesBuildPhase if necessary
+            buildFiles = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile']
+            for buildFile in buildFiles:
+                if id == buildFile.get('fileRef'):
+                    keysToRemove = [key for key, value in self.objects.iteritems() if value == buildFile]
+                    PBXRBP = [f for f in self.objects.values() if f.get('isa') == 'PBXResourcesBuildPhase']
+                    PBXSBP = [f for f in self.objects.values() if f.get('isa') == 'PBXSourcesBuildPhase']
+                    for key in keysToRemove:
+                        print "Removing build file " + key
+                        self.objects.remove(key)
+                        if PBXSBP[0].has_build_file(key):
+                            print "Removing " + key + " from PBX build resources phase section"
+                            PBXSBP[0].remove_build_file(key)
+                        if PBXRBP[0].has_build_file(key):
+                            print "Removing " + key + " from PBX build sources phase section"
+                            PBXRBP[0].remove_build_file(key)
+                        
+        
             if recursive:
                 groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
@@ -943,7 +959,40 @@ class XcodeProject(PBXDict):
 
             self.modified = True
 
+    def remove_group(self, id, recursive = False):
+        if not PBXType.IsGuid(id):
+            id = id.id
+        name = self.objects.get(id).get('path')
+        children = self.objects.get(id).get('children')
+        if name is None:
+            name = id
+        if id in self.objects:
+            if recursive:
+                for childKey in children:
+                    childValue = self.objects.get(childKey)
+                    if childValue.get('isa') == 'PBXGroup':
+                        self.remove_group(childKey, True)
+                    else:
+                        self.remove_file(childKey, False)
+            else:
+                print "Group " + self.objects.get(id).get('path') + " is not empty."
+                return
+        else:
+            print "Can not find group " + name
+            return
+        self.objects.remove(id);
+        print "Removing gourp " + name
+
+    def remove_group_by_name(self, name, recursive = False):
+        groups = self.get_groups_by_name(name)
+        if len(groups):
+            for group in groups:
+                self.remove_group(group, recursive)
+        else:
+            print "No group named " + name
+
     def move_file(self, id, dest_grp=None):
+        print "Moving"
         pass
 
     def apply_patch(self, patch_path, xcode_path):
