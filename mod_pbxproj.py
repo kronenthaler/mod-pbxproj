@@ -944,8 +944,6 @@ class XcodeProject(PBXDict):
                             PBXSBP[0].remove_build_file(key)
                         if PBXRBP[0].has_build_file(key):
                             PBXRBP[0].remove_build_file(key)
-                        
-        
             if recursive:
                 groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
