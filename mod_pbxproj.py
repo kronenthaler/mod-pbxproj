@@ -924,8 +924,6 @@ class XcodeProject(PBXDict):
             if not os.path.exists(finalLib):
                 os.symlink(srcLib, finalLib)
 
-    def remove_group(self, grp):
-        pass
 
     def remove_file(self, id, recursive=True):
         if not PBXType.IsGuid(id):
@@ -933,7 +931,18 @@ class XcodeProject(PBXDict):
 
         if id in self.objects:
             self.objects.remove(id)
-
+            # Remove from PBXResourcesBuildPhase and PBXSourcesBuildPhase if necessary
+            buildFiles = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile']
+            for buildFile in buildFiles:
+                if id == buildFile.get('fileRef'):
+                    key = buildFile.id
+                    PBXRBP = [f for f in self.objects.values() if f.get('isa') == 'PBXResourcesBuildPhase']
+                    PBXSBP = [f for f in self.objects.values() if f.get('isa') == 'PBXSourcesBuildPhase']
+                    self.objects.remove(key)
+                    if PBXSBP[0].has_build_file(key):
+                        PBXSBP[0].remove_build_file(key)
+                    if PBXRBP[0].has_build_file(key):
+                        PBXRBP[0].remove_build_file(key)
             if recursive:
                 groups = [g for g in self.objects.values() if g.get('isa') == 'PBXGroup']
 
@@ -942,6 +951,34 @@ class XcodeProject(PBXDict):
                         group.remove_child(id)
 
             self.modified = True
+
+    def remove_group(self, id, recursive = False):
+        if not PBXType.IsGuid(id):
+            id = id.id
+        name = self.objects.get(id).get('path')
+        children = self.objects.get(id).get('children')
+        if name is None:
+            name = id
+        if id in self.objects:
+            if recursive:
+                for childKey in children:
+                    childValue = self.objects.get(childKey)
+                    if childValue.get('isa') == 'PBXGroup':
+                        self.remove_group(childKey, True)
+                    else:
+                        self.remove_file(childKey, False)
+            else:
+                return
+        else:
+            return
+        self.objects.remove(id);
+
+    def remove_group_by_name(self, name, recursive = False):
+        groups = self.get_groups_by_name(name)
+        if len(groups):
+            for group in groups:
+                self.remove_group(group, recursive)
+        else:
 
     def move_file(self, id, dest_grp=None):
         pass
