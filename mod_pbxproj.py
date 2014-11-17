@@ -979,6 +979,7 @@ class XcodeProject(PBXDict):
             for group in groups:
                 self.remove_group(group, recursive)
         else:
+            return
 
     def move_file(self, id, dest_grp=None):
         pass
