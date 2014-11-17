@@ -1392,7 +1392,7 @@ class XcodeProject(PBXDict):
     
     @classmethod    
     def LoadFromXML(cls, path):
-    	tree = plistlib.readPlist(path)
+        tree = plistlib.readPlist(path)
         return XcodeProject(tree, path)
 
 
