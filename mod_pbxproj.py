@@ -159,6 +159,7 @@ class PBXFileReference(PBXType):
         '.framework': ('wrapper.framework', 'PBXFrameworksBuildPhase'),
         '.h': ('sourcecode.c.h', None),
         '.hpp': ('sourcecode.c.h', None),
+        '.swift': ('sourcecode.swift', None),
         '.icns': ('image.icns', 'PBXResourcesBuildPhase'),
         '.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
         '.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
