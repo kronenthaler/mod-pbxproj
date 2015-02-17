@@ -377,13 +377,13 @@ class PBXTargetDependency(PBXType):
 
 
 class PBXAggregateTarget(PBXType):
-	pass
-	
-	
+    pass
+
+
 class PBXHeadersBuildPhase(PBXType):
-	pass
-	
-	
+    pass
+
+
 class PBXBuildPhase(PBXType):
     def add_build_file(self, bf):
         if bf.get('isa') != 'PBXBuildFile':
@@ -484,34 +484,14 @@ class XCBuildConfiguration(PBXType):
         return self.add_search_paths(paths, 'buildSettings', 'FRAMEWORK_SEARCH_PATHS', recursive=recursive)
 
     def add_other_cflags(self, flags):
-        modified = False
-
-        base = 'buildSettings'
-        key = 'OTHER_CFLAGS'
-
-        if isinstance(flags, basestring):
-            flags = PBXList(flags)
-
-        if base not in self:
-            self[base] = PBXDict()
-
-        for flag in flags:
-            if key not in self[base]:
-                self[base][key] = PBXList()
-            elif isinstance(self[base][key], basestring):
-                self[base][key] = PBXList(self[base][key])
-
-            if self[base][key].add(flag):
-                self[base][key] = [e for e in self[base][key] if e]
-                modified = True
-
-        return modified
+        return self.add_flag('OTHER_CFLAGS', flags)
 
     def add_other_ldflags(self, flags):
-        modified = False
+        return self.add_flag('OTHER_LDFLAGS', flags)
 
+    def add_flag(self, key, flags):
+        modified = False
         base = 'buildSettings'
-        key = 'OTHER_LDFLAGS'
 
         if isinstance(flags, basestring):
             flags = PBXList(flags)
@@ -531,11 +511,9 @@ class XCBuildConfiguration(PBXType):
 
         return modified
 
-    def remove_other_ldflags(self, flags):
+    def remove_flag(self, key, flags):
         modified = False
-
         base = 'buildSettings'
-        key = 'OTHER_LDFLAGS'
 
         if isinstance(flags, basestring):
             flags = PBXList(flags)
@@ -551,8 +529,13 @@ class XCBuildConfiguration(PBXType):
                     self[base][key] = [e for e in self[base][key] if e]
                     modified = True
 
+                if len(self[base][key]) == 0:
+                    self[base].pop(key, None)
+
         return modified
 
+    def remove_other_ldflags(self, flags):
+        return self.remove_flag('OTHER_LD_FLAGS', flags)
 
 class XCConfigurationList(PBXType):
     pass
@@ -631,7 +614,28 @@ class XcodeProject(PBXDict):
             if b.add_library_search_paths(paths, recursive):
                 self.modified = True
 
-                # TODO: need to return value if project has been modified
+    def add_flags(self, pairs, configuration='All'):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+
+        # iterate over all the pairs of configurations
+        for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
+
+            for k in pairs:
+                if b.add_flag(k, pairs[k]):
+                    self.modified = True
+
+    def remove_flags(self, pairs, configuration='All'):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+
+        # iterate over all the pairs of configurations
+        for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
+            for k in pairs:
+                if b.remove_flag(k, pairs[k]):
+                    self.modified = True
 
     def get_obj(self, id):
         return self.objects.get(id)
@@ -737,14 +741,14 @@ class XcodeProject(PBXDict):
                 for buildPhase in t['buildPhases']:
                     if self.objects[buildPhase].get('isa') == 'PBXShellScriptBuildPhase' and self.objects[buildPhase].get('shellScript') == script:
                         skip = True
-                        
+
                 if not skip:
                     t['buildPhases'].add(script_phase.id)
                     self.objects[script_phase.id] = script_phase
                     result.append(script_phase)
-            
+
         return result
-    
+
     def add_run_script_all_targets(self, script=None):
         result = []
         targets = self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget')
@@ -755,14 +759,14 @@ class XcodeProject(PBXDict):
                 for buildPhase in t['buildPhases']:
                     if self.objects[buildPhase].get('isa') == 'PBXShellScriptBuildPhase' and self.objects[buildPhase].get('shellScript') == script:
                         skip = True
-                        
+
                 if not skip:
                     t['buildPhases'].add(script_phase.id)
                     self.objects[script_phase.id] = script_phase
                     result.append(script_phase)
-            
+
         return result
-    
+
     def add_folder(self, os_path, parent=None, excludes=None, recursive=True, create_build_files=True):
         if not os.path.isdir(os_path):
             return []
@@ -1169,11 +1173,11 @@ class XcodeProject(PBXDict):
             self.saveFormatXML(file_name)
         else:
             self.saveFormat3_2(file_name)
-    
+
     def saveFormat3_2(self, file_name=None):
         """Alias for backward compatibility"""
         self.save_new_format(file_name)
-        
+
     def save_format_xml(self, file_name=None):
         """Saves in old (xml) format"""
         if not file_name:
@@ -1391,8 +1395,8 @@ class XcodeProject(PBXDict):
 
         tree = plistlib.readPlistFromString(stdout)
         return XcodeProject(tree, path)
-    
-    @classmethod    
+
+    @classmethod
     def LoadFromXML(cls, path):
         tree = plistlib.readPlist(path)
         return XcodeProject(tree, path)
@@ -1436,3 +1440,51 @@ def _escapeAndEncode(text):
     text = text.replace("<", "&lt;")        # escape '<'
     text = text.replace(">", "&gt;")        # escape '>'
     return text.encode("ascii", "xmlcharrefreplace")  # encode as ascii with xml character references
+
+def main():
+    import json
+    import argparse
+    import subprocess
+    import shutil
+    import os
+
+    parser = argparse.ArgumentParser("Modify an xcode project file using a single command at a time.")
+    parser.add_argument('project', help="Project path")
+    parser.add_argument('configuration', help="Modify the flags of the given configuration", choices=['Debug', 'Release', 'All'])
+    parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
+    parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
+
+    args = parser.parse_args();
+
+    # open the project file
+    if os.path.isdir(args.project) :
+        args.project = args.project + "/project.pbxproj"
+
+    if not os.path.isfile(args.project) :
+        raise Exception("Project File not found")
+
+    project = XcodeProject.Load(args.project)
+    project.backup()
+
+    # apply the commands
+    # add flags
+    if args.af :
+        pairs = {}
+        for flag in args.af:
+            tokens = flag.split("=")
+            pairs[tokens[0]] = tokens[1]
+        project.add_flags(pairs, args.configuration)
+
+    # remove flags
+    if args.rf :
+        pairs = {}
+        for flag in args.rf:
+            tokens = flag.split("=")
+            pairs[tokens[0]] = tokens[1]
+        project.remove_flags(pairs, args.configuration)
+
+    # save the file
+    project.save()
+
+if __name__ == "__main__":
+    main()
