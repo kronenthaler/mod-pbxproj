@@ -489,12 +489,12 @@ class XCBuildConfiguration(PBXType):
     def add_other_ldflags(self, flags):
         return self.add_flag('OTHER_LDFLAGS', flags)
 
-    def add_flag(self, key, values):
+    def add_flag(self, key, flags):
         modified = False
         base = 'buildSettings'
 
-        if isinstance(values, basestring):
-            flags = PBXList(values)
+        if isinstance(flags, basestring):
+            flags = PBXList(flags)
 
         if base not in self:
             self[base] = PBXDict()
@@ -528,6 +528,9 @@ class XCBuildConfiguration(PBXType):
                 if self[base][key].remove(flag):
                     self[base][key] = [e for e in self[base][key] if e]
                     modified = True
+
+                if len(self[base][key]) == 0:
+                    self[base].pop(key, None)
 
         return modified
 
@@ -610,6 +613,24 @@ class XcodeProject(PBXDict):
         for b in build_configs:
             if b.add_library_search_paths(paths, recursive):
                 self.modified = True
+
+    def add_flags(self, pairs):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+
+        # iterate over all the pairs of configurations
+        for b in build_configs:
+            for k in pairs:
+                if b.add_flag(k, pairs[k]):
+                    self.modified = True
+
+    def remove_flags(self, pairs):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+
+        # iterate over all the pairs of configurations
+        for b in build_configs:
+            for k in pairs:
+                if b.remove_flag(k, pairs[k]):
+                    self.modified = True
 
     def get_obj(self, id):
         return self.objects.get(id)
@@ -1414,3 +1435,50 @@ def _escapeAndEncode(text):
     text = text.replace("<", "&lt;")        # escape '<'
     text = text.replace(">", "&gt;")        # escape '>'
     return text.encode("ascii", "xmlcharrefreplace")  # encode as ascii with xml character references
+
+def main():
+    import json
+    import argparse
+    import subprocess
+    import shutil
+    import os
+
+    parser = argparse.ArgumentParser("Modify an xcode project file using a single command at a time.")
+    parser.add_argument('project', help="Project path")
+    parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
+    parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
+
+    args = parser.parse_args();
+
+    # open the project file
+    if os.path.isdir(args.project) :
+        args.project = args.project + "/project.pbxproj"
+
+    if not os.path.isfile(args.project) :
+        raise Exception("Project File not found")
+
+    project = XcodeProject.Load(args.project)
+    project.backup()
+
+    # apply the commands
+    # add flags
+    if args.af :
+        pairs = {}
+        for flag in args.af:
+            tokens = flag.split("=")
+            pairs[tokens[0]] = tokens[1]
+        project.add_flags(pairs)
+
+    # remove flags
+    if args.rf :
+        pairs = {}
+        for flag in args.rf:
+            tokens = flag.split("=")
+            pairs[tokens[0]] = tokens[1]
+        project.remove_flags(pairs)
+
+    # save the file
+    project.save()
+
+if __name__ == "__main__":
+    main()
