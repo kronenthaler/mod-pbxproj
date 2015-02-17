@@ -1167,6 +1167,7 @@ class XcodeProject(PBXDict):
             backup_name = "%s.%s.backup" % (file_name, datetime.datetime.now().strftime('%d%m%y-%H%M%S'))
 
         shutil.copy2(file_name, backup_name)
+        return backup_name
 
     def save(self, file_name=None, old_format=False):
         if old_format :
@@ -1453,8 +1454,9 @@ def main():
     parser.add_argument('configuration', help="Modify the flags of the given configuration", choices=['Debug', 'Release', 'All'])
     parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
     parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
-
+    parser.add_argument('-b', '--backup', help='Create a temporary backup before modify', action='store_true')
     args = parser.parse_args();
+
 
     # open the project file
     if os.path.isdir(args.project) :
@@ -1464,7 +1466,9 @@ def main():
         raise Exception("Project File not found")
 
     project = XcodeProject.Load(args.project)
-    project.backup()
+    backup_file = None
+    if args.backup :
+        backup_file = project.backup()
 
     # apply the commands
     # add flags
@@ -1485,6 +1489,10 @@ def main():
 
     # save the file
     project.save()
+
+    # remove backup if everything was ok.
+    if args.backup :
+        os.remove(backup_file)
 
 if __name__ == "__main__":
     main()
