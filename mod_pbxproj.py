@@ -614,20 +614,25 @@ class XcodeProject(PBXDict):
             if b.add_library_search_paths(paths, recursive):
                 self.modified = True
 
-    def add_flags(self, pairs):
+    def add_flags(self, pairs, configuration='All'):
         build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
         # iterate over all the pairs of configurations
         for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
+
             for k in pairs:
                 if b.add_flag(k, pairs[k]):
                     self.modified = True
 
-    def remove_flags(self, pairs):
+    def remove_flags(self, pairs, configuration='All'):
         build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
         # iterate over all the pairs of configurations
         for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
             for k in pairs:
                 if b.remove_flag(k, pairs[k]):
                     self.modified = True
@@ -1445,6 +1450,7 @@ def main():
 
     parser = argparse.ArgumentParser("Modify an xcode project file using a single command at a time.")
     parser.add_argument('project', help="Project path")
+    parser.add_argument('configuration', help="Modify the flags of the given configuration", choices=['Debug', 'Release', 'All'])
     parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
     parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
 
@@ -1467,7 +1473,7 @@ def main():
         for flag in args.af:
             tokens = flag.split("=")
             pairs[tokens[0]] = tokens[1]
-        project.add_flags(pairs)
+        project.add_flags(pairs, args.configuration)
 
     # remove flags
     if args.rf :
@@ -1475,7 +1481,7 @@ def main():
         for flag in args.rf:
             tokens = flag.split("=")
             pairs[tokens[0]] = tokens[1]
-        project.remove_flags(pairs)
+        project.remove_flags(pairs, args.configuration)
 
     # save the file
     project.save()
