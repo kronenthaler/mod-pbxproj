@@ -159,7 +159,7 @@ class PBXFileReference(PBXType):
         '.framework': ('wrapper.framework', 'PBXFrameworksBuildPhase'),
         '.h': ('sourcecode.c.h', None),
         '.hpp': ('sourcecode.c.h', None),
-        '.swift': ('sourcecode.swift', None),
+        '.swift': ('sourcecode.swift', PBXSourcesBuildPhase),
         '.icns': ('image.icns', 'PBXResourcesBuildPhase'),
         '.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
         '.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
@@ -1302,7 +1302,8 @@ class XcodeProject(PBXDict):
                         ('PBXTargetDependency', True),
                         ('PBXVariantGroup', True),
                         ('PBXReferenceProxy', True),
-                        ('PBXContainerItemProxy', True)]
+                        ('PBXContainerItemProxy', True),
+                        ('XCVersionGroup', True)]
 
                     for section in sections:  # iterate over the sections
                         if self.sections.get(section[0]) is None:
