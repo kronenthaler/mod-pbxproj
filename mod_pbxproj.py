@@ -1302,7 +1302,8 @@ class XcodeProject(PBXDict):
                         ('PBXTargetDependency', True),
                         ('PBXVariantGroup', True),
                         ('PBXReferenceProxy', True),
-                        ('PBXContainerItemProxy', True)]
+                        ('PBXContainerItemProxy', True),
+                        ('XCVersionGroup', True)]
 
                     for section in sections:  # iterate over the sections
                         if self.sections.get(section[0]) is None:
