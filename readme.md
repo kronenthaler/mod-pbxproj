@@ -1,4 +1,4 @@
-This module can read, modify, and write a .pbxproj file from an Xcode 4 project.  The file is usually called `project.pbxproj` and can be found inside the .xcodeproj bundle.
+This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 projects.  The file is usually called `project.pbxproj` and can be found inside the .xcodeproj bundle.
 
 Basic Usage:
 
