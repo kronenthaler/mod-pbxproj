@@ -1169,15 +1169,15 @@ class XcodeProject(PBXDict):
         shutil.copy2(file_name, backup_name)
         return backup_name
 
-    def save(self, file_name=None, old_format=False):
+    def save(self, file_name=None, old_format=False, sort=False):
         if old_format :
             self.saveFormatXML(file_name)
         else:
-            self.saveFormat3_2(file_name)
+            self.saveFormat3_2(file_name, sort)
 
-    def saveFormat3_2(self, file_name=None):
+    def saveFormat3_2(self, file_name=None, sort=False):
         """Alias for backward compatibility"""
-        self.save_new_format(file_name)
+        self.save_new_format(file_name, sort)
 
     def save_format_xml(self, file_name=None):
         """Saves in old (xml) format"""
@@ -1191,7 +1191,7 @@ class XcodeProject(PBXDict):
             writer.writeValue(self.data)
             writer.writeln("</plist>")
 
-    def save_new_format(self, file_name=None):
+    def save_new_format(self, file_name=None, sort=False):
         """Save in Xcode 3.2 compatible (new) format"""
         if not file_name:
             file_name = self.pbxproj_path
@@ -1239,7 +1239,7 @@ class XcodeProject(PBXDict):
 
         out = open(file_name, 'w')
         out.write('// !$*UTF8*$!\n')
-        self._printNewXCodeFormat(out, self.data, '', enters=True)
+        self._printNewXCodeFormat(out, self.data, '', enters=True, sort=sort)
         out.close()
 
     @classmethod
@@ -1247,7 +1247,7 @@ class XcodeProject(PBXDict):
         d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n"}
         return ''.join(d.get(c, c) for c in s)
 
-    def _printNewXCodeFormat(self, out, root, deep, enters=True):
+    def _printNewXCodeFormat(self, out, root, deep, enters=True, sort=False):
         if isinstance(root, IterableUserDict):
             out.write('{')
 
@@ -1311,6 +1311,11 @@ class XcodeProject(PBXDict):
 
                         out.write('\n/* Begin %s section */' % section[0].encode("utf-8"))
                         self.sections.get(section[0]).sort(cmp=lambda x, y: cmp(x[0], y[0]))
+
+                        if sort and section[0] == 'PBXGroup':
+                            for entry in self.sections.get(section[0]):
+                                entry[1]['children'] = sorted(entry[1]['children'],
+                                                              key=lambda x: self.uuids[x].encode("utf-8"))
 
                         for pair in self.sections.get(section[0]):
                             key = pair[0]
