@@ -743,7 +743,7 @@ class XcodeProject(PBXDict):
                         skip = True
 
                 if not skip:
-                    if insert_before_compile is True:
+                    if insert_before_compile:
                         t['buildPhases'].insert(0, script_phase.id)
                     else:
                         t['buildPhases'].add(script_phase.id)
