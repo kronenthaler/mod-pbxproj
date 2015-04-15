@@ -421,7 +421,6 @@ class PBXFrameworksBuildPhase(PBXBuildPhase):
 class PBXResourcesBuildPhase(PBXBuildPhase):
     pass
 
-
 class PBXShellScriptBuildPhase(PBXBuildPhase):
     @classmethod
     def Create(cls, script, shell="/bin/sh", files=[], input_paths=[], output_paths=[], show_in_log = '0'):
@@ -731,7 +730,7 @@ class XcodeProject(PBXDict):
 
         return set(file_list).difference(exists_list)
 
-    def add_run_script(self, target, script=None):
+    def add_run_script(self, target, script=None, insert_before_compile=False):
         result = []
         targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target]
         if len(targets) != 0 :
@@ -743,7 +742,10 @@ class XcodeProject(PBXDict):
                         skip = True
 
                 if not skip:
-                    t['buildPhases'].add(script_phase.id)
+                    if insert_before_compile is True:
+                        t['buildPhases'].insert(0, script_phase.id)
+                    else:
+                        t['buildPhases'].add(script_phase.id)
                     self.objects[script_phase.id] = script_phase
                     result.append(script_phase)
 
