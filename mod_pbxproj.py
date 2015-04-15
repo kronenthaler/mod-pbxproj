@@ -421,6 +421,7 @@ class PBXFrameworksBuildPhase(PBXBuildPhase):
 class PBXResourcesBuildPhase(PBXBuildPhase):
     pass
 
+
 class PBXShellScriptBuildPhase(PBXBuildPhase):
     @classmethod
     def Create(cls, script, shell="/bin/sh", files=[], input_paths=[], output_paths=[], show_in_log = '0'):
