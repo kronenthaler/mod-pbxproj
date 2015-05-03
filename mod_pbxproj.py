@@ -933,6 +933,20 @@ class XcodeProject(PBXDict):
                 os.symlink(srcLib, finalLib)
 
 
+    def get_file_id_by_path(self, f_path):
+        for k, v in self.objects.iteritems():
+            if str(v.get('path')) == f_path:
+                return k
+        return 0
+
+
+    def remove_file_by_path(self, f_path, recursive=True):
+        id = self.get_file_id_by_path(f_path)
+        if id != 0:
+            self.remove_file(id, recursive=recursive)
+        return
+
+
     def remove_file(self, id, recursive=True):
         if not PBXType.IsGuid(id):
             id = id.id
