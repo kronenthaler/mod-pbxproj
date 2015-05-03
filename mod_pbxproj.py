@@ -175,7 +175,8 @@ class PBXFileReference(PBXType):
         '.xib': ('file.xib', 'PBXResourcesBuildPhase'),
         '.strings': ('text.plist.strings', 'PBXResourcesBuildPhase'),
         '.bundle': ('wrapper.plug-in', 'PBXResourcesBuildPhase'),
-        '.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase')
+        '.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase'),
+        '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase')
     }
 
     trees = [
@@ -383,6 +384,8 @@ class PBXAggregateTarget(PBXType):
 class PBXHeadersBuildPhase(PBXType):
     pass
 
+class XCVersionGroup(PBXType):
+    pass
 
 class PBXBuildPhase(PBXType):
     def add_build_file(self, bf):
