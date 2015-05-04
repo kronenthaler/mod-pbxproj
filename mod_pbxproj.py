@@ -854,14 +854,9 @@ class XcodeProject(PBXDict):
         return tail or ntpath.basename(head)
 
     def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
-        for obj in self.objects.values():
-            if 'path' in obj:
-                if self.path_leaf(f_path) == self.path_leaf(obj.get('path')):
-                    return []
+        return self.add_file(f_path, parent, tree, create_build_files, weak, ignore_unknown_type=ignore_unknown_type, create_build_files_forced=False, create_file_reference_forced=False)
 
-        return self.add_file(f_path, parent, tree, create_build_files, weak, ignore_unknown_type=ignore_unknown_type)
-
-    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False):
+    def add_file(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False, ignore_unknown_type=False, create_build_files_forced=True, create_file_reference_forced=True):
         results = []
         abs_path = ''
 
@@ -882,18 +877,104 @@ class XcodeProject(PBXDict):
             parent = self.objects.get(parent, self.root_group)
 
         file_ref = PBXFileReference.Create(f_path, tree, ignore_unknown_type=ignore_unknown_type)
-        parent.add_child(file_ref)
-        results.append(file_ref)
+
+        pbx_build_files = {}
+        pbx_file_references = {}
+        pbx_build_phases = {}
+
+        if (not create_build_files_forced) or (not create_file_reference_forced):
+            # populate maps for the build file, file reference, and build phase PBX types
+            for key in self.objects.keys():
+                value = self.objects[key]
+
+                isa = value.get('isa')
+
+                if isa == 'PBXBuildFile':
+                    pbx_build_files[key] = value
+                elif isa == 'PBXFileReference':
+                    pbx_file_references[key] = value
+                elif file_ref.build_phase and (isa == file_ref.build_phase):
+                    pbx_build_phases[key] = value
+
+        create_file_reference = True
+
+        if not create_file_reference_forced:
+            # check for an existing file reference
+            for pbx_file_reference_id in pbx_file_references.keys():
+                pbx_file_reference = pbx_file_references[pbx_file_reference_id]
+
+                if self.path_leaf(f_path) != self.path_leaf(pbx_file_reference.get('path')):
+                    # file reference path does not match the file to add
+                    continue
+
+                # existing file reference found
+
+                # update the created file reference properties with the exiting file reference found
+                file_ref.id = pbx_file_reference_id
+                file_ref['path'] = pbx_file_reference.get('path')
+                file_ref['name'] = pbx_file_reference.get('name')
+                file_ref['sourceTree'] = pbx_file_reference.get('sourceTree')
+
+                create_file_reference = False
+                break
+
+        if create_file_reference_forced or create_file_reference:
+            parent.add_child(file_ref)
+            results.append(file_ref)
 
         # create a build file for the file ref
         if file_ref.build_phase and create_build_files:
-            phases = self.get_build_phases(file_ref.build_phase)
+            if create_build_files_forced:
+                pbx_build_phases = self.get_build_phases(file_ref.build_phase)
 
-            for phase in phases:
-                build_file = PBXBuildFile.Create(file_ref, weak=weak)
+                for pbx_build_phase in pbx_build_phases:
+                    pbx_build_file = PBXBuildFile.Create(file_ref, weak=weak)
+                    pbx_build_phase.add_build_file(pbx_build_file)
+                    results.append(pbx_build_file)
+            else:
+                pbx_build_phase_build_file_map = {}
 
-                phase.add_build_file(build_file)
-                results.append(build_file)
+                # initialize the build phase / build file map
+                for pbx_build_phase_id in pbx_build_phases.keys():
+                    pbx_build_phase_build_file_map[pbx_build_phase_id] = None
+
+                # check for existing build files for the file reference
+                for pbx_build_file_id in pbx_build_files.keys():
+                    pbx_build_file = pbx_build_files[pbx_build_file_id]
+
+                    if file_ref.id != pbx_build_file.get('fileRef'):
+                        # build file reference does not match the added file reference
+                        continue
+
+                    # existing build file found
+
+                    # find build phases that reference the existing build file found
+                    for pbx_build_phase_id in pbx_build_phases.keys():
+                        pbx_build_phase = pbx_build_phases[pbx_build_phase_id];
+
+                        pbx_build_phase_files = pbx_build_phase.get('files')
+
+                        if pbx_build_file_id in pbx_build_phase_files:
+                            # update the build phase / build file map
+                            pbx_build_phase_build_file_map[pbx_build_phase_id] = pbx_build_file_id
+                            break
+
+                # find build phases that don't have a corresponding build file
+                for pbx_build_phase_id in pbx_build_phase_build_file_map.keys():
+                    pbx_build_file_id = pbx_build_phase_build_file_map[pbx_build_phase_id]
+
+                    if pbx_build_file_id is not None:
+                        # build file exists for the build phase
+                        continue
+
+                    # build phase without a build file
+
+                    pbx_build_phase = pbx_build_phases[pbx_build_phase_id]
+
+                    # create the build file and add it to the build phase
+                    pbx_build_file = PBXBuildFile.Create(file_ref, weak=weak)
+                    pbx_build_phase.add_build_file(pbx_build_file)
+                    results.append(pbx_build_file)
 
             if abs_path and tree == 'SOURCE_ROOT' \
                         and os.path.isfile(abs_path) \
