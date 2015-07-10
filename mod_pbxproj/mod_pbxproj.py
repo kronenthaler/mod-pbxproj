@@ -992,7 +992,7 @@ class XcodeProject(PBXDict):
                         self.remove_group(childKey, True)
                     else:
                         self.remove_file(childKey, False)
-            
+
         self.objects.remove(id);
 
     def remove_group_by_name(self, name, recursive = False):
@@ -1238,7 +1238,7 @@ class XcodeProject(PBXDict):
                     uuids[key] = 'Build configuration list for PBXNativeTarget "TARGET_NAME"'
 
         ro = self.data.get('rootObject')
-        uuids[ro] = 'Project Object'
+        uuids[ro] = 'Project object'
 
         for key in objs:
             # transitive references (used in the BuildFile section)
