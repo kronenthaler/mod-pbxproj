@@ -468,6 +468,9 @@ class XCBuildConfiguration(PBXType):
             elif isinstance(self[base][key], basestring):
                 self[base][key] = PBXList(self[base][key])
 
+            if path == '$(inherited)':
+                escape = False
+
             if escape:
                 if self[base][key].add('"%s"' % path):  # '\\"%s\\"' % path
                     modified = True
