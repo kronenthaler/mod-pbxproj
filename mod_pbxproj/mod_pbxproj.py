@@ -1413,7 +1413,7 @@ class XcodeProject(PBXDict):
             p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
             stdout, stderr = p.communicate()
 
-            # If the plist was malformed, returncode will be non-zero
+            # If the plist was malformed, return code will be non-zero
             if p.returncode != 0:
                 print stdout
                 return None
