@@ -1189,14 +1189,10 @@ class XcodeProject(PBXDict):
 
     def save(self, file_name=None, old_format=False, sort=False):
         if old_format :
-            self.saveFormatXML(file_name)
+            self.save_format_xml(file_name)
         else:
-            self.saveFormat3_2(file_name, sort)
-
-    def saveFormat3_2(self, file_name=None, sort=False):
-        """Alias for backward compatibility"""
-        self.save_new_format(file_name, sort)
-
+            self.save_new_format(file_name, sort)
+    
     def save_format_xml(self, file_name=None):
         """Saves in old (xml) format"""
         if not file_name:
@@ -1403,22 +1399,26 @@ class XcodeProject(PBXDict):
                 out.write(" /* " + self.uuids[root].encode("utf-8") + " */")
 
     @classmethod
-    def Load(cls, path):
-        cls.plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
+    def Load(cls, path, pure_python=False):
+        if pure_python:
+            import openstep_parser as osp
+            tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
+        else:
+            cls.plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
 
-        if not os.path.isfile(XcodeProject.plutil_path):
-            cls.plutil_path = 'plutil'
+            if not os.path.isfile(XcodeProject.plutil_path):
+                cls.plutil_path = 'plutil'
 
-        # load project by converting to xml and then convert that using plistlib
-        p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
-        stdout, stderr = p.communicate()
+            # load project by converting to xml and then convert that using plistlib
+            p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
+            stdout, stderr = p.communicate()
 
-        # If the plist was malformed, returncode will be non-zero
-        if p.returncode != 0:
-            print stdout
-            return None
+            # If the plist was malformed, return code will be non-zero
+            if p.returncode != 0:
+                print stdout
+                return None
 
-        tree = plistlib.readPlistFromString(stdout)
+            tree = plistlib.readPlistFromString(stdout)
         return XcodeProject(tree, path)
 
     @classmethod
@@ -1467,10 +1467,7 @@ def _escapeAndEncode(text):
     return text.encode("ascii", "xmlcharrefreplace")  # encode as ascii with xml character references
 
 def main():
-    import json
     import argparse
-    import subprocess
-    import shutil
     import os
 
     parser = argparse.ArgumentParser("Modify an xcode project file using a single command at a time.")
@@ -1479,8 +1476,7 @@ def main():
     parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
     parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
     parser.add_argument('-b', '--backup', help='Create a temporary backup before modify', action='store_true')
-    args = parser.parse_args();
-
+    args = parser.parse_args()
 
     # open the project file
     if os.path.isdir(args.project) :

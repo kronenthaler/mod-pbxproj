@@ -35,7 +35,7 @@ You can supply an array of regular expressions for files you want to skip. This 
 
     project.add_folder('/path/to/folder', excludes=["^.*\.mdown$", "^.*\.pdf$"])
 
-If a modification you are trying to apply have already been applied to the project then it will be skipped.  This means that before saving the project you should check the modified flag to make sure changes have occured.
+If a modification you are trying to apply have already been applied to the project then it will be skipped.  This means that before saving the project you should check the modified flag to make sure changes have occurred.
 
     if project.modified:
         project.backup()
