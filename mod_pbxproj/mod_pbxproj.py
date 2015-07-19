@@ -468,6 +468,9 @@ class XCBuildConfiguration(PBXType):
             elif isinstance(self[base][key], basestring):
                 self[base][key] = PBXList(self[base][key])
 
+            if path == '$(inherited)':
+                escape = False
+
             if escape:
                 if self[base][key].add('"%s"' % path):  # '\\"%s\\"' % path
                     modified = True
@@ -992,19 +995,14 @@ class XcodeProject(PBXDict):
                         self.remove_group(childKey, True)
                     else:
                         self.remove_file(childKey, False)
-            else:
-                return
-        else:
-            return
+
         self.objects.remove(id);
 
     def remove_group_by_name(self, name, recursive = False):
         groups = self.get_groups_by_name(name)
         if len(groups):
             for group in groups:
-                self.remove_group(group, recursive)
-        else:
-            return
+                self.remove_group(group.id, recursive)
 
     def move_file(self, id, dest_grp=None):
         pass
@@ -1239,7 +1237,7 @@ class XcodeProject(PBXDict):
                     uuids[key] = 'Build configuration list for PBXNativeTarget "TARGET_NAME"'
 
         ro = self.data.get('rootObject')
-        uuids[ro] = 'Project Object'
+        uuids[ro] = 'Project object'
 
         for key in objs:
             # transitive references (used in the BuildFile section)
