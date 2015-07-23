@@ -980,7 +980,7 @@ class XcodeProject(PBXDict):
 
             self.modified = True
 
-    def remove_group(self, id, recursive = False):
+    def remove_group(self, id, recursive = True):
         if not PBXType.IsGuid(id):
             id = id.id
         name = self.objects.get(id).get('path')
@@ -998,7 +998,7 @@ class XcodeProject(PBXDict):
 
         self.objects.remove(id);
 
-    def remove_group_by_name(self, name, recursive = False):
+    def remove_group_by_name(self, name, recursive = True):
         groups = self.get_groups_by_name(name)
         if len(groups):
             for group in groups:

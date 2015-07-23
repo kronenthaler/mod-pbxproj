@@ -1,47 +1,222 @@
-This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 projects.  The file is usually called `project.pbxproj` and can be found inside the .xcodeproj bundle.
+# mod-pbxproj
 
-Basic Usage:
+[TOC]
 
-    from mod_pbxproj import XcodeProject
-    project = XcodeProject.Load('/path/to/.pbxproj')
+## Installation
+### Using pip
+You can install this project directly without cloning it by executing:
 
-You now have a project object that has a bunch of methods for manipulating it.  By default files added to the project are also added to the appropriate build phase, as long as the file's type can be determined.
+```
+sudo pip install mod_pbxproj
+```
 
-This will add a file in the root of a project.
-**NOTE**: everything goes better if you supply absolute paths.
+### Using setup.py
+You need to clone this repository, open a terminal and go to the folder and execute:
 
-    project.add_file('/path/to/file.name')
+```
+sudo python setup.py install
+```
 
-This will return a group object that you can add files/folders under
+## Using as CLI
+This repository allows you to use the project as a CLI tool or as python module inside your script.
+If you clone the repository you can execute the CLI, you need to navigate to the repository folder first. Once there, you can execute the CLI version with:
 
-    new_group = project.get_or_create_group('new group')
+```
+python -m mod_pbxproj <args>
+```
 
-This will add other.file to the project as a child of 'new group'
+_Note: If you installed it using pip, you can use the command above from any directory._
 
-    project.add_file('/path/to/other.file', parent=new_group)
+### CLI options
+Currently the CLI only allows to add and remove flags on the project. It's a handy way to modify compilation or linking flags without the need of writing a full python script.
 
-If you want to add a framework or library that is found in the SDK,
-supply a relative path and set the tree argument to 'SDKROOT'
+```
+usage: Modify an xcode project file using a single command at a time.
+       [-h] [-af AF] [-rf RF] [-b] project {Debug,Release,All}
 
-    project.add_file('System/Libray/UIKit.framework', tree='SDKROOT')
-    project.add_file('usr/lib/libz.dylib', tree='SDKROOT')
+positional arguments:
+  project              Project path
+  {Debug,Release,All}  Modify the flags of the given configuration
 
-This will recursively create groups and add the directory's contents
-to the project.  You can optionally turn off the recursion.
+optional arguments:
+  -h, --help           show this help message and exit
+  -af AF               Add a flag value, in the format key=value
+  -rf RF               Remove a flag value, in the format key=value
+  -b, --backup         Create a temporary backup before modify
+  -pp, --pure-python   Use the pure python parser
+```
 
-    project.add_folder('/path/to/folder')
+For instance, it you want to add the `-ObjC` flag to a project, remove `-all_load` from the same project, on all configurations, making a backup for security, execute:
 
-You can supply an array of regular expressions for files you want to skip. This won't add any pdfs or mdown files found as it recurses.
+```
+python -m mod_pbxproj -b -af OTHER_LDFLAGS=-ObjC -rf OTHER_LDFLAGS=-all_load MyApp.xcodeproj/project.pbxproj All
+```
 
-    project.add_folder('/path/to/folder', excludes=["^.*\.mdown$", "^.*\.pdf$"])
+## Basic usage
+### Import the module
+First thing you need to do, no matter if you copied the mod_pbxproj.py file to your project or you installed it using pip, you need to import the module in your script with:
 
-If a modification you are trying to apply have already been applied to the project then it will be skipped.  This means that before saving the project you should check the modified flag to make sure changes have occurred.
+```
+from mod_pbxproj import XcodeProject
+```
 
-    if project.modified:
-        project.backup()
-        project.save() # will save by default using the new xcode 3.2 format
-        project.save(old_format=True) # will force to save the project in plist XML format (NOT RECOMMENDED)
+### Load a project file
+Second thing to do, is open the file to start the modifications.
 
-The backup method saves a copy of the project file in its current state on disk.  This can be very useful if a modification leaves the project file unreadable.
+```
+project = XcodeProject.Load('myapp.xcodeproj/project.pbxproj')
+```
 
-p.s. **NO WARRANTIES**
+Here there is an optional parameter:
+
+* pure_python: Boolean, that allows you use this project on non-mac machines. Because this feature is in experimental phase, use it under your own risk.
+
+### Create a backup
+In case something goes wrong during the parsing or writing, is a good idea to make a backup before starting to do any modifications to the file.
+
+```
+project.backup()
+```
+
+The function receives 2 optional parameters:
+
+* file_name: String, the path and name where the project should be backed up. Default is the same path that the project file.
+* backup_name: String, the name of the backup file. Default is None, and will generate a timestamped version of the project file name.
+
+### Create a group
+Groups are logical folders inside the Xcode's project, you can search or create them if they don't exists with a single method call:
+
+```
+group = project.get_or_create_group('my folder')
+```
+
+The function receives 2 optional parameters:
+
+* path: String, represents the relative physical path to the parent group. For instance, if your files are in Classes/Module/, and you want to add the Module group, path has to be 'Module'
+* parent: String or PBXGroup object, represents the group that will act as the parent. if you want to add a group under another, you have to retrieve the parent first and pass it to this method as the parent.
+
+_Note: The groups of nested groups have to be created one by one. A group: 'Classes/Module/Core' has to be created: Classes -> Module -> Core._
+
+### Add a source/header file
+To add new files to your project execute:
+
+```
+project.add_file_if_doesnt_exist('my folder/file.m')
+```
+
+This method contains the following optional paramters:
+
+* parent: PBXGroup object, the group reference under the file will be listed in the project. None means Project Root. 
+* tree: String, indicating what filesystem should be used as a root. By default SOURCE_ROOT is used, meaning this project folder.
+* create_build_files: Boolean, add this files to the build phase. By default, all files are added to the build phase.
+* weak: Boolean, link the file as a required or weak reference. Only applies to frameworks and libraries.
+* ignore_unknown_type: Boolean, when adding files that are unknown to the project an error is reported. That check can be overruled with this flag. Using this flag may lead to unexpected behaviors.
+
+### Add a library/framework
+Libraries and Frameworks are the second most common assets added to a project. They are special files, they might have special requirements (minimum version to work, other system frameworks, etc). Also they have 2 types, system frameworks and 3rd party frameworks.
+
+To add a system framework:
+
+```
+project.add_file_if_doesnt_exist('System/Library/Frameworks/AdSupport.framework', parent=frameworks, weak=True, tree='SDKROOT')
+```
+
+Most system frameworks are under the tree `SDKROOT` and the relative path is `System/Library/Frameworks/`.
+System libraries reside under the `SDKROOT` as well but in a different path `usr/lib/`. For instance: `usr/lib/libsqlite3.0.dylib`
+
+To add a 3rd party framework:
+
+```
+project.add_file_if_doesnt_exist('Libraries/MyFramework.framework', parent=frameworks, weak=True)
+```
+
+This will look up for the framework under the tree `SOURCE_ROOT` a.k.a. the project folder.
+
+### Add a flag
+Another common task is to add compilation flags to the project. There are 2 convenient methods to add specific kinds of flags easily, "Other Compiler flags" and "Other Linker flags".
+
+#### Compiler flags
+Compiler flags are passed as they are defined down to the C compiler. If you want to enable/disable or define something you have to format your flag as the compiler expects it.
+
+```
+project.add_other_cflags('-DDEBUG=1')
+```
+
+or 
+
+```
+project.add_other_cflags(['-DDEBUG=1', '-DLOG=OFF'])
+```
+
+#### Linker flags
+Linker flags are passed as they are defined to the linker. If you want to enable/disable or define something you have to format your flag as the compiler expects it.
+
+```
+project.add_other_ldflags('-ObjC')
+```
+
+or
+
+```
+project.add_other_ldflags(['-ObjC', '-all_load', '-fobjc-arc'])
+```
+
+#### Any other flags
+The above methods are simple aliases of this method using the specific key to add the flags to.
+To add any other flags, just specify the name of the flag and the values to be add to it.
+
+```
+project.add_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
+```
+
+### Remove groups
+There are 2 ways of removing groups, by name and by ID
+
+#### Remove group by ID
+You need to have the ID of the group. The ID is a string of hexadecimal of 24 characters
+
+```
+project.remove_group('AF62C671190997D50075DD39')
+```
+
+Optionally, you can remove everything recursively
+
+* recursive: Boolean, remove all children groups and files from the project. Default true.
+
+#### Remove group by name
+You can remove the group by it's human-readable name. 
+
+```
+project.remove_group_by_name('Classes')
+```
+
+Optionally, you can remove everything recursively
+
+* recursive: Boolean, remove all children groups and files from the project. Default true.
+
+_Caution: If many groups match the same name all will be removed as well._
+
+### Remove files
+There are 2 ways of removing files, by path and by ID
+
+#### Remove files by ID
+You need to have the ID of the file. The ID is a string of hexadecimal of 24 characters
+
+```
+project.remove_file('AF62C671190997D50075DD39')
+```
+
+#### Remove files by path
+You can remove files by their physical path relative to the group. For instance, imagine 'Classes/Module/Header.h', if all groups are created properly to match the physical structure, you have to delete the file using: "Header.h". Au contraire, if the groups don't match the physical structure, you have to use the real relative path: 'Module/Header.h' or 'Classes/Module/Header.h' depending on the parent group.
+
+```
+project.remove_file_by_path('Header.h')
+```
+
+### Remove flags
+Remove flags works exactly the same way as the add flags.
+
+```
+project.remove_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
+```
+

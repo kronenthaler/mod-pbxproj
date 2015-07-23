@@ -11,6 +11,7 @@ def main():
     parser.add_argument('-af', help='Add a flag value, in the format key=value', action='append')
     parser.add_argument('-rf', help='Remove a flag value, in the format key=value', action='append')
     parser.add_argument('-b', '--backup', help='Create a temporary backup before modify', action='store_true')
+    parser.add_argument('-pp', '--pure-python', help='Use the pure python parser', action='store_true')
     args = parser.parse_args()
 
     # open the project file
@@ -20,7 +21,7 @@ def main():
     if not os.path.isfile(args.project) :
         raise Exception("Project File not found")
 
-    project = XcodeProject.Load(args.project)
+    project = XcodeProject.Load(args.project, pure_python=args.pure_python)
     backup_file = None
     if args.backup :
         backup_file = project.backup()
