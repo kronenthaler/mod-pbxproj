@@ -193,8 +193,9 @@ class PBXFileReference(PBXType):
         self.remove('explicitFileType')
         self.remove('lastKnownFileType')
 
+
         ext = os.path.splitext(self.get('name', ''))[1]
-        if os.path.isdir(self.get('path')) and ext != '.framework' and ext != '.bundle':
+        if os.path.isdir(self.get('path')) and ext not in XcodeProject.special_folders:
             f_type = 'folder'
             build_phase = None
             ext = ''
@@ -550,8 +551,8 @@ class XCConfigurationList(PBXType):
 
 class XcodeProject(PBXDict):
     plutil_path = 'plutil'
-    special_folders = ['.bundle', '.framework', '.xcodeproj']
-
+    special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld']
+    
     def __init__(self, d=None, path=None):
         if not path:
             path = os.path.join(os.getcwd(), 'project.pbxproj')
