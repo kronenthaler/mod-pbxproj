@@ -552,7 +552,7 @@ class XCConfigurationList(PBXType):
 class XcodeProject(PBXDict):
     plutil_path = 'plutil'
     special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld']
-    
+
     def __init__(self, d=None, path=None):
         if not path:
             path = os.path.join(os.getcwd(), 'project.pbxproj')
