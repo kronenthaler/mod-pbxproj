@@ -176,7 +176,8 @@ class PBXFileReference(PBXType):
         '.strings': ('text.plist.strings', 'PBXResourcesBuildPhase'),
         '.bundle': ('wrapper.plug-in', 'PBXResourcesBuildPhase'),
         '.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase'),
-        '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase')
+        '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase'),
+        '.xcassets': ('folder.assetcatalog', 'PBXResourcesBuildPhase')
     }
 
     trees = [
