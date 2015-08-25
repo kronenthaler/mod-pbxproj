@@ -203,7 +203,7 @@ To add a system framework:
 project.add_file_if_doesnt_exist('System/Library/Frameworks/AdSupport.framework', parent=frameworks, weak=True, tree='SDKROOT')
 ```
 
-_parent_ can be either a group previously created/retrieved or an ID indicating the name of the group. In the example: `frameworks = project.get_or_create_group('Frameworks')`
+_parent_ can be either a group previously created/retrieved or an ID indicating the name of the group. In the example: `frameworks = project.get_or_create_group('Frameworks')`.
 Most system frameworks are under the tree `SDKROOT` and the relative path is `System/Library/Frameworks/`.
 System libraries reside under the `SDKROOT` as well but in a different path `usr/lib/`. For instance: `usr/lib/libsqlite3.0.dylib`
 
@@ -213,7 +213,7 @@ To add a 3rd party framework:
 project.add_file_if_doesnt_exist('Libraries/MyFramework.framework', parent=frameworks, weak=True)
 ```
 
-_parent_ can be either a group previously created/retrieved or an ID indicating the name of the group. In the example: `frameworks = project.get_or_create_group('Frameworks')`
+_parent_ can be either a group previously created/retrieved or an ID indicating the name of the group. In the example: `frameworks = project.get_or_create_group('Frameworks')`.
 This will look up for the framework under the tree `SOURCE_ROOT` a.k.a. the project folder.
 
 #### Remove files by ID
