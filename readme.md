@@ -200,7 +200,7 @@ Libraries and Frameworks are the second most common assets added to a project. T
 To add a system framework:
 
 ```
-project.add_file_if_doesnt_exist('System/Library/Frameworks/AdSupport.framework', parent=frameworks, weak=True, tree='SDKROOT')
+project.add_file_if_doesnt_exist('System/Library/Frameworks/AdSupport.framework', parent='frameworks', weak=True, tree='SDKROOT')
 ```
 
 Most system frameworks are under the tree `SDKROOT` and the relative path is `System/Library/Frameworks/`.
