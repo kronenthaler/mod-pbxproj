@@ -668,11 +668,16 @@ class XcodeProject(PBXDict):
                                                          and f.get('name') == name]
 
         return files
+    
+    def get_keys_for_files_by_name(self, name):
+        keys = [key for key in self.objects if self.objects.data[key].get('name') == name
+                                                and self.objects.data[key].get('isa') == 'PBXFileReference']
+        return keys
+    
 
     def get_build_files(self, id):
         files = [f for f in self.objects.values() if f.get('isa') == 'PBXBuildFile'
                                                      and f.get('fileRef') == id]
-
         return files
 
     def get_groups_by_name(self, name, parent=None):
