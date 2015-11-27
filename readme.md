@@ -193,6 +193,7 @@ This method contains the following optional paramters:
 * create_build_files: Boolean, add this files to the build phase. By default, all files are added to the build phase.
 * weak: Boolean, link the file as a required or weak reference. Only applies to frameworks and libraries.
 * ignore_unknown_type: Boolean, when adding files that are unknown to the project an error is reported. That check can be overruled with this flag. Using this flag may lead to unexpected behaviors.
+* target: String, Target name that will include the new file added. By default, the file added is included in all targets.
 
 #### Add a library/framework
 Libraries and Frameworks are the second most common assets added to a project. They are special files, they might have special requirements (minimum version to work, other system frameworks, etc). Also they have 2 types, system frameworks and 3rd party frameworks.
