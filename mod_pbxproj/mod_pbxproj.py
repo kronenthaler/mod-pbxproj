@@ -545,8 +545,8 @@ class XCBuildConfiguration(PBXType):
     def remove_other_ldflags(self, flags):
         return self.remove_flag('OTHER_LD_FLAGS', flags)
 
-# Set one option under buildSettings root
-    def add_other_buildsetting(self, flag, value):
+    # Set a single-valued flag under buildSettings
+    def add_single_valued_flag(self, flag, value):
         modified = False
         base = 'buildSettings'
         key = flag
@@ -558,6 +558,17 @@ class XCBuildConfiguration(PBXType):
                 return False
         self[base][key] = value                             
         modified = True
+        return modified
+
+    # Remove a single-valued flag under buildSettings
+    def remove_single_valued_flag(self, flag):
+        modified = False
+        base = 'buildSettings'
+        key = flag
+         
+        if self.has_key(base) and self[base].has_key(key):
+            self[base].pop(key, None)                            
+            modified = True
         return modified
 
 class XCConfigurationList(PBXType):
@@ -649,15 +660,6 @@ class XcodeProject(PBXDict):
                 if b.add_flag(k, pairs[k]):
                     self.modified = True
 
-# Set one option under buildSettings root
-    def add_other_buildsetting(self, flag, value):
-        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
-        
-        for b in build_configs:
-            if b.add_other_buildsetting(flag, value):
-                self.modified = True
-
-
     def remove_flags(self, pairs, configuration='All'):
         build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
 
@@ -668,6 +670,28 @@ class XcodeProject(PBXDict):
             for k in pairs:
                 if b.remove_flag(k, pairs[k]):
                     self.modified = True
+
+    # Set a single-valued flag (whereas add_flags adds a flag to a list of flags with a given key)
+    def add_single_valued_flag(self, flag, value, configuration='All'):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        
+        for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
+
+            if b.add_single_valued_flag(flag, value):
+                self.modified = True
+
+    # Remove a single-valued flag (whereas remove_flags deletes a flag from a list of flags with a given key)
+    def remove_single_valued_flag(self, flag, configuration='All'):
+        build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
+        
+        for b in build_configs:
+            if configuration != "All" and b.get('name') != configuration :
+                continue
+
+            if b.remove_single_valued_flag(flag):
+                self.modified = True
 
     def get_obj(self, id):
         return self.objects.get(id)
