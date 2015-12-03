@@ -232,7 +232,7 @@ project.remove_file_by_path('Header.h')
 ```
 
 ### Flags
-#### Add a flag
+#### Lists of flags
 Another common task is to add compilation flags to the project. There are 2 convenient methods to add specific kinds of flags easily, "Other Compiler flags" and "Other Linker flags".
 
 ##### Compiler flags
@@ -269,10 +269,20 @@ To add any other flags, just specify the name of the flag and the values to be a
 project.add_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
 ```
 
-#### Remove flags
-Remove flags works exactly the same way as the add flags.
+##### Remove flags from a list of flags
+Removing flags works exactly the same way as adding flags.
 
 ```
 project.remove_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
 ```
 
+#### Single-valued flags
+The above methods will add/remove flags to a list of flags in your project file. If you would instead like to add/modify/remove a flag like `ENABLE_BITCODE` or `CLANG_ENABLE_MODULES`, which take a single value instead of a list of values, you can use these methods instead.
+
+```
+project.add_single_valued_flag('ENABLE_BITCODE', 'YES')
+project.remove_single_valued_flag('CLANG_ENABLE_MODULES')
+```
+
+#### Only modifying some build configurations
+All four generic `add`/`remove` methods also take an optional `configuration` parameter that can limit what build configuration to modify by name. By default, the methods modify all build configurations in the project.
