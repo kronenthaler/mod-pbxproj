@@ -79,9 +79,6 @@ else:
         return s
 
 
-regex = '[a-zA-Z0-9\\._/-]*'
-
-
 class PBXEncoder(json.JSONEncoder):
 
     def default(self, obj):
@@ -645,6 +642,13 @@ class XcodeProject(PBXDict):
 
         for k, v in _items(self.objects):
             v.id = k
+
+        self.build_phase_types = {
+            'PBXSourcesBuildPhase': 'Sources',
+            'PBXFrameworksBuildPhase': 'Frameworks',
+            'PBXResourcesBuildPhase': 'Resources',
+            'PBXShellScriptBuildPhase': 'Run Script',
+        }
 
     def add_other_cflags(self, flags):
         build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
@@ -1316,49 +1320,69 @@ class XcodeProject(PBXDict):
         objs = self.data.get('objects')
         sections = dict()
         uuids = dict()
+        build_phases = dict()
 
         for key in objs:
             l = list()
 
-            if objs.get(key).get('isa') in sections:
-                l = sections.get(objs.get(key).get('isa'))
+            obj = objs.get(key)
+            isa = obj.get('isa')
+            if isa in sections:
+                l = sections.get(isa)
 
-            l.append(tuple([key, objs.get(key)]))
-            sections[objs.get(key).get('isa')] = l
+            if isa.endswith('BuildPhase'):
+                build_phases[key] = obj
 
-            if 'name' in objs.get(key):
-                uuids[key] = objs.get(key).get('name')
-            elif 'path' in objs.get(key):
-                uuids[key] = objs.get(key).get('path')
-            else:
-                if objs.get(key).get('isa') == 'PBXProject':
-                    uuids[objs.get(key).get('buildConfigurationList')] = 'Build configuration list for PBXProject "Unity-iPhone"'
-                elif objs.get(key).get('isa')[0:3] == 'PBX':
-                    uuids[key] = objs.get(key).get('isa')[3:-10]
+            l.append(tuple([key, obj]))
+            sections[isa] = l
+
+            if 'name' in obj:
+                uuids[key] = obj.get('name')
+            elif 'path' in obj:
+                uuids[key] = obj.get('path')
+            elif isa != 'PBXGroup':
+                if isa == 'PBXProject':
+                    uuids[obj.get('buildConfigurationList')] = 'Build configuration list for %s "%s"'
+                elif isa.startswith('PBX') and isa in self.build_phase_types:
+                    uuids[key] = self.build_phase_types[isa]
+                elif isa.startswith('PBX') and isa != 'PBXGroup':
+                    uuids[key] = isa
                 else:
-                    uuids[key] = 'Build configuration list for PBXNativeTarget "TARGET_NAME"'
+                    uuids[key] = 'Build configuration list for %s "%s"'
 
         ro = self.data.get('rootObject')
         uuids[ro] = 'Project object'
 
         for key in objs:
+            obj = objs.get(key)
+
             # transitive references (used in the BuildFile section)
-            if 'fileRef' in objs.get(key) and objs.get(key).get('fileRef') in uuids:
-                uuids[key] = uuids[objs.get(key).get('fileRef')]
+            if 'fileRef' in obj and obj.get('fileRef') in uuids:
+                uuids[key] = uuids[obj.get('fileRef')]
 
             # transitive reference to the target name (used in the Native target section)
-            if objs.get(key).get('isa') == 'PBXNativeTarget':
-                uuids[objs.get(key).get('buildConfigurationList')] = uuids[objs.get(key).get('buildConfigurationList')].replace('TARGET_NAME', uuids[key])
+            if obj.get('isa') in ['PBXNativeTarget', 'PBXProject']:
+                name = uuids[key]
+                if name == 'Project object':
+                    name = os.path.splitext(os.path.basename(os.path.dirname(self.pbxproj_path)))[0]  # need the product name here
+                uuids[obj.get('buildConfigurationList')] = uuids[obj.get('buildConfigurationList')] % (obj.get('isa'), name)
+
+        build_phase_files = dict()
+        for key, build_phase in _items(build_phases):
+            for file_ref in build_phase.get('files'):
+                build_phase_files[file_ref] = build_phase
 
         self.uuids = uuids
         self.sections = sections
+        self.build_phases = build_phase_files
 
         if sys.version_info[0] < 3:
             out = open(file_name, 'w')
         else:
             out = open(file_name, 'w', encoding='utf-8')
         out.write('// !$*UTF8*$!\n')
-        self._printNewXCodeFormat(out, self.data, '', enters=True, sort=sort)
+        self._printNewXCodeFormat(out, self.data, None, '', enters=True, sort=sort)
+        out.write('\n')
         out.close()
 
     @classmethod
@@ -1366,7 +1390,7 @@ class XcodeProject(PBXDict):
         d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n": "\\n"}
         return ''.join(d.get(c, c) for c in s)
 
-    def _printNewXCodeFormat(self, out, root, deep, enters=True, sort=False):
+    def _printNewXCodeFormat(self, out, root, root_key, deep, enters=True, sort=False):
         if isinstance(root, IterableUserDict):
             out.write('{')
 
@@ -1380,7 +1404,7 @@ class XcodeProject(PBXDict):
                     out.write('\t' + deep)
 
                 out.write('isa = ')
-                self._printNewXCodeFormat(out, isa, '\t' + deep, enters=enters)
+                self._printNewXCodeFormat(out, isa, None, '\t' + deep, enters=enters)
                 out.write(';')
 
                 if enters:
@@ -1392,7 +1416,7 @@ class XcodeProject(PBXDict):
                 if enters:
                     out.write('\t' + deep)
 
-                if re.match(regex, key).group(0) == key:
+                if _dictEscapeValuePat.match(key).group(0) == key:
                     out.write(_write_encode(key) + ' = ')
                 else:
                     out.write('"' + _write_encode(key) + '" = ')
@@ -1406,6 +1430,7 @@ class XcodeProject(PBXDict):
 
                     sections = [
                         ('PBXBuildFile', False),
+                        ('PBXContainerItemProxy', True),
                         ('PBXCopyFilesBuildPhase', True),
                         ('PBXFileReference', False),
                         ('PBXFrameworksBuildPhase', True),
@@ -1416,12 +1441,11 @@ class XcodeProject(PBXDict):
                         ('PBXResourcesBuildPhase', True),
                         ('PBXShellScriptBuildPhase', True),
                         ('PBXSourcesBuildPhase', True),
+                        ('PBXTargetDependency', True),
                         ('XCBuildConfiguration', True),
                         ('XCConfigurationList', True),
-                        ('PBXTargetDependency', True),
                         ('PBXVariantGroup', True),
                         ('PBXReferenceProxy', True),
-                        ('PBXContainerItemProxy', True),
                         ('XCVersionGroup', True)]
 
                     for section in sections:  # iterate over the sections
@@ -1436,9 +1460,7 @@ class XcodeProject(PBXDict):
                                 entry[1]['children'] = sorted(entry[1]['children'],
                                                               key=lambda x: _write_encode(self.uuids[x]))
 
-                        for pair in self.sections.get(section[0]):
-                            key = pair[0]
-                            value = pair[1]
+                        for key, value in self.sections.get(section[0]):
                             out.write('\n')
 
                             if enters:
@@ -1447,17 +1469,25 @@ class XcodeProject(PBXDict):
                             out.write(_write_encode(key))
 
                             if key in self.uuids:
-                                out.write(" /* " + _write_encode(self.uuids[key]) + " */")
+                                out.write(" /* " + _write_encode(self.uuids[key]))
+                                if key in self.build_phases:
+                                    build_phase = self.build_phases[key]
+                                    if 'isa' in build_phase and build_phase.get('isa') in self.build_phase_types:
+                                        out.write(" in " + _write_encode(self.build_phase_types[build_phase.get('isa')]))
+
+                                out.write(" */")
 
                             out.write(" = ")
-                            self._printNewXCodeFormat(out, value, '\t\t' + deep, enters=section[1])
+                            if isinstance(value, UserList) and len(value) == 1:
+                                value = value[0]
+                            self._printNewXCodeFormat(out, value, key, '\t\t' + deep, enters=section[1])
                             out.write(';')
 
                         out.write('\n/* End %s section */\n' % _write_encode(section[0]))
 
                     out.write(deep + '\t}')  # close of the objects section
                 else:
-                    self._printNewXCodeFormat(out, root[key], '\t' + deep, enters=enters)
+                    self._printNewXCodeFormat(out, root[key], key, '\t' + deep, enters=enters)
 
                 out.write(';')
 
@@ -1474,34 +1504,53 @@ class XcodeProject(PBXDict):
             out.write('}')
 
         elif isinstance(root, UserList):
-            out.write('(')
-
-            if enters:
-                out.write('\n')
-
-            for value in root:
-                if enters:
-                    out.write('\t' + deep)
-
-                self._printNewXCodeFormat(out, value, '\t' + deep, enters=enters)
-                out.write(',')
+            needs_indent = root_key != 'PRODUCT_BUNDLE_IDENTIFIER'
+            if needs_indent:
+                out.write('(')
 
                 if enters:
                     out.write('\n')
 
-            if enters:
-                out.write(deep)
+            for value in root:
+                if enters and needs_indent:
+                    out.write('\t' + deep)
 
-            out.write(')')
+                self._printNewXCodeFormat(out, value, None, '\t' + deep, enters=enters)
+                if needs_indent:
+                    out.write(',')
+
+                if enters and needs_indent:
+                    out.write('\n')
+
+            if needs_indent:
+                if enters:
+                    out.write(deep)
+
+                out.write(')')
 
         else:
-            if len(root) > 0 and re.match(regex, root).group(0) == root:
+            if len(root) > 0 and _escapeValuePat.match(root).group(0) == root:
                 out.write(_write_encode(root))
             else:
                 out.write('"' + XcodeProject.addslashes(_write_encode(root)) + '"')
 
             if root in self.uuids:
-                out.write(" /* " + _write_encode(self.uuids[root]) + " */")
+                name = self.uuids[root]
+
+                if root_key not in ['remoteGlobalIDString', 'TestTargetID']:
+                    out.write(" /* " + _write_encode(name))
+                    if root in self.build_phases:
+                        build_phase = self.build_phases[root]
+                        name = None
+                        if 'isa' in build_phase and build_phase.get('isa') in self.build_phase_types:
+                            name = self.build_phase_types[build_phase.get('isa')]
+                        elif type(build_phase).__name__ in self.build_phase_types:
+                            name = self.build_phase_types[type(build_phase).__name__]
+
+                        if name:
+                            out.write(" in " + _write_encode(name))
+
+                    out.write(" */")
 
     @classmethod
     def Load(cls, path, pure_python=False):
@@ -1557,6 +1606,12 @@ class PBXWriter(_PlistWriter):
         else:
             self.writeln("<%s/>" % element)
 
+
+# Regex to find whether a values needs escaping with quotes
+_escapeValuePat = re.compile('[a-zA-Z0-9\\\/._]*')
+
+# Regex to find whether a values needs escaping with quotes for dictionary values
+_dictEscapeValuePat = re.compile('[a-zA-Z0-9\\._/-]*')
 
 # Regex to find any control chars, except for \t \n and \r
 _controlCharPat = re.compile(
