@@ -286,3 +286,16 @@ project.remove_single_valued_flag('CLANG_ENABLE_MODULES')
 
 #### Only modifying some build configurations
 All four generic `add`/`remove` methods also take an optional `configuration` parameter that can limit what build configuration to modify by name. By default, the methods modify all build configurations in the project.
+
+#### Per-file flags
+Individual build file objects returned by `project.get_build_files` contain a method called `add_compiler_flag`. Here is an example of a function which uses this to disable ARC for a specific file:
+
+```
+def disableArc(filePath):
+    fileId = project.get_file_id_by_path(filePath)
+    files = project.get_build_files(fileId)
+    for f in files:
+        f.add_compiler_flag('-fno-objc-arc')
+
+disableArc('Libraries/Plugins/iOS/JSONKit.m')
+```
