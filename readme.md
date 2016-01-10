@@ -31,6 +31,9 @@ This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 p
       * [Linker flags](#linker-flags)
       * [Any other flags](#any-other-flags)
     * [Remove flags](#remove-flags)
+    * [Single-valued flags](#single-valued-flags)
+    * [Only modifying some build configurations](#only-modifying-some-build-configurations)
+    * [Per-file flags](#per-file-flags)
 
 
 ## Installation
