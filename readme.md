@@ -30,7 +30,7 @@ This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 p
       * [Compiler flags](#compiler-flags)
       * [Linker flags](#linker-flags)
       * [Any other flags](#any-other-flags)
-    * [Remove flags](#remove-flags)
+    * [Remove flags from a list of flags](#remove-flags-from-a-list-of-flags)
     * [Single-valued flags](#single-valued-flags)
     * [Only modifying some build configurations](#only-modifying-some-build-configurations)
     * [Per-file flags](#per-file-flags)
@@ -272,7 +272,7 @@ To add any other flags, just specify the name of the flag and the values to be a
 project.add_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
 ```
 
-##### Remove flags from a list of flags
+#### Remove flags from a list of flags
 Removing flags works exactly the same way as adding flags.
 
 ```
