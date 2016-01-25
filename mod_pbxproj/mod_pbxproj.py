@@ -587,9 +587,9 @@ class XCBuildConfiguration(PBXType):
         base = 'buildSettings'
         key = flag
 
-        if not self.has_key(base):
+        if base not in self:
             self[base] = PBXDict()
-        if self[base].has_key(key):
+        if key in self[base]:
             if self[base][key] == value:
                 return False
         self[base][key] = value
@@ -602,7 +602,7 @@ class XCBuildConfiguration(PBXType):
         base = 'buildSettings'
         key = flag
 
-        if self.has_key(base) and self[base].has_key(key):
+        if base in self and key in self[base]:
             self[base].pop(key, None)
             modified = True
         return modified
