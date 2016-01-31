@@ -5,7 +5,13 @@ python:
     - "2.7"
 
 # command to install dependencies
-install: "pip install ."
+install: 
+    - pip install .
+    - pip install coveralls
 
 # command to run tests
-script: nosetests tests/*
+script: 
+    - python setup.py test
+    - coverage run --source=mod_pbxproj setup.py test
+
+after_success: coveralls

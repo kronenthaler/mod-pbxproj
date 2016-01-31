@@ -30,7 +30,10 @@ This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 p
       * [Compiler flags](#compiler-flags)
       * [Linker flags](#linker-flags)
       * [Any other flags](#any-other-flags)
-    * [Remove flags](#remove-flags)
+    * [Remove flags from a list of flags](#remove-flags-from-a-list-of-flags)
+    * [Single-valued flags](#single-valued-flags)
+    * [Only modifying some build configurations](#only-modifying-some-build-configurations)
+    * [Per-file flags](#per-file-flags)
 
 
 ## Installation
@@ -193,6 +196,7 @@ This method contains the following optional paramters:
 * create_build_files: Boolean, add this files to the build phase. By default, all files are added to the build phase.
 * weak: Boolean, link the file as a required or weak reference. Only applies to frameworks and libraries.
 * ignore_unknown_type: Boolean, when adding files that are unknown to the project an error is reported. That check can be overruled with this flag. Using this flag may lead to unexpected behaviors.
+* target: String, Target name that will include the new file added. By default, the file added is included in all targets.
 
 #### Add a library/framework
 Libraries and Frameworks are the second most common assets added to a project. They are special files, they might have special requirements (minimum version to work, other system frameworks, etc). Also they have 2 types, system frameworks and 3rd party frameworks.
@@ -231,7 +235,7 @@ project.remove_file_by_path('Header.h')
 ```
 
 ### Flags
-#### Add a flag
+#### Lists of flags
 Another common task is to add compilation flags to the project. There are 2 convenient methods to add specific kinds of flags easily, "Other Compiler flags" and "Other Linker flags".
 
 ##### Compiler flags
@@ -268,10 +272,33 @@ To add any other flags, just specify the name of the flag and the values to be a
 project.add_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
 ```
 
-#### Remove flags
-Remove flags works exactly the same way as the add flags.
+#### Remove flags from a list of flags
+Removing flags works exactly the same way as adding flags.
 
 ```
 project.remove_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
 ```
 
+#### Single-valued flags
+The above methods will add/remove flags to a list of flags in your project file. If you would instead like to add/modify/remove a flag like `ENABLE_BITCODE` or `CLANG_ENABLE_MODULES`, which take a single value instead of a list of values, you can use these methods instead.
+
+```
+project.add_single_valued_flag('ENABLE_BITCODE', 'YES')
+project.remove_single_valued_flag('CLANG_ENABLE_MODULES')
+```
+
+#### Only modifying some build configurations
+All four generic `add`/`remove` methods also take an optional `configuration` parameter that can limit what build configuration to modify by name. By default, the methods modify all build configurations in the project.
+
+#### Per-file flags
+Individual build file objects returned by `project.get_build_files` contain a method called `add_compiler_flag`. Here is an example of a function which uses this to disable ARC for a specific file:
+
+```
+def disableArc(filePath):
+    fileId = project.get_file_id_by_path(filePath)
+    files = project.get_build_files(fileId)
+    for f in files:
+        f.add_compiler_flag('-fno-objc-arc')
+
+disableArc('Libraries/Plugins/iOS/JSONKit.m')
+```

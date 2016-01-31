@@ -29,7 +29,7 @@ import openstep_parser as osp
 class Parsing(unittest.TestCase):
     def testParsingPurePython(self):
         for file in ['music-cube', 'metal-image-processing', 'collection-view', 'cloud-search']:
-            result = XcodeProject.Load('tests/samples/{0}.pbxproj'.format(file), pure_python=True)
-            control = osp.OpenStepDecoder.ParseFromFile(open('tests/samples/{0}.pbxproj'.format(file)))
+            result = XcodeProject.Load('samples/{0}.pbxproj'.format(file), pure_python=True)
+            control = osp.OpenStepDecoder.ParseFromFile(open('samples/{0}.pbxproj'.format(file)))
             assert result.data == control
 
