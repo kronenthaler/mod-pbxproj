@@ -112,6 +112,20 @@ class PBXType(PBXDict):
             self['isa'] = self.__class__.__name__
         self.id = None
 
+
+    #every PBXType object keep a reference to project
+    def set_project(self, project, add = False):
+        """set project for this object
+
+        project is a XcodeProject object
+
+        add controls whether this object need add to project's objects
+        """
+        self.project = project
+
+        if add:
+            project.objects[self.id] = self
+
     @staticmethod
     def Convert(o):
         if isinstance(o, list):
@@ -236,6 +250,9 @@ class PBXFileReference(PBXType):
 
 
 class PBXBuildFile(PBXType):
+    def get_file(self):
+        return self.project.objects.get(self.get('fileRef'))
+
     def set_weak_link(self, weak=False):
         k_settings = 'settings'
         k_attributes = 'ATTRIBUTES'
@@ -356,14 +373,72 @@ class PBXGroup(PBXType):
 
         return grp
 
+class PBXTarget(PBXType):
+    def get_build_phases(self, phase_isa, phase_name = None):
+        phases = [self.project.objects.get(guid) for guid in self.get('buildPhases')]
+        phases = [p for p in phases if p.get('isa') == phase_isa and (phase_name == None or p.get('name') == phase_name)]
 
-class PBXNativeTarget(PBXType):
+        return phases
+
+    def get_buildconfig(self, configName):
+        for buildConfig in self.get_buildconfigs():
+            if buildConfig['name'] == configName:
+                return buildConfig
+
+        return None
+
+    def get_buildconfigs(self):
+        buildConfigurationList = self.project.objects.get(self['buildConfigurationList'])
+        return [self.project.objects.get(guid) for guid in buildConfigurationList['buildConfigurations']]
+
+class PBXNativeTarget(PBXTarget):
+    def get_embed_buildphase(self):
+        phases = self.get_build_phases('PBXCopyFilesBuildPhase', "Embed Frameworks")
+        build_phase = None
+        if len(phases) > 0:
+            build_phase = phases[0]
+        else:
+            build_phase = PBXCopyFilesBuildPhase.Create('', '10', "Embed Frameworks")
+            build_phase.set_project(self.project, True)
+            self.get('buildPhases').append(build_phase.id)
+
+        return build_phase
+
+    def embed_binary(self, f_path):
+        results = []
+
+        fileid = self.project.get_file_id_by_path(f_path)
+        if not fileid:
+            print("%s not exists in project"%f_path)
+            return
+
+        buildConfigurationList = self.project.objects.get(self['buildConfigurationList'])
+        buildConfigurations = [self.project.objects.get(guid) for guid in buildConfigurationList['buildConfigurations']]
+
+        for buildConfig in buildConfigurations:
+            buildConfig['buildSettings']['LD_RUNPATH_SEARCH_PATHS'] = "$(inherited) @executable_path/Frameworks"
+
+        embed_buildphase = self.get_embed_buildphase()
+        build_file = embed_buildphase.get_build_file(f_path)
+
+        if build_file == None:
+            build_file = PBXBuildFile.Create(fileid, weak=False)
+            build_file['settings'] = {'ATTRIBUTES' : ['CodeSignOnCopy', 'RemoveHeadersOnCopy']};
+            embed_buildphase.add_build_file(build_file)
+            build_file.set_project(self.project, True)
+
+            # when manualy add embed framework, xcode will add a PBXFrameworksBuildPhase object, but it's not a must
+            #framework_buildphase = self.get_build_phases('PBXFrameworksBuildPhase')[0]
+            #framework_build_file = PBXBuildFile.Create(fileid, weak=False)
+            #framework_buildphase.add_build_file(framework_build_file)
+            #framework_build_file.set_project(self.project, True)
     pass
 
+class PBXAggregateTarget(PBXTarget):
+    pass
 
 class PBXProject(PBXType):
     pass
-
 
 class PBXContainerItemProxy(PBXType):
     pass
@@ -378,10 +453,6 @@ class PBXVariantGroup(PBXType):
 
 
 class PBXTargetDependency(PBXType):
-    pass
-
-
-class PBXAggregateTarget(PBXType):
     pass
 
 
@@ -420,6 +491,15 @@ class PBXBuildPhase(PBXType):
 
         return id in self['files']
 
+    def get_build_files(self):
+        return [self.project.objects.get(guid) for guid in self.get('files')]
+
+    def get_build_file(self, fpath):
+        for f in self.get_build_files():
+            if f.get_file().get('path') == fpath:
+                return f
+
+        return None
 
 class PBXFrameworksBuildPhase(PBXBuildPhase):
     pass
@@ -450,7 +530,31 @@ class PBXSourcesBuildPhase(PBXBuildPhase):
 
 
 class PBXCopyFilesBuildPhase(PBXBuildPhase):
-    pass
+    @classmethod
+    def Create(cls, dstPath, dstSubfolderSpec, name):
+        bf = cls()
+        bf.id = cls.GenerateId()
+
+        # buildActionMask 0x7fffffff
+        bf['buildActionMask'] = "2147483647"
+        bf['dstPath'] = dstPath
+
+        # dstSubfolderSpec values:
+        # 1   # Wrapper
+        # 6   # Executables
+        # 7   # Resources
+        # 15  # Java Resources
+        # 16  # Products Directory
+        # 10  # Frameworks
+        # 11  # Shared Frameworks
+        # 12  # Shared Support
+        # 13  # PlugIns
+        bf['dstSubfolderSpec'] = dstSubfolderSpec
+        bf['files'] = []
+        bf['name'] = name
+        bf['runOnlyForDeploymentPostprocessing'] = "0"
+
+        return bf
 
 
 class XCBuildConfiguration(PBXType):
@@ -607,6 +711,8 @@ class XcodeProject(PBXDict):
 
         for k, v in self.objects.iteritems():
             v.id = k
+            v.set_project(self)
+
 
     def add_other_cflags(self, flags):
         build_configs = [b for b in self.objects.values() if b.get('isa') == 'XCBuildConfiguration']
@@ -758,6 +864,7 @@ class XcodeProject(PBXDict):
                 return grp
 
         grp = PBXGroup.Create(name, path)
+        grp.set_project(self)
         parent.add_child(grp)
 
         self.objects[grp.id] = grp
@@ -808,6 +915,7 @@ class XcodeProject(PBXDict):
         targets = [t for t in self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget') if t.get('name') == target]
         if len(targets) != 0 :
             script_phase = PBXShellScriptBuildPhase.Create(script)
+            script_phase.set_project(self)
             for t in targets:
                 skip = False
                 for buildPhase in t['buildPhases']:
@@ -829,6 +937,7 @@ class XcodeProject(PBXDict):
         targets = self.get_build_phases('PBXNativeTarget') + self.get_build_phases('PBXAggregateTarget')
         if len(targets) != 0 :
             script_phase = PBXShellScriptBuildPhase.Create(script)
+            script_phase.set_project(self)
             for t in targets:
                 skip = False
                 for buildPhase in t['buildPhases']:
@@ -951,6 +1060,7 @@ class XcodeProject(PBXDict):
             parent = self.objects.get(parent, self.root_group)
 
         file_ref = PBXFileReference.Create(f_path, tree, ignore_unknown_type=ignore_unknown_type)
+        file_ref.set_project(self)
         parent.add_child(file_ref)
         results.append(file_ref)
 
@@ -963,6 +1073,7 @@ class XcodeProject(PBXDict):
             for phase in phases:
                 if (not target) or (phase.id in target.get('buildPhases')):
                     build_file = PBXBuildFile.Create(file_ref, weak=weak)
+                    build_file.set_project(self)
                     phase.add_build_file(build_file)
                     results.append(build_file)
 
