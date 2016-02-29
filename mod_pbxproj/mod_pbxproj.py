@@ -391,6 +391,9 @@ class PBXHeadersBuildPhase(PBXType):
 class XCVersionGroup(PBXType):
     pass
 
+class PBXLegacyTarget(PBXType):
+    pass
+
 class PBXBuildPhase(PBXType):
     def add_build_file(self, bf):
         if bf.get('isa') != 'PBXBuildFile':
@@ -1385,7 +1388,8 @@ class XcodeProject(PBXDict):
                         ('PBXVariantGroup', True),
                         ('PBXReferenceProxy', True),
                         ('PBXContainerItemProxy', True),
-                        ('XCVersionGroup', True)]
+                        ('XCVersionGroup', True),
+                        ('PBXLegacyTarget', True)]
 
                     for section in sections:  # iterate over the sections
                         if self.sections.get(section[0]) is None:
