@@ -13,7 +13,8 @@ deploy:
   provider: pypi
   user: kronenthaler
   password:
-    secure: ut9H5eN/vsU4cSgbwWUakUXtyn4FDgiBq0SPOJ2BEgFrPofH1/jJKeXMZIxb1fpXRw5ritmvpjZ0hcNytm5RXb3pLEPq2UlWrdXnHEKE1QaJWAU/wbPpyIzJmI/Fk4LcHlYfosSbxWzvs3+uPu/i5uMa4i+qVf5OQSfGhZPtlZI=
+    secure: wJTcHIa1sbXxE4FnLux/fUI+OqZl8tM3EuvPckC7FaYKFzVbFG63xHhpThZxOVF5295nxHBFIBPSm/wA+6wOjvDazaPd3Kvw+BlQqPOaUPuJEfeK9R0IfRB0ojkn7nXmhhiUJiO3UzNrCFsMdt9zMCzu7jih/r7DCv8pYb66CuQ=
   on:
+    tags: true
     distributions: sdist bdist_wheel
     repo: kronenthaler/mod-pbxproj
