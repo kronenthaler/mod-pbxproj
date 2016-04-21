@@ -271,14 +271,14 @@ The above methods are simple aliases of this method using the specific key to ad
 To add any other flags, just specify the name of the flag and the values to be add to it.
 
 ```
-project.add_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
+project.add_flags({'OTHER_LDFLAGS': ['-ObjC', '-all_load', '-fobjc-arc']})
 ```
 
 #### Remove flags from a list of flags
 Removing flags works exactly the same way as adding flags.
 
 ```
-project.remove_flags('OTHER_LDFLAGS', ['-ObjC', '-all_load', '-fobjc-arc'])
+project.remove_flags({'OTHER_LDFLAGS': ['-ObjC', '-all_load', '-fobjc-arc']})
 ```
 
 #### Single-valued flags
