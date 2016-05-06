@@ -21,11 +21,74 @@
 # SOFTWARE.
 
 import os
+import re
 
-class objects:
+
+class DynamicObject:
+    """
+    Generic class that creates internal attributes to match the structure of the tree used to create the element.
+    Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
+    """
+    _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/-]*'
+
+    def parse(self, value):
+        if isinstance(value, dict):
+            return self._parse_dict(value)
+
+        return value
+
+    def _parse_dict(self, obj):
+        # all top level objects are added as variables to this object
+        for key, value in obj.iteritems():
+            if not hasattr(self, key):
+                # check if the key maps to a kind of object
+                if hasattr(self.__module__, key):
+                    class_ = getattr(self.__module__, key)
+                    instance = class_().parse(value)
+                else:
+                    instance = DynamicObject().parse(value)
+
+                setattr(self, key, instance)
+
+        return self
+
+    def __repr__(self):
+        return self._print_object("")
+
+    def _print_object(self, indent):
+        ret = "{\n"
+        for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
+            value = getattr(self, key)
+            if hasattr(value, '_print_object'):
+                value = value._print_object(indent+"\t")
+            elif isinstance(value, list):
+                value = self._print_list(value, indent+"\t")
+            else:
+                value = DynamicObject._escape(value.__str__())
+
+            ret += indent+"\t{0} = {1};\n".format(DynamicObject._escape(key), value)
+        ret += indent+"}"
+        return ret
+
+    def _print_list(self, value, indent):
+        ret = "(\n"
+        for item in value:
+            ret += indent+"\t{0},\n".format(item)
+        ret += indent+")"
+        return ret
+
+    @classmethod
+    def _escape(cls, item):
+        if re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
+            return '"{0}"'.format(item)
+        return item
+
+
+class objects(DynamicObject):
     pass
 
-class XcodeProject:
+
+class XcodeProject(DynamicObject):
     """
     Top level class, handles the project CRUD operations, new, load, save, delete. Also, exposes methods to manipulate
     the project's content, add/remove files, add/remove libraries/frameworks, query sections. For more advanced
@@ -39,23 +102,7 @@ class XcodeProject:
         self._source_root = os.path.abspath(os.path.join(os.path.split(path)[0], '..'))
 
         # initialize the structure using the given tree
-        self._parse(tree)
-
-    def _parse(self, tree):
-        # all top level objects are added as variables to this object
-        for key, value in tree.iteritems():
-            if not hasattr(self, key):
-                # check if the key maps to a kind of object
-                setattr(self, key, value)
-
-        module = __import__("mod_pbxproj2")
-        class_ = getattr(module, "objects")
-        instance = class_()
-        print instance
-
-    def __repr__(self):
-        # print all non-function and non-private ones
-        return str([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
+        self.parse(tree)
 
     def save(self, path=None):
         if path is None:
@@ -75,14 +122,13 @@ class XcodeProject:
             import plistlib
             import subprocess
 
-            cls.plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
+            plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
 
-            if not os.path.isfile(XcodeProject.plutil_path):
-                cls.plutil_path = 'plutil'
+            if not os.path.isfile(plutil_path):
+                plutil_path = 'plutil'
 
             # load project by converting to xml and then convert that using plistlib
-            p = subprocess.Popen([XcodeProject.plutil_path, '-convert', 'xml1', '-o', '-', path],
-                                 stdout=subprocess.PIPE)
+            p = subprocess.Popen([plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
             stdout, stderr = p.communicate()
 
             # If the plist was malformed, return code will be non-zero
@@ -96,4 +142,5 @@ class XcodeProject:
 
 
 if __name__ == "__main__":
-    print XcodeProject({"a": "b", "c": ["1", 2, 4]})
+    print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
+    print XcodeProject.load('../tests/samples/cloud-search.pbxproj')
