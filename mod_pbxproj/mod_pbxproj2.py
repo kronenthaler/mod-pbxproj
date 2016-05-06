@@ -24,7 +24,7 @@ import os
 import re
 
 
-class DynamicObject:
+class DynamicObject(object):
     """
     Generic class that creates internal attributes to match the structure of the tree used to create the element.
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
@@ -42,8 +42,9 @@ class DynamicObject:
         for key, value in obj.iteritems():
             if not hasattr(self, key):
                 # check if the key maps to a kind of object
-                if hasattr(self.__module__, key):
-                    class_ = getattr(self.__module__, key)
+                module = __import__("mod_pbxproj2")
+                if hasattr(module, key):
+                    class_ = getattr(module, key)
                     instance = class_().parse(value)
                 else:
                     instance = DynamicObject().parse(value)
@@ -53,14 +54,14 @@ class DynamicObject:
         return self
 
     def __repr__(self):
-        return self._print_object("")
+        return self.print_object("")
 
-    def _print_object(self, indent):
+    def print_object(self, indent):
         ret = "{\n"
         for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
             value = getattr(self, key)
-            if hasattr(value, '_print_object'):
-                value = value._print_object(indent+"\t")
+            if hasattr(value, 'print_object'):
+                value = value.print_object(indent + "\t")
             elif isinstance(value, list):
                 value = self._print_list(value, indent+"\t")
             else:
@@ -85,7 +86,15 @@ class DynamicObject:
 
 
 class objects(DynamicObject):
-    pass
+    def __init__(self):
+        self._sections = {}
+        # during parsing time the section will be aggregated under the same isa key.
+        # this will allow do queries and retrieve especific sections far more easily
+        # printing the object should iterate over said sections.
+
+    def print_object(self, indent):
+        # override to change the way the object is printed out
+        return super(type(self), self).print_object(indent)
 
 
 class XcodeProject(DynamicObject):
@@ -108,9 +117,9 @@ class XcodeProject(DynamicObject):
         if path is None:
             path = self._pbxproj_path
 
-        # f = open(path, 'w')
-        # f.write(self.__repr__())
-        # f.close()
+        f = open(path, 'w')
+        f.write(self.__repr__())
+        f.close()
 
     @classmethod
     def load(cls, path, pure_python=False):
