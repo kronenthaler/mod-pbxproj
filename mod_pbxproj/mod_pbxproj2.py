@@ -41,17 +41,18 @@ class DynamicObject(object):
         # all top level objects are added as variables to this object
         for key, value in obj.iteritems():
             if not hasattr(self, key):
-                # check if the key maps to a kind of object
-                module = __import__("mod_pbxproj2")
-                if hasattr(module, key):
-                    class_ = getattr(module, key)
-                    instance = class_().parse(value)
-                else:
-                    instance = DynamicObject().parse(value)
-
-                setattr(self, key, instance)
+                setattr(self, key, self._get_instance(key, value))
 
         return self
+
+    def _get_instance(self, key, value):
+        # check if the key maps to a kind of object
+        module = __import__("mod_pbxproj2")
+        if hasattr(module, key):
+            class_ = getattr(module, key)
+            return class_().parse(value)
+
+        return DynamicObject().parse(value)
 
     def __repr__(self):
         return self.print_object("")
@@ -67,6 +68,7 @@ class DynamicObject(object):
             else:
                 value = DynamicObject._escape(value.__str__())
 
+            # use key decorators, could simplify the generation of the comments.
             ret += indent+"\t{0} = {1};\n".format(DynamicObject._escape(key), value)
         ret += indent+"}"
         return ret
@@ -92,9 +94,29 @@ class objects(DynamicObject):
         # this will allow do queries and retrieve especific sections far more easily
         # printing the object should iterate over said sections.
 
+    def parse(self, object):
+        # iterate over the keys and fill the sections
+        if isinstance(object, dict):
+            for key, value in object.iteritems():
+                child = self._get_instance(key, value)
+                if child.isa not in self._sections:
+                    self._sections[child.isa] = []
+
+                node = (key, child)
+                self._sections[child.isa].append(node)
+
+            return self
+
+        return super(type(self), self).parse(object)
+
     def print_object(self, indent):
         # override to change the way the object is printed out
-        return super(type(self), self).print_object(indent)
+        result = "{\n"
+        for section, object in self._sections.iteritems():
+            for (key, value) in object:
+                result += indent+"\t{0} = {1};\n".format(key, value.print_object(indent+'\t'))
+        result += indent+"}"
+        return result
 
 
 class XcodeProject(DynamicObject):
@@ -151,5 +173,7 @@ class XcodeProject(DynamicObject):
 
 
 if __name__ == "__main__":
-    print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
-    print XcodeProject.load('../tests/samples/cloud-search.pbxproj')
+    # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
+    obj = XcodeProject.load('../tests/samples/cloud-search.pbxproj')
+    print type(obj)
+    print obj
