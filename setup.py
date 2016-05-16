@@ -15,6 +15,22 @@ class NoseTestCommand(TestCommand):
         nose.run_exit(argv=['nosetests', '-w', 'mod_pbxproj/tests'])
 
 
+class NoseTestCoverage(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # Run nose ensuring that argv simulates running nosetests directly
+        import nose
+        nose.run_exit(argv=['nosetests',
+                            '--with-coverage',
+                            '--cover-erase',
+                            '--cover-package=mod_pbxproj2',
+                            '-w', 'mod_pbxproj2/tests'])
+
+
 setup(name='mod_pbxproj',
       author='Ignacio Calderon',
       description='XCode Project Generator for Python',
@@ -24,4 +40,4 @@ setup(name='mod_pbxproj',
       install_requires=['openstep_parser'],
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
-      cmdclass={'test': NoseTestCommand})
+      cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage})

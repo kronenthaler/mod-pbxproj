@@ -15,7 +15,7 @@ class DynamicObjectTest(unittest.TestCase):
         obj = {"objects": {"id": {"isa": "type"}}}
         dobj = DynamicObject().parse(obj)
 
-        self.assertEqual(type(dobj.objects), objects)
+        self.assertIsInstance(dobj.objects, objects)
 
     def testEscapeItem(self):
         self.assertEqual(DynamicObject._escape("/bin/sh"), "/bin/sh")
