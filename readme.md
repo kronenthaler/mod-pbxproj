@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=refactor)](https://travis-ci.org/kronenthaler/mod-pbxproj)
+[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=refactor)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=refactor)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=refactor)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=refactor)
+
 # mod-pbxproj
 
 This module can read, modify, and write a .pbxproj file from an Xcode 4, 5 & 6 projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle.
