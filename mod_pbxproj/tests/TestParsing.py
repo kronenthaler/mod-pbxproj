@@ -26,7 +26,8 @@ import unittest
 from mod_pbxproj import XcodeProject
 import openstep_parser as osp
 
-class Parsing(unittest.TestCase):
+
+class ParsingTest(unittest.TestCase):
     def testParsingPurePython(self):
         for file in ['music-cube', 'metal-image-processing', 'collection-view', 'cloud-search']:
             result = XcodeProject.Load('samples/{0}.pbxproj'.format(file), pure_python=True)

@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) [year] [fullname]
+# Copyright (c) 2016 Ignacio Calderon aka kronenthaler
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -45,19 +45,19 @@ class DynamicObject(object):
 
         return self
 
-    def _get_instance(self, key, value):
+    def _get_instance(self, type, content):
         # check if the key maps to a kind of object
         module = __import__("mod_pbxproj2")
-        if hasattr(module, key):
-            class_ = getattr(module, key)
-            return class_().parse(value)
+        if hasattr(module, type):
+            class_ = getattr(module, type)
+            return class_().parse(content)
 
-        return DynamicObject().parse(value)
+        return DynamicObject().parse(content)
 
     def __repr__(self):
-        return self.print_object("")
+        return self.print_object()
 
-    def print_object(self, indent):
+    def print_object(self, indent=""):
         ret = "{\n"
         for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
             value = getattr(self, key)
@@ -91,14 +91,17 @@ class objects(DynamicObject):
     def __init__(self):
         self._sections = {}
         # during parsing time the section will be aggregated under the same isa key.
-        # this will allow do queries and retrieve especific sections far more easily
+        # this will allow do queries and retrieve specific sections far more easily
         # printing the object should iterate over said sections.
 
     def parse(self, object):
         # iterate over the keys and fill the sections
         if isinstance(object, dict):
             for key, value in object.iteritems():
-                child = self._get_instance(key, value)
+                type = key
+                if 'isa' in value:
+                    type = value['isa']
+                child = self._get_instance(type, value)
                 if child.isa not in self._sections:
                     self._sections[child.isa] = []
 
@@ -109,7 +112,7 @@ class objects(DynamicObject):
 
         return super(type(self), self).parse(object)
 
-    def print_object(self, indent):
+    def print_object(self, indent=""):
         # override to change the way the object is printed out
         result = "{\n"
         for section, object in self._sections.iteritems():
@@ -174,6 +177,6 @@ class XcodeProject(DynamicObject):
 
 if __name__ == "__main__":
     # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
-    obj = XcodeProject.load('../tests/samples/cloud-search.pbxproj')
+    obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
     print type(obj)
     print obj
