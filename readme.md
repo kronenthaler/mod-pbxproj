@@ -1,4 +1,3 @@
-[![PyPI](https://img.shields.io/pypi/dm/mod_pbxproj.svg)](https://pypi.python.org/pypi/mod_pbxproj/)
 
 # mod-pbxproj
 
