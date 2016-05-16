@@ -6,7 +6,8 @@
 build
 dist
 files.txt
-mod_pbxproj.egg-info
+*.egg-info
+.coverage
 
 # Mac OS X cruft
 .DS_Store
