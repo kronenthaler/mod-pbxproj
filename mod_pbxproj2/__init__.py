@@ -57,20 +57,29 @@ class DynamicObject(object):
     def __repr__(self):
         return self.print_object()
 
-    def print_object(self, indent=""):
-        ret = "{\n"
+    def print_object(self, indentation_depth="", single_line=False):
+        entry_separator = "\n"
+        object_start = "\n"
+        indentation_increment = "\t"
+
+        if single_line:
+            entry_separator = " "
+            object_start = ""
+            indentation_increment = ""
+
+        ret = "{" + object_start
         for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
             value = getattr(self, key)
             if hasattr(value, 'print_object'):
-                value = value.print_object(indent + "\t")
+                value = value.print_object(indentation_depth + indentation_increment)
             elif isinstance(value, list):
-                value = self._print_list(value, indent+"\t")
+                value = self._print_list(value, indentation_depth + indentation_increment)
             else:
                 value = DynamicObject._escape(value.__str__())
 
             # use key decorators, could simplify the generation of the comments.
-            ret += indent+"\t{0} = {1};\n".format(DynamicObject._escape(key), value)
-        ret += indent+"}"
+            ret += indentation_depth + "{3}{0} = {1};{2}".format(DynamicObject._escape(key), value, entry_separator, indentation_increment)
+        ret += indentation_depth + "}"
         return ret
 
     def _print_list(self, value, indent):
@@ -88,6 +97,7 @@ class DynamicObject(object):
 
 
 class objects(DynamicObject):
+    # section priorities PBXBuildFile > PBXFileReference > ...
     def __init__(self):
         # sections: dict<isa, [tuple(id, obj)]>
         # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
@@ -113,16 +123,27 @@ class objects(DynamicObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(type(self), self).parse(object)
 
-    def print_object(self, indent=""):
+    def print_object(self, indentation_depth="", single_line=False):
         # override to change the way the object is printed out
         result = "{\n"
-        for section, object in self._sections.iteritems():
+        for section, phase in self._sections.iteritems():
             result += "\n/* Begin {0} section */\n".format(section)
-            for (key, value) in object:
-                result += indent+"\t{0} = {1};\n".format(key, value.print_object(indent+'\t'))
+            for (key, value) in phase:
+                obj = value.print_object(indentation_depth + "\t", single_line)
+                result += indentation_depth + "\t{0} = {1};\n".format(key, obj)
             result += "/* End {0} section */\n".format(section)
-        result += indent+"}"
+        result += indentation_depth + "}"
         return result
+
+
+class PBXBuildFile(DynamicObject):
+    def print_object(self, indentation_depth="", single_line=True):
+        return super(type(self), self).print_object("", True)
+
+
+class PBXFileReference(DynamicObject):
+    def print_object(self, indentation_depth="", single_line=True):
+        return super(type(self), self).print_object("", True)
 
 
 class XcodeProject(DynamicObject):
