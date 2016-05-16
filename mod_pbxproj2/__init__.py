@@ -89,19 +89,19 @@ class DynamicObject(object):
 
 class objects(DynamicObject):
     def __init__(self):
+        # sections: dict<isa, [tuple(id, obj)]>
+        # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
         self._sections = {}
-        # during parsing time the section will be aggregated under the same isa key.
-        # this will allow do queries and retrieve specific sections far more easily
-        # printing the object should iterate over said sections.
 
     def parse(self, object):
         # iterate over the keys and fill the sections
         if isinstance(object, dict):
             for key, value in object.iteritems():
-                type = key
+                obj_type = key
                 if 'isa' in value:
-                    type = value['isa']
-                child = self._get_instance(type, value)
+                    obj_type = value['isa']
+
+                child = self._get_instance(obj_type, value)
                 if child.isa not in self._sections:
                     self._sections[child.isa] = []
 
@@ -110,14 +110,17 @@ class objects(DynamicObject):
 
             return self
 
+        # safe-guard: delegate to the parent how to deal with non-object values
         return super(type(self), self).parse(object)
 
     def print_object(self, indent=""):
         # override to change the way the object is printed out
         result = "{\n"
         for section, object in self._sections.iteritems():
+            result += "\n/* Begin {0} section */\n".format(section)
             for (key, value) in object:
                 result += indent+"\t{0} = {1};\n".format(key, value.print_object(indent+'\t'))
+            result += "/* End {0} section */\n".format(section)
         result += indent+"}"
         return result
 
@@ -175,8 +178,8 @@ class XcodeProject(DynamicObject):
         return XcodeProject(tree, path)
 
 
-if __name__ == "__main__":
-    # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
-    obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
-    print type(obj)
-    print obj
+# if __name__ == "__main__":
+#     # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
+#     obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
+#     print type(obj)
+#     print obj
