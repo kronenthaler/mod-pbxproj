@@ -58,14 +58,12 @@ class DynamicObject(object):
         return self.print_object()
 
     def print_object(self, indentation_depth="", single_line=False):
-        entry_separator = "\n"
-        object_start = "\n"
+        entry_separator = object_start = "\n"
         indentation_increment = "\t"
 
         if single_line:
             entry_separator = " "
-            object_start = ""
-            indentation_increment = ""
+            object_start = indentation_increment = ""
 
         ret = "{" + object_start
         for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
@@ -82,11 +80,18 @@ class DynamicObject(object):
         ret += indentation_depth + "}"
         return ret
 
-    def _print_list(self, value, indent):
-        ret = "(\n"
+    def _print_list(self, value, indentation_depth="", single_line=False):
+        entry_separator = object_start = "\n"
+        indentation_increment = "\t"
+
+        if single_line:
+            entry_separator = " "
+            object_start = indentation_increment = ""
+
+        ret = "(" + object_start
         for item in value:
-            ret += indent+"\t{0},\n".format(item)
-        ret += indent+")"
+            ret += indentation_depth + "{1}{0},{2}".format(item, indentation_increment, entry_separator)
+        ret += indentation_depth + ")"
         return ret
 
     @classmethod
