@@ -60,21 +60,18 @@ class DynamicObject(object):
     def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "{" + object_start
 
-        # TODO: move isa key if present to the first position.
-        fields = list([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
-        if 'isa' in fields:
-            fields.remove('isa')
-            fields = sorted(fields)
-            fields.insert(0, 'isa')
-        else:
-            fields = sorted(fields)
-
-        for key in fields:
+        for key in self._get_keys():
             value = getattr(self, key)
             if hasattr(value, '_print_object'):
-                value = value._print_object(indentation_depth + indentation_increment)
+                value = value._print_object(indentation_depth + indentation_increment,
+                                            entry_separator,
+                                            object_start,
+                                            indentation_increment)
             elif isinstance(value, list):
-                value = self._print_list(value, indentation_depth + indentation_increment)
+                value = self._print_list(value, indentation_depth + indentation_increment,
+                                         entry_separator,
+                                         object_start,
+                                         indentation_increment)
             else:
                 value = DynamicObject._escape(value.__str__())
 
@@ -83,19 +80,23 @@ class DynamicObject(object):
         ret += indentation_depth + "}"
         return ret
 
-    def _print_list(self, value, indentation_depth="", single_line=False):
-        entry_separator = object_start = "\n"
-        indentation_increment = "\t"
-
-        if single_line:
-            entry_separator = " "
-            object_start = indentation_increment = ""
-
+    def _print_list(self, value, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "(" + object_start
         for item in value:
             ret += indentation_depth + "{1}{0},{2}".format(item, indentation_increment, entry_separator)
         ret += indentation_depth + ")"
         return ret
+
+    def _get_keys(self):
+        fields = list([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
+        if 'isa' in fields:
+            fields.remove('isa')
+            fields = sorted(fields)
+            fields.insert(0, 'isa')
+        else:
+            fields = sorted(fields)
+
+        return fields
 
     @classmethod
     def _escape(cls, item):
@@ -135,7 +136,8 @@ class objects(DynamicObject):
         # override to change the way the object is printed out
         result = "{\n"
         # TODO: sort sections alphabetically
-        for section, phase in self._sections.iteritems():
+        for section in self._get_keys():
+            phase = self._sections[section]
             result += "\n/* Begin {0} section */\n".format(section)
             for (key, value) in phase:
                 obj = value._print_object(indentation_depth + "\t", entry_separator, object_start, indentation_increment)
@@ -143,6 +145,11 @@ class objects(DynamicObject):
             result += "/* End {0} section */\n".format(section)
         result += indentation_depth + "}"
         return result
+
+    def _get_keys(self):
+        sections = self._sections.keys()
+        sections.sort()
+        return sections
 
 
 class PBXBuildFile(DynamicObject):
