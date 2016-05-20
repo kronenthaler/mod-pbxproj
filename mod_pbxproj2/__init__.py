@@ -59,8 +59,17 @@ class DynamicObject(object):
 
     def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "{" + object_start
+
         # TODO: move isa key if present to the first position.
-        for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
+        fields = list([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
+        if 'isa' in fields:
+            fields.remove('isa')
+            fields = sorted(fields)
+            fields.insert(0, 'isa')
+        else:
+            fields = sorted(fields)
+
+        for key in fields:
             value = getattr(self, key)
             if hasattr(value, '_print_object'):
                 value = value._print_object(indentation_depth + indentation_increment)
