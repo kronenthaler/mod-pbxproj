@@ -55,21 +55,15 @@ class DynamicObject(object):
         return DynamicObject().parse(content)
 
     def __repr__(self):
-        return self.print_object()
+        return self._print_object()
 
-    def print_object(self, indentation_depth="", single_line=False):
-        entry_separator = object_start = "\n"
-        indentation_increment = "\t"
-
-        if single_line:
-            entry_separator = " "
-            object_start = indentation_increment = ""
-
+    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "{" + object_start
+        # TODO: move isa key if present to the first position.
         for key in [x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')]:
             value = getattr(self, key)
-            if hasattr(value, 'print_object'):
-                value = value.print_object(indentation_depth + indentation_increment)
+            if hasattr(value, '_print_object'):
+                value = value._print_object(indentation_depth + indentation_increment)
             elif isinstance(value, list):
                 value = self._print_list(value, indentation_depth + indentation_increment)
             else:
@@ -128,13 +122,14 @@ class objects(DynamicObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(type(self), self).parse(object)
 
-    def print_object(self, indentation_depth="", single_line=False):
+    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         # override to change the way the object is printed out
         result = "{\n"
+        # TODO: sort sections alphabetically
         for section, phase in self._sections.iteritems():
             result += "\n/* Begin {0} section */\n".format(section)
             for (key, value) in phase:
-                obj = value.print_object(indentation_depth + "\t", single_line)
+                obj = value._print_object(indentation_depth + "\t", entry_separator, object_start, indentation_increment)
                 result += indentation_depth + "\t{0} = {1};\n".format(key, obj)
             result += "/* End {0} section */\n".format(section)
         result += indentation_depth + "}"
@@ -142,13 +137,13 @@ class objects(DynamicObject):
 
 
 class PBXBuildFile(DynamicObject):
-    def print_object(self, indentation_depth="", single_line=True):
-        return super(type(self), self).print_object("", True)
+    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
+        return super(type(self), self)._print_object("", entry_separator=' ', object_start='', indentation_increment='')
 
 
 class PBXFileReference(DynamicObject):
-    def print_object(self, indentation_depth="", single_line=True):
-        return super(type(self), self).print_object("", True)
+    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
+        return super(type(self), self)._print_object("", entry_separator=' ', object_start='', indentation_increment='')
 
 
 class XcodeProject(DynamicObject):
