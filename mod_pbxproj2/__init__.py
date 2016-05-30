@@ -31,6 +31,9 @@ class DynamicObject(object):
     """
     _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/-]*'
 
+    def __init__(self, parent=None):
+        self._parent = parent
+
     def parse(self, value):
         if isinstance(value, dict):
             return self._parse_dict(value)
@@ -70,9 +73,9 @@ class DynamicObject(object):
         module = __import__("mod_pbxproj2")
         if hasattr(module, type):
             class_ = getattr(module, type)
-            return class_().parse(content)
+            return class_(self).parse(content)
 
-        return DynamicObject().parse(content)
+        return DynamicObject(self).parse(content)
 
     def __repr__(self):
         return self._print_object()
@@ -120,6 +123,12 @@ class DynamicObject(object):
 
         return fields
 
+    def __getitem__(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+
+        return None
+
     @classmethod
     def _escape(cls, item):
         if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
@@ -129,7 +138,9 @@ class DynamicObject(object):
 
 class objects(DynamicObject):
     # section priorities PBXBuildFile > PBXFileReference > ...
-    def __init__(self):
+    def __init__(self, parent=None):
+        super(type(self), self).__init__(parent)
+
         # sections: dict<isa, [tuple(id, obj)]>
         # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
         self._sections = {}
@@ -174,16 +185,40 @@ class objects(DynamicObject):
         sections.sort()
         return sections
 
+    def __getitem__(self, key):
+        for section in self._sections.iterkeys():
+            phase = self._sections[section]
+            for (target_key, value) in phase:
+                if key == target_key:
+                    return value
+        return None
+
 
 class PBXKey(unicode):
     def __new__(cls, value, parent):
         obj = unicode.__new__(cls, value)
-        obj.parent = parent
+        obj._parent = parent
         return obj
 
     def __repr__(self):
-        return "{0} /* */".format(self.__str__())
+        return "{0} /* {1} */".format(self.__str__(), self._resolve_comment())
 
+    # TODO: this method should call to an object implementation that allows it to change the comment content based on
+    # class that is used
+    def _resolve_comment(self):
+        parent = self._parent
+
+        while parent is not None:
+            obj = parent[self.__str__()]
+            if obj is not None:
+                if hasattr(obj, "name"):
+                    return obj.name
+                if hasattr(obj, 'path'):
+                    return obj.path
+
+            parent = parent._parent
+
+        return "-" #str(type(self._parent))
 
 class PBXBuildFile(DynamicObject):
     def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
@@ -202,6 +237,8 @@ class XcodeProject(DynamicObject):
     operations, underlying objects are exposed that can be manipulated using said objects.
     """
     def __init__(self, tree=None, path=None):
+        self._parent = None
+
         if path is None:
             path = os.path.join(os.getcwd(), 'project.pbxproj')
 
@@ -254,5 +291,4 @@ class XcodeProject(DynamicObject):
 if __name__ == "__main__":
     # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
     obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
-    print type(obj)
     print obj
