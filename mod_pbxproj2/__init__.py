@@ -100,7 +100,7 @@ class DynamicObject(object):
 
     @classmethod
     def _escape(cls, item):
-        if re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
+        if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
             return '"{0}"'.format(item)
         return item
 
@@ -135,9 +135,9 @@ class objects(DynamicObject):
     def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         # override to change the way the object is printed out
         result = "{\n"
-        # TODO: sort sections alphabetically
         for section in self._get_keys():
             phase = self._sections[section]
+            phase.sort(key=lambda x: x[0])
             result += "\n/* Begin {0} section */\n".format(section)
             for (key, value) in phase:
                 obj = value._print_object(indentation_depth + "\t", entry_separator, object_start, indentation_increment)
