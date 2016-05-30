@@ -35,15 +35,35 @@ class DynamicObject(object):
         if isinstance(value, dict):
             return self._parse_dict(value)
 
+        if isinstance(value, basestring):
+            return self._parse_string(value)
+
+        if isinstance(value, list):
+            return self._parse_list(value)
+
         return value
 
     def _parse_dict(self, obj):
         # all top level objects are added as variables to this object
         for key, value in obj.iteritems():
+            key = self._parse_string(key)
             if not hasattr(self, key):
                 setattr(self, key, self._get_instance(key, value))
 
         return self
+
+    def _parse_list(self, obj):
+        ret = []
+        for item in obj:
+            ret.append(self.parse(item))
+
+        return ret
+
+    def _parse_string(self, obj):
+        if re.match('([0-9A-F]{24})', obj) is not None:
+            return PBXKey(obj, self)
+
+        return obj
 
     def _get_instance(self, type, content):
         # check if the key maps to a kind of object
@@ -72,6 +92,8 @@ class DynamicObject(object):
                                          entry_separator,
                                          object_start,
                                          indentation_increment)
+            elif isinstance(value, PBXKey):
+                value = value.__repr__()
             else:
                 value = DynamicObject._escape(value.__str__())
 
@@ -83,7 +105,7 @@ class DynamicObject(object):
     def _print_list(self, value, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "(" + object_start
         for item in value:
-            ret += indentation_depth + "{1}{0},{2}".format(item, indentation_increment, entry_separator)
+            ret += indentation_depth + "{1}{0},{2}".format(item.__repr__(), indentation_increment, entry_separator)
         ret += indentation_depth + ")"
         return ret
 
@@ -116,6 +138,7 @@ class objects(DynamicObject):
         # iterate over the keys and fill the sections
         if isinstance(object, dict):
             for key, value in object.iteritems():
+                key = self._parse_string(key)
                 obj_type = key
                 if 'isa' in value:
                     obj_type = value['isa']
@@ -141,7 +164,7 @@ class objects(DynamicObject):
             result += "\n/* Begin {0} section */\n".format(section)
             for (key, value) in phase:
                 obj = value._print_object(indentation_depth + "\t", entry_separator, object_start, indentation_increment)
-                result += indentation_depth + "\t{0} = {1};\n".format(key, obj)
+                result += indentation_depth + "\t{0} = {1};\n".format(key.__repr__(), obj)
             result += "/* End {0} section */\n".format(section)
         result += indentation_depth + "}"
         return result
@@ -150,6 +173,16 @@ class objects(DynamicObject):
         sections = self._sections.keys()
         sections.sort()
         return sections
+
+
+class PBXKey(unicode):
+    def __new__(cls, value, parent):
+        obj = unicode.__new__(cls, value)
+        obj.parent = parent
+        return obj
+
+    def __repr__(self):
+        return "{0} /* */".format(self.__str__())
 
 
 class PBXBuildFile(DynamicObject):
@@ -186,6 +219,9 @@ class XcodeProject(DynamicObject):
         f.write(self.__repr__())
         f.close()
 
+    def __repr__(self):
+        return "// !$*UTF8*$!\n" + super(type(self), self).__repr__()
+
     @classmethod
     def load(cls, path, pure_python=False):
         if pure_python:
@@ -215,8 +251,8 @@ class XcodeProject(DynamicObject):
         return XcodeProject(tree, path)
 
 
-# if __name__ == "__main__":
-#     # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
-#     obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
-#     print type(obj)
-#     print obj
+if __name__ == "__main__":
+    # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
+    obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
+    print type(obj)
+    print obj
