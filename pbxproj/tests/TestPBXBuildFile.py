@@ -1,5 +1,5 @@
 import unittest
-from mod_pbxproj2 import *
+from pbxproj import *
 
 
 class PBXBuildFileTest(unittest.TestCase):

@@ -1,7 +1,9 @@
+import shutil
 import unittest
 import os
-import shutil
-from mod_pbxproj2 import *
+
+from pbxproj import *
+from pbxproj import XcodeProject
 
 
 class XCodeProjectTest(unittest.TestCase):

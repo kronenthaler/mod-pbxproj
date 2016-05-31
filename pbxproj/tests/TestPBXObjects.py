@@ -1,8 +1,9 @@
 import unittest
-from mod_pbxproj2 import *
+
+from pbxproj.PBXObjects import objects
 
 
-class ObjectTest(unittest.TestCase):
+class PBXObjectTest(unittest.TestCase):
     MINIMUM_OBJ = {'1': {'isa': 'phase1'}, '2': {'isa': 'phase1'}, '3': {'isa': 'phase2'}}
 
     def testParseNonObject(self):
@@ -12,14 +13,14 @@ class ObjectTest(unittest.TestCase):
         self.assertIsInstance(dobj, list)
 
     def testParseGroupsPhases(self):
-        dobj = objects().parse(ObjectTest.MINIMUM_OBJ)
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
 
         self.assertEqual(dobj._sections.__len__(), 2)
         self.assertEqual(dobj._sections['phase1'].__len__(), 2)
         self.assertEqual(dobj._sections['phase2'].__len__(), 1)
 
     def testPrintSeparateSections(self):
-        dobj = objects().parse(ObjectTest.MINIMUM_OBJ)
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         str = dobj.__repr__()
 
         self.assertTrue(str.__contains__("/* Begin phase1 section */"))
