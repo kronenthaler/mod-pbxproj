@@ -21,19 +21,9 @@
 # SOFTWARE.
 
 from pbxproj.PBXGenericObject import PBXGenericObject
-from pbxproj.XcodeProject import XcodeProject
 from pbxproj.PBXObjects import objects
-
-
-class PBXBuildFile(PBXGenericObject):
-    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
-        return super(type(self), self)._print_object("", entry_separator=' ', object_start='', indentation_increment='')
-
-
-class PBXFileReference(PBXGenericObject):
-    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
-        return super(type(self), self)._print_object("", entry_separator=' ', object_start='', indentation_increment='')
-
+from pbxproj.XcodeProject import XcodeProject
+from pbxproj.pbxsections import *
 
 if __name__ == "__main__":
     # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
