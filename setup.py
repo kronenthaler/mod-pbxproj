@@ -12,7 +12,7 @@ class NoseTestCommand(TestCommand):
     def run_tests(self):
         # Run nose ensuring that argv simulates running nosetests directly
         import nose
-        nose.run_exit(argv=['nosetests', '-w', 'pbxproj/tests'])
+        nose.run_exit(argv=['nosetests', '-w', 'tests'])
 
 
 class NoseTestCoverage(TestCommand):
@@ -28,7 +28,7 @@ class NoseTestCoverage(TestCommand):
                             '--with-coverage',
                             '--cover-erase',
                             '--cover-package=pbxproj',
-                            '-w', 'pbxproj/tests'])
+                            '-w', 'tests'])
 
 
 setup(name='mod_pbxproj',

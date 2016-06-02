@@ -11,7 +11,7 @@ install:
 
 script:
   - python setup.py test
-  - coverage run --source=mod_pbxproj2 setup.py test
+  - coverage run --source=pbxproj setup.py test
 
 after_success:
   - coveralls
