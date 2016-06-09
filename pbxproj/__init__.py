@@ -24,8 +24,3 @@ from pbxproj.PBXGenericObject import PBXGenericObject
 from pbxproj.PBXObjects import objects
 from pbxproj.XcodeProject import XcodeProject
 from pbxproj.pbxsections import *
-
-if __name__ == "__main__":
-    # print XcodeProject({"a": "b", "c": {"1": 2},"z":[1,2,4]})
-    obj = XcodeProject.load('../mod_pbxproj/tests/samples/cloud-search.pbxproj')
-    print obj

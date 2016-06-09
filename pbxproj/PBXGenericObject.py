@@ -8,7 +8,7 @@ class PBXGenericObject(object):
     Generic class that creates internal attributes to match the structure of the tree used to create the element.
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
     """
-    _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/-]*'
+    _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/]*'
 
     def __init__(self, parent=None):
         self._parent = parent
@@ -63,33 +63,39 @@ class PBXGenericObject(object):
         ret = "{" + object_start
 
         for key in self._get_keys():
-            value = getattr(self, key)
-            if hasattr(value, '_print_object'):
-                value = value._print_object(indentation_depth + indentation_increment,
-                                            entry_separator,
-                                            object_start,
-                                            indentation_increment)
-            elif isinstance(value, list):
-                value = self._print_list(value, indentation_depth + indentation_increment,
-                                         entry_separator,
-                                         object_start,
-                                         indentation_increment)
-            elif isinstance(value, PBXKey):
-                value = value.__repr__()
-            else:
-                value = PBXGenericObject._escape(value.__str__())
+            value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start, indentation_increment)
 
             # use key decorators, could simplify the generation of the comments.
             ret += indentation_depth + "{3}{0} = {1};{2}".format(PBXGenericObject._escape(key), value, entry_separator, indentation_increment)
         ret += indentation_depth + "}"
         return ret
 
-    def _print_list(self, value, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
+    def _print_list(self, obj, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
         ret = "(" + object_start
-        for item in value:
-            ret += indentation_depth + "{1}{0},{2}".format(item.__repr__(), indentation_increment, entry_separator)
+        for item in obj:
+            value = self._format(item, indentation_depth, entry_separator, object_start, indentation_increment)
+
+            ret += indentation_depth + "{1}{0},{2}".format(value, indentation_increment, entry_separator)
         ret += indentation_depth + ")"
         return ret
+
+    def _format(self, value, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
+        if hasattr(value, '_print_object'):
+            value = value._print_object(indentation_depth + indentation_increment,
+                                        entry_separator,
+                                        object_start,
+                                        indentation_increment)
+        elif isinstance(value, list):
+            value = self._print_list(value, indentation_depth + indentation_increment,
+                                     entry_separator,
+                                     object_start,
+                                     indentation_increment)
+        elif isinstance(value, PBXKey):
+            value = value.__repr__()
+        else:
+            value = PBXGenericObject._escape(value.__str__())
+
+        return value
 
     def _get_keys(self):
         fields = list([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
@@ -107,6 +113,24 @@ class PBXGenericObject(object):
             return getattr(self, key)
 
         return None
+
+    def _resolve_comment(self, key):
+        obj = self[key]
+        if obj is not None:
+            return obj._get_comment()
+
+        if self._parent is None:
+            return "-"
+
+        return self._parent._resolve_comment(key)
+
+    def _get_comment(self):
+        if hasattr(self, "name"):
+            return self.name
+        if hasattr(self, 'path'):
+            return self.path
+
+        return "-"
 
     @classmethod
     def _escape(cls, item):

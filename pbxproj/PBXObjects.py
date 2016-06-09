@@ -56,3 +56,11 @@ class objects(PBXGenericObject):
                 if key == target_key:
                     return value
         return None
+
+    def keys(self):
+        keys = []
+        for section in self._sections.iterkeys():
+            phase = self._sections[section]
+            for (target_key, value) in phase:
+                keys.append(target_key)
+        return keys
