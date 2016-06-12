@@ -15,11 +15,11 @@ class PBXBuildFile(PBXGenericObject):
         objects = self._parent
         target = ''
         for key in objects.keys():
-            obj = objects[key]
-            if obj == self:
+            if objects[key] == self:
                 target = key
                 break
 
+        # TODO: ask object for the specific sections!
         for key in objects.keys():
             obj = objects[key]
             if isinstance(obj, PBXSourcesBuildPhase) or \

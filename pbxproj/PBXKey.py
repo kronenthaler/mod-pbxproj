@@ -5,7 +5,13 @@ class PBXKey(unicode):
         return obj
 
     def __repr__(self):
-        return "{0} /* {1} */".format(self.__str__(), self._get_comment())
+        comment = self._get_comment()
+        if comment is not None:
+            comment = " /* {0} */".format(comment)
+        else:
+            comment = ""
+
+        return "{0}{1}".format(self.__str__(), comment)
 
     def _get_comment(self):
         return self._parent._resolve_comment(self)

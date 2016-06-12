@@ -57,6 +57,9 @@ class objects(PBXGenericObject):
                     return value
         return None
 
+    def __contains__(self, item):
+        return self[item] is not None
+
     def keys(self):
         keys = []
         for section in self._sections.iterkeys():
