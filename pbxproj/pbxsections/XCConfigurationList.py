@@ -7,5 +7,15 @@ class XCConfigurationList(PBXGenericObject):
         return 'Build configuration list for {0} "{1}"'.format(*info)
 
     def _get_section(self):
-        # search for the section where this config is used and get the isa and name
-        return ('PBXNativeTarget', "X")
+        objects = self._parent
+        target = objects.indexOf(self)
+
+        for (key, obj) in objects.get_objects_in_section('PBXNativeTarget'):
+            if target in obj.buildConfigurationList:
+                return obj.isa, obj.name
+
+        for (key, obj) in objects.get_objects_in_section('PBXProject'):
+            if target in obj.buildConfigurationList:
+                return obj.isa, objects[obj.targets[0]].productName
+
+        return '', ''

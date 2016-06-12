@@ -34,28 +34,6 @@ class XcodeProject(PBXGenericObject):
 
     @classmethod
     def load(cls, path, pure_python=False):
-        if pure_python:
-            import openstep_parser as osp
-
-            tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
-        else:
-            import plistlib
-            import subprocess
-
-            plutil_path = os.path.join(os.path.split(__file__)[0], 'plutil')
-
-            if not os.path.isfile(plutil_path):
-                plutil_path = 'plutil'
-
-            # load project by converting to xml and then convert that using plistlib
-            p = subprocess.Popen([plutil_path, '-convert', 'xml1', '-o', '-', path], stdout=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-
-            # If the plist was malformed, return code will be non-zero
-            if p.returncode != 0:
-                print stdout
-                return None
-
-            tree = plistlib.readPlistFromString(stdout)
-
+        import openstep_parser as osp
+        tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
         return XcodeProject(tree, path)

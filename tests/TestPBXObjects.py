@@ -27,3 +27,24 @@ class PBXObjectTest(unittest.TestCase):
         self.assertTrue(str.__contains__("/* End phase1 section */"))
         self.assertTrue(str.__contains__("/* Begin phase2 section */"))
         self.assertTrue(str.__contains__("/* End phase2 section */"))
+
+    def testGetItem(self):
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
+        self.assertIsNotNone(dobj['1'])
+        self.assertIsNone(dobj['4'])
+
+    def testContains(self):
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
+        self.assertTrue('1' in dobj)
+        self.assertFalse('4' in dobj)
+
+    def testIndexOf(self):
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
+        item = dobj['1']
+        self.assertEqual(dobj.indexOf(item), '1')
+        self.assertEqual(dobj.indexOf(None), None)
+
+    def testGetObjectsInsection(self):
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
+        self.assertEqual(dobj.get_objects_in_section('phase1'), dobj._sections['phase1'])
+        self.assertEqual(dobj.get_objects_in_section('phaseX'), [])

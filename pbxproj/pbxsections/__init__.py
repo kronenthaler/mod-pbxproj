@@ -5,3 +5,7 @@ from pbxproj.pbxsections.PBXProject import *
 from pbxproj.pbxsections.PBXResourcesBuildPhase import *
 from pbxproj.pbxsections.PBXSourcesBuildPhase import *
 from pbxproj.pbxsections.XCConfigurationList import *
+from pbxproj.pbxsections.PBXContainerItemProxy import *
+from pbxproj.pbxsections.PBXCopyFilesBuildPhase import *
+from pbxproj.pbxsections.PBXShellScriptBuildPhase import *
+from pbxproj.pbxsections.PBXTargetDependency import *

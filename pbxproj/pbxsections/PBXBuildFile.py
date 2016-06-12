@@ -13,17 +13,11 @@ class PBXBuildFile(PBXGenericObject):
 
     def _get_section(self):
         objects = self._parent
-        target = ''
-        for key in objects.keys():
-            if objects[key] == self:
-                target = key
-                break
+        target = objects.indexOf(self)
 
-        # TODO: ask object for the specific sections!
-        for key in objects.keys():
-            obj = objects[key]
-            if isinstance(obj, PBXSourcesBuildPhase) or \
-               isinstance(obj, PBXResourcesBuildPhase) or \
-               isinstance(obj, PBXFrameworksBuildPhase):
-                if target in obj.files:
-                    return obj._get_comment()
+        for (key, obj) in objects.get_objects_in_section('PBXSourcesBuildPhase') + \
+                          objects.get_objects_in_section('PBXResourcesBuildPhase') + \
+                          objects.get_objects_in_section('PBXCopyFilesBuildPhase') + \
+                          objects.get_objects_in_section('PBXFrameworksBuildPhase'):
+            if target in obj.files:
+                return obj._get_comment()
