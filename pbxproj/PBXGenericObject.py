@@ -137,5 +137,5 @@ class PBXGenericObject(object):
     @classmethod
     def _escape(cls, item):
         if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
-            return '"{0}"'.format(item)
+            return '"{0}"'.format(item.replace('\n', "\\n").replace('\"', '\\"').replace("\0", "\\0"))
         return item

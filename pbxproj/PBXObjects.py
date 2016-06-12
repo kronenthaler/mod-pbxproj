@@ -60,10 +60,15 @@ class objects(PBXGenericObject):
     def __contains__(self, item):
         return self[item] is not None
 
-    def keys(self):
-        keys = []
+    def indexOf(self, value):
         for section in self._sections.iterkeys():
             phase = self._sections[section]
-            for (target_key, value) in phase:
-                keys.append(target_key)
-        return keys
+            for (key, target_value) in phase:
+                if target_value == value:
+                    return key
+        return None
+
+    def get_objects_in_section(self, name):
+        if name in self._sections:
+            return self._sections[name]
+        return []
