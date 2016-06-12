@@ -114,13 +114,15 @@ class PBXGenericObject(object):
 
         return None
 
+    def __contains__(self, item):
+        return hasattr(self, item)
+
     def _resolve_comment(self, key):
-        obj = self[key]
-        if obj is not None:
-            return obj._get_comment()
+        if key in self:
+            return self[key]._get_comment()
 
         if self._parent is None:
-            return "-"
+            return None
 
         return self._parent._resolve_comment(key)
 
@@ -130,7 +132,7 @@ class PBXGenericObject(object):
         if hasattr(self, 'path'):
             return self.path
 
-        return "-"
+        return None
 
     @classmethod
     def _escape(cls, item):
