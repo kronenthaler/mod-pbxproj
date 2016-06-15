@@ -1,7 +1,4 @@
 from pbxproj import PBXGenericObject
-from pbxproj.pbxsections.PBXSourcesBuildPhase import *
-from pbxproj.pbxsections.PBXResourcesBuildPhase import *
-from pbxproj.pbxsections.PBXFrameworksBuildPhase import *
 
 
 class PBXBuildFile(PBXGenericObject):
@@ -15,9 +12,7 @@ class PBXBuildFile(PBXGenericObject):
         objects = self._parent
         target = objects.indexOf(self)
 
-        for (key, obj) in objects.get_objects_in_section('PBXSourcesBuildPhase') + \
-                          objects.get_objects_in_section('PBXResourcesBuildPhase') + \
-                          objects.get_objects_in_section('PBXCopyFilesBuildPhase') + \
-                          objects.get_objects_in_section('PBXFrameworksBuildPhase'):
-            if target in obj.files:
-                return obj._get_comment()
+        for section in objects._get_keys():
+            for (key, obj) in objects.get_objects_in_section(section):
+                if 'files' in obj and target in obj.files:
+                    return obj._get_comment()
