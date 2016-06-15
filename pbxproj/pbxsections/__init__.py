@@ -9,3 +9,5 @@ from pbxproj.pbxsections.PBXContainerItemProxy import *
 from pbxproj.pbxsections.PBXCopyFilesBuildPhase import *
 from pbxproj.pbxsections.PBXShellScriptBuildPhase import *
 from pbxproj.pbxsections.PBXTargetDependency import *
+from pbxproj.pbxsections.PBXHeadersBuildPhase import *
+
