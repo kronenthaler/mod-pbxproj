@@ -30,7 +30,7 @@ class XcodeProject(PBXGenericObject):
         f.close()
 
     def __repr__(self):
-        return "// !$*UTF8*$!\n" + super(type(self), self).__repr__()
+        return u'// !$*UTF8*$!\n' + super(type(self), self).__repr__()
 
     @classmethod
     def load(cls, path, pure_python=False):

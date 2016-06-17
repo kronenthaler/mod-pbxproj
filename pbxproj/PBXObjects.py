@@ -30,18 +30,18 @@ class objects(PBXGenericObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(type(self), self).parse(object)
 
-    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
+    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
         # override to change the way the object is printed out
-        result = "{\n"
+        result = u'{\n'
         for section in self._get_keys():
             phase = self._sections[section]
             phase.sort(key=lambda x: x[0])
-            result += "\n/* Begin {0} section */\n".format(section)
+            result += u'\n/* Begin {0} section */\n'.format(section)
             for (key, value) in phase:
-                obj = value._print_object(indentation_depth + "\t", entry_separator, object_start, indentation_increment)
-                result += indentation_depth + "\t{0} = {1};\n".format(key.__repr__(), obj)
-            result += "/* End {0} section */\n".format(section)
-        result += indentation_depth + "}"
+                obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start, indentation_increment)
+                result += indentation_depth + u'\t{0} = {1};\n'.format(key.__repr__(), obj)
+            result += u'/* End {0} section */\n'.format(section)
+        result += indentation_depth + u'}'
         return result
 
     def _get_keys(self):
