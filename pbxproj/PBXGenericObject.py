@@ -49,7 +49,7 @@ class PBXGenericObject(object):
 
     def _get_instance(self, type, content):
         # check if the key maps to a kind of object
-        module = __import__("pbxproj")
+        module = __import__('pbxproj')
         if hasattr(module, type):
             class_ = getattr(module, type)
             return class_(self).parse(content)
@@ -59,28 +59,28 @@ class PBXGenericObject(object):
     def __repr__(self):
         return self._print_object()
 
-    def _print_object(self, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
-        ret = "{" + object_start
+    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+        ret = u'{' + object_start
 
         for key in self._get_keys():
             value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start, indentation_increment)
 
             # use key decorators, could simplify the generation of the comments.
-            ret += indentation_depth + "{3}{0} = {1};{2}".format(PBXGenericObject._escape(key), value, entry_separator, indentation_increment)
-        ret += indentation_depth + "}"
+            ret += indentation_depth + u'{3}{0} = {1};{2}'.format(PBXGenericObject._escape(key), value, entry_separator, indentation_increment)
+        ret += indentation_depth + u'}'
         return ret
 
-    def _print_list(self, obj, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
-        ret = "(" + object_start
+    def _print_list(self, obj, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+        ret = u'(' + object_start
         for item in obj:
             value = self._format(item, indentation_depth, entry_separator, object_start, indentation_increment)
 
-            ret += indentation_depth + "{1}{0},{2}".format(value, indentation_increment, entry_separator)
-        ret += indentation_depth + ")"
+            ret += indentation_depth + u'{1}{0},{2}'.format(value, indentation_increment, entry_separator)
+        ret += indentation_depth + u')'
         return ret
 
-    def _format(self, value, indentation_depth="", entry_separator='\n', object_start='\n', indentation_increment='\t'):
-        if hasattr(value, '_print_object'):
+    def _format(self, value, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+        if hasattr(value, u'_print_object'):
             value = value._print_object(indentation_depth + indentation_increment,
                                         entry_separator,
                                         object_start,
@@ -98,11 +98,11 @@ class PBXGenericObject(object):
         return value
 
     def _get_keys(self):
-        fields = list([x for x in dir(self) if not x.startswith("_") and not hasattr(getattr(self, x), '__call__')])
-        if 'isa' in fields:
-            fields.remove('isa')
+        fields = list([x for x in dir(self) if not x.startswith(u'_') and not hasattr(getattr(self, x), '__call__')])
+        if u'isa' in fields:
+            fields.remove(u'isa')
             fields = sorted(fields)
-            fields.insert(0, 'isa')
+            fields.insert(0, u'isa')
         else:
             fields = sorted(fields)
 
@@ -127,9 +127,9 @@ class PBXGenericObject(object):
         return self._parent._resolve_comment(key)
 
     def _get_comment(self):
-        if hasattr(self, "name"):
+        if hasattr(self, u'name'):
             return self.name
-        if hasattr(self, 'path'):
+        if hasattr(self, u'path'):
             return self.path
 
         return None
@@ -137,5 +137,5 @@ class PBXGenericObject(object):
     @classmethod
     def _escape(cls, item):
         if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
-            return '"{0}"'.format(item.replace('\n', "\\n").replace('\"', '\\"').replace("\0", "\\0"))
+            return u'"{0}"'.format(item.replace(u'\n', u'\\n').replace(u'\"', u'\\"').replace(u'\0', u'\\0'))
         return item

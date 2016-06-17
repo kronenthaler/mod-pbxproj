@@ -3,4 +3,4 @@ from pbxproj import PBXGenericObject
 
 class PBXTargetDependency(PBXGenericObject):
     def _get_comment(self):
-        return "PBXTargetDependency"
+        return u'PBXTargetDependency'

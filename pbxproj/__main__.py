@@ -1,9 +1,9 @@
 from pbxproj import XcodeProject
 import sys
 import os
+import cProfile
 
-
-if __name__ == "__main__":
+def main():
     stdout = sys.stdout
     files = os.listdir('../mod_pbxproj/tests/samples/')
     for file in files:
@@ -14,3 +14,8 @@ if __name__ == "__main__":
         obj = XcodeProject.load('../mod_pbxproj/tests/samples/{0}'.format(file), pure_python=True)
         print obj
         sys.stdout.close()
+
+    sys.stdout = stdout
+
+if __name__ == "__main__":
+    cProfile.run("main()", sort="cumtime")
