@@ -117,6 +117,9 @@ class PBXGenericObject(object):
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+    def __delitem__(self, key):
+        delattr(self, key)
+
     def __contains__(self, item):
         return hasattr(self, item)
 

@@ -58,3 +58,25 @@ class XcodeProject(PBXGenericObject):
         """
         for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
             configuration.add_other_ldflags(flags)
+
+    def remove_other_cflags(self, flags, target_name=None, configuration_name=None):
+        """
+        Adds the given flags to the OTHER_CFLAGS section of the target on the configurations
+        :param flags: A string or array of strings
+        :param target_name: Target name to add the flag to or None for every target
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return: void
+        """
+        for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
+            configuration.remove_other_cflags(flags)
+
+    def remove_other_ldflags(self, flags, target_name=None, configuration_name=None):
+        """
+        Adds the given flags to the OTHER_CFLAGS section of the target on the configurations
+        :param flags: A string or array of strings
+        :param target_name: Target name to add the flag to or None for every target
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return: void
+        """
+        for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
+            configuration.remove_other_ldflags(flags)
