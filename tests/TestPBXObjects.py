@@ -48,3 +48,43 @@ class PBXObjectTest(unittest.TestCase):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         self.assertEqual(dobj.get_objects_in_section('phase1'), dobj._sections['phase1'])
         self.assertEqual(dobj.get_objects_in_section('phaseX'), [])
+
+    def testGetTargets(self):
+        obj = {
+            '1': {'isa': 'PBXNativeTarget', 'name': 'app'},
+            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report'}
+        }
+        dobj = objects().parse(obj)
+
+        self.assertEqual(dobj.get_targets().__len__(), 2)
+        self.assertEqual(dobj.get_targets('app').__len__(), 1)
+        self.assertEqual(dobj.get_targets('report').__len__(), 1)
+        self.assertEqual(dobj.get_targets('whatever').__len__(), 0)
+
+    def testGetConfigurationTargets(self):
+        obj = {
+            '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3'},
+            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4'},
+            '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
+            '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+            '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '5'},
+            '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
+            '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+            '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+        }
+        dobj = objects().parse(obj)
+
+        result = [x for x in dobj.get_configurations_on_targets()]
+        self.assertEqual(result.__len__(), 4)
+        self.assertSetEqual(set([x.id for x in result]), set(['5', '6', '7', '8']))
+
+        result = [x for x in dobj.get_configurations_on_targets(target_name='app')]
+        self.assertEqual(result.__len__(), 2)
+        self.assertSetEqual(set([x.id for x in result]), set(['5', '6']))
+
+        result = [x for x in dobj.get_configurations_on_targets(configuration_name='Release')]
+        self.assertSetEqual(set([x.id for x in result]), set(['5', '7']))
+
+        result = [x for x in dobj.get_configurations_on_targets(target_name='app', configuration_name='Release')]
+        self.assertEqual(result.__len__(), 1)
+        self.assertSetEqual(set([x.id for x in result]), set(['5']))

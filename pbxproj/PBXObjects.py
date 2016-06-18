@@ -30,7 +30,8 @@ class objects(PBXGenericObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(type(self), self).parse(object)
 
-    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
+                      indentation_increment=u'\t'):
         # override to change the way the object is printed out
         result = u'{\n'
         for section in self._get_keys():
@@ -38,7 +39,8 @@ class objects(PBXGenericObject):
             phase.sort(key=lambda x: x[0])
             result += u'\n/* Begin {0} section */\n'.format(section)
             for (key, value) in phase:
-                obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start, indentation_increment)
+                obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start,
+                                          indentation_increment)
                 result += indentation_depth + u'\t{0} = {1};\n'.format(key.__repr__(), obj)
             result += u'/* End {0} section */\n'.format(section)
         result += indentation_depth + u'}'
@@ -72,3 +74,37 @@ class objects(PBXGenericObject):
         if name in self._sections:
             return self._sections[name]
         return []
+
+    def get_targets(self, name=None):
+        """
+        Retrieve all/one target objects
+        :param name: name of the target to search for, None for everything
+        :return: A list of target objects
+        """
+        targets = []
+        for section in self._sections.iterkeys():
+            if section.endswith(u'Target'):
+                targets += [value for (key, value) in self._sections[section]]
+
+        if name is None:
+            return targets
+
+        for target in targets:
+            if target.name == name:
+                return [target]
+        return []
+
+    def get_configurations_on_targets(self, target_name=None, configuration_name=None):
+        """
+        Retrieves all configuration given a name on the specified target
+        :param target_name: Searches for a specific target name, if None all targets are used
+        :param configuration_name: Searches for a specific configuration, if None all configuration of the target
+            are used
+        :return: A generator of configurations objects matching the target and configuration given (or all if nothing is
+            specified)
+        """
+        for target in self.get_targets(target_name):
+            configuration_list = self[target.buildConfigurationList]
+            for configuration in configuration_list.buildConfigurations:
+                if configuration_name is None or self[configuration].name == configuration_name:
+                    yield self[configuration]
