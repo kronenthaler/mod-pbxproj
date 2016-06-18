@@ -25,3 +25,6 @@ class XCodeProjectTest(unittest.TestCase):
         XcodeProject({}, "results/default").save()
 
         self.assertTrue(os.path.exists("results/default"))
+
+    def testAddOtherCFlags(self):
+        pass

@@ -48,6 +48,15 @@ class PBXGenericObjectTest(unittest.TestCase):
         self.assertIsInstance(dobj["c"]["c1"], PBXKey)
         self.assertIsNone(dobj['X'])
 
+    def testSetItem(self):
+        obj = {}
+        dobj = PBXGenericObject().parse(obj)
+
+        self.assertIsNone(dobj['something'])
+
+        dobj['something'] = 'yes'
+        self.assertEqual(dobj['something'], 'yes')
+
     def testResolveComment(self):
         obj = {"a": {"name": "A"}, "b": {"path": "B"}, "c": {"c1": "FDDF6A571C68E5B100D7A645"}}
         dobj = PBXGenericObject().parse(obj)
