@@ -1,5 +1,4 @@
 import unittest
-
 from pbxproj.pbxsections.PBXFileReference import PBXFileReference
 
 
