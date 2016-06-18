@@ -5,19 +5,19 @@ class XCBuildConfiguration(PBXGenericObject):
     OTHER_CFLAGS = u'OTHER_CFLAGS'
     OTHER_LDFLAGS = u'OTHER_LDFLAGS'
 
-    def add_other_cflags(self, flags):
-        self._add_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
+    # def add_other_cflags(self, flags):
+    #     self._add_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
+    #
+    # def remove_other_cflags(self, flags):
+    #     self._remove_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
+    #
+    # def add_other_ldflags(self, flags):
+    #     self._add_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
+    #
+    # def remove_other_ldflags(self, flags):
+    #     self._remove_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
 
-    def remove_other_cflags(self, flags):
-        self._remove_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
-
-    def add_other_ldflags(self, flags):
-        self._add_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
-
-    def remove_other_ldflags(self, flags):
-        self._remove_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
-
-    def _add_flags(self, flag_name, flags):
+    def add_flags(self, flag_name, flags):
         if u'buildSettings' not in self:
             self[u'buildSettings'] = PBXGenericObject()
 
@@ -34,7 +34,7 @@ class XCBuildConfiguration(PBXGenericObject):
 
         self.buildSettings[flag_name] += flags
 
-    def _remove_flags(self, flag_name, flags):
+    def remove_flags(self, flag_name, flags):
         if u'buildSettings' not in self or self.buildSettings[flag_name] is None:
             # nothing to remove
             return
