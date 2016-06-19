@@ -45,6 +45,7 @@ class XCBuildConfiguration(PBXGenericObject):
             del self.buildSettings[flag_name]
 
     def add_search_paths(self, paths, key, recursive=False, escape=False):
+        # TODO: check if the escape parameter is necessary at all (formatting is taking care of necessary escaping)
         if not isinstance(paths, list):
             paths = [paths]
 
