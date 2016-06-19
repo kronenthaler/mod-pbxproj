@@ -1,21 +1,10 @@
+import os
 from pbxproj import PBXGenericObject
 
 
 class XCBuildConfiguration(PBXGenericObject):
-    OTHER_CFLAGS = u'OTHER_CFLAGS'
-    OTHER_LDFLAGS = u'OTHER_LDFLAGS'
-
-    # def add_other_cflags(self, flags):
-    #     self._add_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
-    #
-    # def remove_other_cflags(self, flags):
-    #     self._remove_flags(XCBuildConfiguration.OTHER_CFLAGS, flags)
-    #
-    # def add_other_ldflags(self, flags):
-    #     self._add_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
-    #
-    # def remove_other_ldflags(self, flags):
-    #     self._remove_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags)
+    _OTHER_CFLAGS = u'OTHER_CFLAGS'
+    _OTHER_LDFLAGS = u'OTHER_LDFLAGS'
 
     def add_flags(self, flag_name, flags):
         if u'buildSettings' not in self:
@@ -23,6 +12,8 @@ class XCBuildConfiguration(PBXGenericObject):
 
         current_flags = self.buildSettings[flag_name]
         if current_flags is None:
+            if isinstance(flags, list) and flags.__len__() == 1:
+                flags = flags[0]
             self.buildSettings[flag_name] = flags
             return
 
@@ -52,3 +43,26 @@ class XCBuildConfiguration(PBXGenericObject):
             self.buildSettings[flag_name] = self.buildSettings[flag_name][0]
         elif self.buildSettings[flag_name].__len__() == 0:
             del self.buildSettings[flag_name]
+
+    def add_search_paths(self, paths, key, recursive=False, escape=False):
+        if not isinstance(paths, list):
+            paths = [paths]
+
+        # build the recursive/escaped strings and add the flags accordingly
+        flags = []
+        for path in paths:
+            if path == '$(inherited)':
+                escape = False
+                recursive = False
+
+            if recursive and not path.endswith('/**'):
+                path = os.path.join(path, '**')
+
+            if escape:
+                path = u'"{0}"'.format(path)
+            flags.append(path)
+
+        self.add_flags(key, flags)
+
+    def remove_search_paths(self, paths, key):
+        self.remove_flags(key, paths)

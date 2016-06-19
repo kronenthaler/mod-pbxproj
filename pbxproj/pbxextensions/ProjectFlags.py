@@ -35,13 +35,13 @@ class ProjectFlags:
             configuration.remove_flags(flag_name, flags)
 
     def add_other_cflags(self, flags, target_name=None, configuration_name=None):
-        self.add_flags(XCBuildConfiguration.OTHER_CFLAGS, flags, target_name, configuration_name)
+        self.add_flags(XCBuildConfiguration._OTHER_CFLAGS, flags, target_name, configuration_name)
 
     def add_other_ldflags(self, flags, target_name=None, configuration_name=None):
-        self.add_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags, target_name, configuration_name)
+        self.add_flags(XCBuildConfiguration._OTHER_LDFLAGS, flags, target_name, configuration_name)
 
     def remove_other_cflags(self, flags, target_name=None, configuration_name=None):
-        self.remove_flags(XCBuildConfiguration.OTHER_CFLAGS, flags, target_name, configuration_name)
+        self.remove_flags(XCBuildConfiguration._OTHER_CFLAGS, flags, target_name, configuration_name)
 
     def remove_other_ldflags(self, flags, target_name=None, configuration_name=None):
-        self.remove_flags(XCBuildConfiguration.OTHER_LDFLAGS, flags, target_name, configuration_name)
+        self.remove_flags(XCBuildConfiguration._OTHER_LDFLAGS, flags, target_name, configuration_name)

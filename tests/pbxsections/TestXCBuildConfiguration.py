@@ -75,3 +75,51 @@ class XCBuildConfigurationTest(unittest.TestCase):
         dobj.remove_flags('flag', '-flag')
         self.assertEqual(dobj.buildSettings.flag, '-b-flag')
 
+    def testAddSearchPathRecursiveEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=True, escape=True)
+
+        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)/**"')
+
+
+    def testAddSearchPathNonRecursiveEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=False, escape=True)
+
+        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)"')
+
+    def testAddSearchPathRecursiveUnEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=True, escape=False)
+
+        self.assertEqual(dobj.buildSettings.search, '$(SRC_ROOT)/**')
+
+    def testAddSearchPathNonRecursiveUnEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=False, escape=False)
+
+        self.assertEqual(dobj.buildSettings.search, '$(SRC_ROOT)')
+
+    def testAddSearchPathInherit(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('$(inherited)', 'search')
+
+        self.assertEqual(dobj.buildSettings.search, '$(inherited)')
+
+    def testRemoveSearchPath(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {'search': '$(inherited)'}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.remove_search_paths('$(inherited)', 'search')
+
+        self.assertIsNone(dobj.buildSettings['search'])
