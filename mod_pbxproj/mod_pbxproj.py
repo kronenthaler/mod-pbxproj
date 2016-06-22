@@ -548,7 +548,7 @@ class XCBuildConfiguration(PBXType):
         return modified
 
     def remove_other_ldflags(self, flags):
-        return self.remove_flag('OTHER_LD_FLAGS', flags)
+        return self.remove_flag('OTHER_LDFLAGS', flags)
 
     # Set a single-valued flag under buildSettings
     def add_single_valued_flag(self, flag, value):
