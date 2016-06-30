@@ -75,28 +75,11 @@ class XCBuildConfigurationTest(unittest.TestCase):
         dobj.remove_flags('flag', '-flag')
         self.assertEqual(dobj.buildSettings.flag, '-b-flag')
 
-    def testAddSearchPathRecursiveEscaped(self):
-        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
-        dobj = XCBuildConfiguration().parse(obj)
-
-        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=True, escape=True)
-
-        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)/**"')
-
-
-    def testAddSearchPathNonRecursiveEscaped(self):
-        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
-        dobj = XCBuildConfiguration().parse(obj)
-
-        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=False, escape=True)
-
-        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)"')
-
     def testAddSearchPathRecursiveUnEscaped(self):
         obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
         dobj = XCBuildConfiguration().parse(obj)
 
-        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=True, escape=False)
+        dobj.add_search_paths('search', '$(SRC_ROOT)', recursive=True)
 
         self.assertEqual(dobj.buildSettings.search, '$(SRC_ROOT)/**')
 
@@ -104,15 +87,31 @@ class XCBuildConfigurationTest(unittest.TestCase):
         obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
         dobj = XCBuildConfiguration().parse(obj)
 
-        dobj.add_search_paths('$(SRC_ROOT)', 'search', recursive=False, escape=False)
+        dobj.add_search_paths('search', '$(SRC_ROOT)', recursive=False)
 
         self.assertEqual(dobj.buildSettings.search, '$(SRC_ROOT)')
+
+    def testAddSearchPathRecursiveEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('search', '$(SRC_ROOT)', recursive=True, escape=True)
+
+        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)"/**')
+
+    def testAddSearchPathNonRecursiveEscaped(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.add_search_paths('search', '$(SRC_ROOT)', recursive=False, escape=True)
+
+        self.assertEqual(dobj.buildSettings.search, '"$(SRC_ROOT)"')
 
     def testAddSearchPathInherit(self):
         obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {}}
         dobj = XCBuildConfiguration().parse(obj)
 
-        dobj.add_search_paths('$(inherited)', 'search')
+        dobj.add_search_paths('search', '$(inherited)')
 
         self.assertEqual(dobj.buildSettings.search, '$(inherited)')
 
@@ -120,6 +119,6 @@ class XCBuildConfigurationTest(unittest.TestCase):
         obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {'search': '$(inherited)'}}
         dobj = XCBuildConfiguration().parse(obj)
 
-        dobj.remove_search_paths('$(inherited)', 'search')
+        dobj.remove_search_paths('search', '$(inherited)')
 
         self.assertIsNone(dobj.buildSettings['search'])
