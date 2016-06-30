@@ -69,7 +69,6 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertIsNone(project.objects['7'].buildSettings['OTHER_CFLAGS'])
         self.assertIsNone(project.objects['8'].buildSettings['OTHER_CFLAGS'])
 
-
     def testRemoveOtherLDFlags(self):
         project = XcodeProject(self.obj)
         project.add_other_ldflags('-ObjC')
@@ -84,3 +83,75 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertIsNone(project.objects['6'].buildSettings['OTHER_LDFLAGS'])
         self.assertIsNone(project.objects['7'].buildSettings['OTHER_LDFLAGS'])
         self.assertIsNone(project.objects['8'].buildSettings['OTHER_LDFLAGS'])
+
+    def testAddHeaderSearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_header_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+
+    def testAddLibrarySearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_library_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+
+    def testAddFrameworkSearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_framework_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+
+    def testRemoveHeaderSearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_header_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+
+        project.remove_header_search_paths('path/to/search/**')
+        self.assertIsNone(project.objects['5'].buildSettings['HEADER_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['6'].buildSettings['HEADER_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['7'].buildSettings['HEADER_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['8'].buildSettings['HEADER_SEARCH_PATHS'])
+
+    def testRemoveLibrarySearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_library_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+
+        project.remove_library_search_paths('path/to/search/**')
+        self.assertIsNone(project.objects['5'].buildSettings['LIBRARY_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['6'].buildSettings['LIBRARY_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['7'].buildSettings['LIBRARY_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['8'].buildSettings['LIBRARY_SEARCH_PATHS'])
+
+    def testRemoveFrameworkSearchPaths(self):
+        project = XcodeProject(self.obj)
+        project.add_framework_search_paths('path/to/search')
+
+        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+
+        project.remove_framework_search_paths('path/to/search/**')
+        self.assertIsNone(project.objects['5'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['6'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['7'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
+        self.assertIsNone(project.objects['8'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
