@@ -180,6 +180,7 @@ class PBXFileReference(PBXType):
         '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase'),
         '.xcassets': ('folder.assetcatalog', 'PBXResourcesBuildPhase'),
         '.tbd': ('sourcecode.text-based-dylib-definition', 'PBXFrameworksBuildPhase'),
+        '.storyboardc': ('wrapper.storyboardc', 'PBXResourcesBuildPhase'),
     }
 
     trees = [
@@ -582,7 +583,7 @@ class XCConfigurationList(PBXType):
 
 class XcodeProject(PBXDict):
     plutil_path = 'plutil'
-    special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld']
+    special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld', '.storyboardc']
 
     def __init__(self, d=None, path=None):
         if not path:
