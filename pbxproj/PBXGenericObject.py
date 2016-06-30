@@ -49,7 +49,7 @@ class PBXGenericObject(object):
 
     def _get_instance(self, type, content):
         # check if the key maps to a kind of object
-        module = __import__('pbxproj')
+        module = __import__(u'pbxproj')
         if hasattr(module, type):
             class_ = getattr(module, type)
             return class_(self).parse(content)
@@ -115,6 +115,13 @@ class PBXGenericObject(object):
         return None
 
     def __setitem__(self, key, value):
+        if isinstance(value, list):
+            if value.__len__() == 1:
+                value = value[0]
+            if value.__len__() == 0:
+                delattr(self, key)
+                return
+
         setattr(self, key, value)
 
     def __delitem__(self, key):
