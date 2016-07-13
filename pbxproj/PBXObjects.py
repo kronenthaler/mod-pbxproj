@@ -1,3 +1,4 @@
+import uuid
 from pbxproj import PBXGenericObject
 
 
@@ -19,11 +20,8 @@ class objects(PBXGenericObject):
                     obj_type = value['isa']
 
                 child = self._get_instance(obj_type, value)
-                if child.isa not in self._sections:
-                    self._sections[child.isa] = []
-
-                node = (key, child)
-                self._sections[child.isa].append(node)
+                child[u'_id'] = key
+                self[key] = child
 
             return self
 
@@ -59,16 +57,21 @@ class objects(PBXGenericObject):
                     return value
         return None
 
+    def __setitem__(self, key, value):
+        if value.isa not in self._sections:
+            self._sections[value.isa] = []
+
+        node = (key, value)
+        self._sections[value.isa].append(node)
+        value._parent = self
+
+    def __delitem__(self, key):
+        obj = self[key]
+        phase = self._sections[obj.isa]
+        phase.remove((obj._id, obj))
+
     def __contains__(self, item):
         return self[item] is not None
-
-    def indexOf(self, value):
-        for section in self._sections.iterkeys():
-            phase = self._sections[section]
-            for (key, target_value) in phase:
-                if target_value == value:
-                    return key
-        return None
 
     def get_objects_in_section(self, name):
         if name in self._sections:
