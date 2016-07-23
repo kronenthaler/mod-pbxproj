@@ -108,12 +108,7 @@ class ProjectFlags:
             shell = PBXShellScriptBuildPhase.create(script)
 
             self.objects[shell._id] = shell
-            if insert_before_compile:
-                # insert before compile
-                target.buildPhases.insert(0, shell._id)
-            else:
-                # append to the buildPhases of the target
-                target.buildPhases.append(shell._id)
+            target.add_build_phase(shell, 0 if insert_before_compile else None)
 
     def remove_run_script(self, script, target_name=None):
         """
@@ -124,9 +119,9 @@ class ProjectFlags:
         """
         for target in self.objects.get_targets(target_name):
             for buildPhase in target.buildPhases:
-                if self.objects[buildPhase].isa != u'PBXShellScriptBuildPhase':
+                if not isinstance(self.objects[buildPhase], PBXShellScriptBuildPhase):
                     continue
 
                 if self.objects[buildPhase].shellScript == script:
                     del self.objects[buildPhase]
-                    target.buildPhases.remove(buildPhase)
+                    target.remove_build_phase(buildPhase)

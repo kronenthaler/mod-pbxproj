@@ -6,8 +6,8 @@ class ProjectFlagsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3'},
-                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4'},
+                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3', 'buildPhases': ['compile']},
+                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4', 'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
                 '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'} },
@@ -155,3 +155,28 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertIsNone(project.objects['6'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
         self.assertIsNone(project.objects['7'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
         self.assertIsNone(project.objects['8'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
+
+    def testAddRunScriptBeforeCompile(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la', insert_before_compile=True)
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+
+    def testAddRunScriptAfterCompile(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la')
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].shellScript, u'ls -la')
+
+    def testRemoveRunScript(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la', insert_before_compile=True)
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+
+        project.remove_run_script(u'ls -la')
+        self.assertEqual(project.objects['1'].buildPhases[0], u'compile')
+        self.assertEqual(project.objects['2'].buildPhases[0], u'compile')
