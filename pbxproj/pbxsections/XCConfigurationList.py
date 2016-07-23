@@ -8,7 +8,7 @@ class XCConfigurationList(PBXGenericObject):
 
     def _get_section(self):
         objects = self._parent
-        target = objects.indexOf(self)
+        target = self._id
 
         for (key, obj) in objects.get_objects_in_section(u'PBXNativeTarget') + \
                           objects.get_objects_in_section(u'PBXAggregateTarget'):

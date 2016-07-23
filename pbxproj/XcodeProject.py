@@ -1,4 +1,5 @@
-import os
+import shutil
+import datetime
 from pbxproj import *
 from pbxproj.pbxextensions import *
 
@@ -29,11 +30,22 @@ class XcodeProject(PBXGenericObject, ProjectFlags):
         f.write(self.__repr__())
         f.close()
 
+    def backup(self):
+        backup_name = "%s_%s.backup" % (self._pbxproj_path, datetime.datetime.now().strftime('%d%m%y-%H%M%S'))
+
+        shutil.copy2(self._pbxproj_path, backup_name)
+        return backup_name
+
     def __repr__(self):
         return u'// !$*UTF8*$!\n' + super(type(self), self).__repr__()
 
     @classmethod
-    def load(cls, path, pure_python=False):
+    def load(cls, path):
         import openstep_parser as osp
         tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
         return XcodeProject(tree, path)
+
+    @classmethod
+    def Load(cls, path, pure_python=False):
+        # DEPRECATED. Use XcodeProjec.load instead. This method will be removed.
+        return XcodeProject.load(path)

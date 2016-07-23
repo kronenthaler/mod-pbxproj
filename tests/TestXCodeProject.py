@@ -25,3 +25,10 @@ class XCodeProjectTest(unittest.TestCase):
         XcodeProject({}, "results/default").save()
 
         self.assertTrue(os.path.exists("results/default"))
+
+    def testBackup(self):
+        project = XcodeProject({}, 'results/default')
+        project.save('results/default')
+        backup_name = project.backup()
+
+        self.assertRegexpMatches(backup_name, '_[0-9]{6}-[0-9]{6}\\.backup')

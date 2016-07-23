@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from pbxproj.PBXKey import PBXKey
 
@@ -146,6 +147,10 @@ class PBXGenericObject(object):
             return self.path
 
         return None
+
+    @classmethod
+    def _generate_id(cls):
+        return ''.join(str(uuid.uuid4()).upper().split('-')[1:])
 
     @classmethod
     def _escape(cls, item):
