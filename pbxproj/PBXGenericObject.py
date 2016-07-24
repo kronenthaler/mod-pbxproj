@@ -29,6 +29,9 @@ class PBXGenericObject(object):
     def _parse_dict(self, obj):
         # all top level objects are added as variables to this object
         for key, value in obj.iteritems():
+            if value is None:
+                continue
+
             key = self._parse_string(key)
             if not hasattr(self, key):
                 setattr(self, key, self._get_instance(key, value))
