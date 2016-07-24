@@ -13,6 +13,6 @@ class PBXBuildFile(PBXGenericObject):
         target = self._id
 
         for section in objects._get_keys():
-            for (key, obj) in objects.get_objects_in_section(section):
+            for obj in objects.get_objects_in_section(section):
                 if u'files' in obj and target in obj.files:
                     return obj._get_comment()

@@ -10,12 +10,12 @@ class XCConfigurationList(PBXGenericObject):
         objects = self._parent
         target = self._id
 
-        for (key, obj) in objects.get_objects_in_section(u'PBXNativeTarget') + \
+        for obj in objects.get_objects_in_section(u'PBXNativeTarget') + \
                           objects.get_objects_in_section(u'PBXAggregateTarget'):
             if target in obj.buildConfigurationList:
                 return obj.isa, obj.name
 
-        for (key, obj) in objects.get_objects_in_section(u'PBXProject'):
+        for obj in objects.get_objects_in_section(u'PBXProject'):
             if target in obj.buildConfigurationList:
                 return obj.isa, objects[obj.targets[0]].productName
 
