@@ -34,12 +34,12 @@ class objects(PBXGenericObject):
         result = u'{\n'
         for section in self._get_keys():
             phase = self._sections[section]
-            phase.sort(key=lambda x: x[0])
+            phase.sort(key=lambda x: x._id)
             result += u'\n/* Begin {0} section */\n'.format(section)
-            for (key, value) in phase:
+            for value in phase:
                 obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start,
                                           indentation_increment)
-                result += indentation_depth + u'\t{0} = {1};\n'.format(key.__repr__(), obj)
+                result += indentation_depth + u'\t{0} = {1};\n'.format(value._id.__repr__(), obj)
             result += u'/* End {0} section */\n'.format(section)
         result += indentation_depth + u'}'
         return result
@@ -52,23 +52,22 @@ class objects(PBXGenericObject):
     def __getitem__(self, key):
         for section in self._sections.iterkeys():
             phase = self._sections[section]
-            for (target_key, value) in phase:
-                if key == target_key:
-                    return value
+            for obj in phase:
+                if key == obj._id:
+                    return obj
         return None
 
     def __setitem__(self, key, value):
         if value.isa not in self._sections:
             self._sections[value.isa] = []
 
-        node = (key, value)
-        self._sections[value.isa].append(node)
+        self._sections[value.isa].append(value)
         value._parent = self
 
     def __delitem__(self, key):
         obj = self[key]
         phase = self._sections[obj.isa]
-        phase.remove((obj._id, obj))
+        phase.remove(obj)
 
     def __contains__(self, item):
         return self[item] is not None
@@ -87,7 +86,7 @@ class objects(PBXGenericObject):
         targets = []
         for section in self._sections.iterkeys():
             if section.endswith(u'Target'):
-                targets += [value for (key, value) in self._sections[section]]
+                targets += [value for value in self._sections[section]]
 
         if name is None:
             return targets
