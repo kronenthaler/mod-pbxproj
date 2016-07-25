@@ -68,6 +68,13 @@ class XCBuildConfigurationTest(unittest.TestCase):
         dobj.remove_flags('flag', '-flag')
         self.assertIsNone(dobj.buildSettings['flag'])
 
+    def testRemoveFlagAllValues(self):
+        obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {'flag': '-flag'}}
+        dobj = XCBuildConfiguration().parse(obj)
+
+        dobj.remove_flags('flag', None)
+        self.assertIsNone(dobj.buildSettings['flag'])
+
     def testRemoveFlagOnMultipleValue(self):
         obj = {'isa': 'XCBuildConfiguration', 'buildSettings': {'flag': ['-flag', '-b-flag']}}
         dobj = XCBuildConfiguration().parse(obj)

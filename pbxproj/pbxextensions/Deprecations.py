@@ -1,0 +1,64 @@
+import warnings
+from pbxproj.pbxsections import *
+
+
+def deprecated(func):
+    """
+    This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used.
+    """
+
+    def new_func(*args, **kwargs):
+        warnings.filterwarnings('default', category=DeprecationWarning)
+        warnings.warn("Call to deprecated function {}.".format(func.__name__),
+            category=DeprecationWarning)
+        return func(*args, **kwargs)
+
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
+
+
+class Deprecations:
+    """
+    This class contains all methods that will be deprecated on the near future.
+    It provides a compatibility layer meanwhile using old methods signatures as an alias of the new version available.
+    """
+
+    def __init__(self):
+        raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
+
+    @classmethod
+    @deprecated
+    def Load(cls, path, pure_python=False):
+        return cls.load(path)
+
+    @deprecated
+    def remove_group(self, id, recursive=True):
+        return self.remove_group_by_id(id, recursive)
+
+    @deprecated
+    def add_run_script_all_targets(self, script=None):
+        self.add_run_script(script, target=None)
+
+    @deprecated
+    def add_single_valued_flag(self, flag, value, configuration='All'):
+        self.add_flags(flag, value, target_name=None, configuration_name=configuration)
+
+    @deprecated
+    def remove_single_valued_flag(self, flag, configuration='All'):
+        self.remove_flags(flag, None, target_name=None, configuration_name=configuration)
+
+    @deprecated
+    def add_flags(self, pairs, configuration='All'):
+        for flag_name in pairs:
+            self.add_flags(flag_name, pairs[flag_name], target_name=None, configuration_name=configuration)
+
+    @deprecated
+    def remove_flags(self, pairs, configuration='All'):
+        for flag_name in pairs:
+            self.remove_flags(flag_name, pairs[flag_name], target_name=None, configuration_name=configuration)
+
+

@@ -35,6 +35,9 @@ class XCBuildConfiguration(PBXGenericObject):
         if not isinstance(current_flags, list):
             current_flags = [current_flags]
 
+        if flags is None:
+            flags = current_flags
+
         if not isinstance(flags, list):
             flags = [flags]
 
