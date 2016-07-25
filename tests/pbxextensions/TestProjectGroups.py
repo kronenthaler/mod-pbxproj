@@ -1,0 +1,167 @@
+import unittest
+from pbxproj.XcodeProject import *
+
+
+class ProjectGroupsTest(unittest.TestCase):
+    def setUp(self):
+        self.obj = {
+            'objects': {
+                'root': {'isa': 'PBXGroup', 'children': ['1','1p']},
+                '1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2','3']},
+                '2': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
+                '3': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
+                '4': {'isa': 'PBXGroup', 'name': 'root', 'children': ['5', '6']},
+                '5': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
+                '6': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
+                '1p': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2p', '3p']},
+                '2p': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': []},
+                '3p': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': []},
+                '4p': {'isa': 'PBXGroup', 'name': 'root', 'children': ['5p', '6p']},
+                '5p': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': []},
+                '6p': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': []},
+                'broken': {'isa': 'PBXGroup', 'name': 'broken', 'path': '..', 'children': ['broken1']},
+                'broken1': {'isa': 'PBXGroup', 'name': 'b1', 'path': '..', 'children': ['broken2']},
+            }
+        }
+
+    def testInit(self):
+        with self.assertRaisesRegexp(EnvironmentError, '^This class cannot be instantiated directly'):
+            ProjectGroups()
+
+    def testGetGroupsByNameNoParent(self):
+        project = XcodeProject(self.obj)
+        groups = project.get_groups_by_name('app')
+
+        self.assertIn(project.objects['2'], groups)
+        self.assertIn(project.objects['3'], groups)
+        self.assertIn(project.objects['5'], groups)
+        self.assertIn(project.objects['6'], groups)
+
+    def testGetGroupsByNameFromParent(self):
+        project = XcodeProject(self.obj)
+        groups = project.get_groups_by_name('app', parent=project.objects['1'])
+
+        self.assertIn(project.objects['2'], groups)
+        self.assertIn(project.objects['3'], groups)
+        self.assertNotIn(project.objects['5'], groups)
+        self.assertNotIn(project.objects['6'], groups)
+
+    def testGetGroupsByPathNoParent(self):
+        project = XcodeProject(self.obj)
+        groups = project.get_groups_by_path('..')
+
+        self.assertIn(project.objects['2p'], groups)
+        self.assertIn(project.objects['3p'], groups)
+        self.assertIn(project.objects['5p'], groups)
+        self.assertIn(project.objects['6p'], groups)
+
+    def testGetGroupsByPathFromParent(self):
+        project = XcodeProject(self.obj)
+        groups = project.get_groups_by_path('..', parent=project.objects['1p'])
+
+        self.assertIn(project.objects['2p'], groups)
+        self.assertIn(project.objects['3p'], groups)
+        self.assertNotIn(project.objects['5p'], groups)
+        self.assertNotIn(project.objects['6p'], groups)
+
+    def testAddGroupNoParent(self):
+        project = XcodeProject(self.obj)
+        group = project.add_group("my_group")
+
+        self.assertTrue(project.objects['root'].has_child(group._id))
+
+    def testAddGroupToParent(self):
+        project = XcodeProject(self.obj)
+        group = project.add_group("my_group", parent=project.objects['1'])
+
+        self.assertTrue(project.objects['1'].has_child(group._id))
+
+    def testRemoveByIdNotFound(self):
+        project = XcodeProject(self.obj)
+
+        self.assertFalse(project.remove_group_by_id('xxx'))
+
+    def testRemoveByIdRecursive(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_id('1', recursive=True)
+
+        self.assertTrue(result)
+        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertIsNone(project.objects['1'])
+        self.assertIsNone(project.objects['2'])
+        self.assertIsNone(project.objects['3'])
+
+    def testRemoveByIdNonRecursive(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_id('1', recursive=False)
+
+        self.assertTrue(result)
+        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertIsNone(project.objects['1'])
+        self.assertIsNotNone(project.objects['2'])
+        self.assertIsNotNone(project.objects['3'])
+
+    def testRemoveByNameNotFound(self):
+        project = XcodeProject(self.obj)
+
+        self.assertFalse(project.remove_group_by_name('xxx'))
+
+    def testRemoveByNameRecursive(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_name('root', recursive=True)
+
+        self.assertTrue(result)
+        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertIsNone(project.objects['1'])
+        self.assertIsNone(project.objects['2'])
+        self.assertIsNone(project.objects['3'])
+        self.assertIsNone(project.objects['1p'])
+        self.assertIsNone(project.objects['2p'])
+        self.assertIsNone(project.objects['3p'])
+
+    def testRemoveByNameNonRecursive(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_name('root', recursive=False)
+
+        self.assertTrue(result)
+        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertIsNone(project.objects['1'])
+        self.assertIsNotNone(project.objects['2'])
+        self.assertIsNotNone(project.objects['3'])
+        self.assertIsNone(project.objects['1p'])
+        self.assertIsNotNone(project.objects['2p'])
+        self.assertIsNotNone(project.objects['3p'])
+
+    def testRemoveBrokenGroups(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_id('broken')
+
+        self.assertFalse(result)
+
+    def testRemoveBrokenGroupsByName(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_group_by_name('broken')
+
+        self.assertFalse(result)
+
+    def testGetOrCreateGroupNoName(self):
+        project = XcodeProject(self.obj)
+        group = project.get_or_create_group(None)
+
+        self.assertIsNone(group)
+
+    def testGetOrCreateGroupNotFound(self):
+        project = XcodeProject(self.obj)
+        group = project.get_or_create_group('whatever')
+
+        self.assertIsNotNone(group)
+        self.assertNotIn(group._id, self.obj['objects'])
+
+    def testGetOrCreateGroupFound(self):
+        project = XcodeProject(self.obj)
+        group = project.get_or_create_group('root')
+
+        self.assertIsNotNone(group)
+        self.assertIn(group._id, self.obj['objects'])
