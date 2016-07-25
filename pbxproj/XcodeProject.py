@@ -4,7 +4,7 @@ from pbxproj import *
 from pbxproj.pbxextensions import *
 
 
-class XcodeProject(PBXGenericObject, ProjectFlags, ProjectGroups):
+class XcodeProject(PBXGenericObject, ProjectFlags, ProjectGroups, Deprecations):
     """
     Top level class, handles the project CRUD operations, new, load, save, delete. Also, exposes methods to manipulate
     the project's content, add/remove files, add/remove libraries/frameworks, query sections. For more advanced
@@ -44,8 +44,3 @@ class XcodeProject(PBXGenericObject, ProjectFlags, ProjectGroups):
         import openstep_parser as osp
         tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
         return XcodeProject(tree, path)
-
-    @classmethod
-    def Load(cls, path, pure_python=False):
-        # DEPRECATED. Use XcodeProjec.load instead. This method will be removed.
-        return XcodeProject.load(path)
