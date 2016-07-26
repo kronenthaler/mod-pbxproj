@@ -4,7 +4,7 @@ from pbxproj import *
 from pbxproj.pbxextensions import *
 
 
-class XcodeProject(PBXGenericObject, ProjectFlags):
+class XcodeProject(PBXGenericObject, ProjectFlags, ProjectGroups):
     """
     Top level class, handles the project CRUD operations, new, load, save, delete. Also, exposes methods to manipulate
     the project's content, add/remove files, add/remove libraries/frameworks, query sections. For more advanced

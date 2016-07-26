@@ -11,7 +11,7 @@ def main():
         stdout.flush()
 
         sys.stdout = open('../test-{0}'.format(file), 'w')
-        obj = XcodeProject.load('../mod_pbxproj/tests/samples/{0}'.format(file), pure_python=True)
+        obj = XcodeProject.load('../mod_pbxproj/tests/samples/{0}'.format(file))
         print obj
         sys.stdout.close()
 
