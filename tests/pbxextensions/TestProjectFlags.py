@@ -180,3 +180,14 @@ class ProjectFlagsTest(unittest.TestCase):
         project.remove_run_script(u'ls -la')
         self.assertEqual(project.objects['1'].buildPhases[0], u'compile')
         self.assertEqual(project.objects['2'].buildPhases[0], u'compile')
+
+    def testRemoveRunScriptNotFound(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la', insert_before_compile=True)
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+
+        project.remove_run_script(u'ls')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
