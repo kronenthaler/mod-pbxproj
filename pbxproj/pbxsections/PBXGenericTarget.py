@@ -6,7 +6,7 @@ class PBXGenericTarget(PBXGenericObject):
         if position is None:
             position = self.buildPhases.__len__()
 
-        self.buildPhases.insert(position, build_phase._id)
+        self.buildPhases.insert(position, build_phase.get_id())
 
     def remove_build_phase(self, build_phase):
         self.buildPhases.remove(build_phase)

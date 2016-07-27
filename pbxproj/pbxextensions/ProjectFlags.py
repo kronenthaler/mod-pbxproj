@@ -107,7 +107,7 @@ class ProjectFlags:
         for target in self.objects.get_targets(target_name):
             shell = PBXShellScriptBuildPhase.create(script)
 
-            self.objects[shell._id] = shell
+            self.objects[shell.get_id()] = shell
             target.add_build_phase(shell, 0 if insert_before_compile else None)
 
     def remove_run_script(self, script, target_name=None):

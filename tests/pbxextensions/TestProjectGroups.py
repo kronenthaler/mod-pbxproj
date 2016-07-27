@@ -68,13 +68,13 @@ class ProjectGroupsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group")
 
-        self.assertTrue(project.objects['root'].has_child(group._id))
+        self.assertTrue(project.objects['root'].has_child(group.get_id()))
 
     def testAddGroupToParent(self):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group", parent=project.objects['1'])
 
-        self.assertTrue(project.objects['1'].has_child(group._id))
+        self.assertTrue(project.objects['1'].has_child(group.get_id()))
 
     def testRemoveByIdNotFound(self):
         project = XcodeProject(self.obj)
@@ -157,11 +157,11 @@ class ProjectGroupsTest(unittest.TestCase):
         group = project.get_or_create_group('whatever')
 
         self.assertIsNotNone(group)
-        self.assertNotIn(group._id, self.obj['objects'])
+        self.assertNotIn(group.get_id(), self.obj['objects'])
 
     def testGetOrCreateGroupFound(self):
         project = XcodeProject(self.obj)
         group = project.get_or_create_group('root')
 
         self.assertIsNotNone(group)
-        self.assertIn(group._id, self.obj['objects'])
+        self.assertIn(group.get_id(), self.obj['objects'])

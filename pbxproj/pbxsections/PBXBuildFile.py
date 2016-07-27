@@ -10,7 +10,7 @@ class PBXBuildFile(PBXGenericObject):
 
     def _get_section(self):
         objects = self._parent
-        target = self._id
+        target = self.get_id()
 
         for section in objects._get_keys():
             for obj in objects.get_objects_in_section(section):

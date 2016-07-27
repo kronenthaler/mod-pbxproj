@@ -143,6 +143,9 @@ class PBXGenericObject(object):
 
         return self._parent._resolve_comment(key)
 
+    def get_id(self):
+        return self['_id']
+
     def _get_comment(self):
         if hasattr(self, u'name'):
             return self.name

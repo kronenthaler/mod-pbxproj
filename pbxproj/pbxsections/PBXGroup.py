@@ -42,7 +42,7 @@ class PBXGroup(PBXGenericObject):
 
     def remove(self, recursive=True):
         # remove from the objects reference
-        del self._parent[self._id]
+        del self._parent[self.get_id()]
 
         # remove children if necessary
         if recursive:
