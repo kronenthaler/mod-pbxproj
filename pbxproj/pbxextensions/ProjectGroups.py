@@ -28,8 +28,8 @@ class ProjectGroups:
         if parent is None:
             parent = self.get_groups_by_name(None)[0]
 
-        parent.add_child(group._id)
-        self.objects[group._id] = group
+        parent.add_child(group.get_id())
+        self.objects[group.get_id()] = group
 
         return group
 
@@ -69,7 +69,7 @@ class ProjectGroups:
             return False
 
         for group in groups:
-            if not self.remove_group_by_id(group._id, recursive):
+            if not self.remove_group_by_id(group.get_id(), recursive):
                 return False
 
         return True
@@ -85,7 +85,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_name() == name]
 
         if parent:
-            return [group for group in groups if parent.has_child(group._id)]
+            return [group for group in groups if parent.has_child(group.get_id())]
 
         return groups
 
@@ -101,7 +101,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_path() == path]
 
         if parent:
-            return [group for group in groups if parent.has_child(group._id)]
+            return [group for group in groups if parent.has_child(group.get_id())]
 
         return groups
 

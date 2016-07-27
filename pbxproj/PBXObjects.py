@@ -34,12 +34,12 @@ class objects(PBXGenericObject):
         result = u'{\n'
         for section in self._get_keys():
             phase = self._sections[section]
-            phase.sort(key=lambda x: x._id)
+            phase.sort(key=lambda x: x.get_id())
             result += u'\n/* Begin {0} section */\n'.format(section)
             for value in phase:
                 obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start,
                                           indentation_increment)
-                result += indentation_depth + u'\t{0} = {1};\n'.format(value._id.__repr__(), obj)
+                result += indentation_depth + u'\t{0} = {1};\n'.format(value.get_id().__repr__(), obj)
             result += u'/* End {0} section */\n'.format(section)
         result += indentation_depth + u'}'
         return result
@@ -53,7 +53,7 @@ class objects(PBXGenericObject):
         for section in self._sections.iterkeys():
             phase = self._sections[section]
             for obj in phase:
-                if key == obj._id:
+                if key == obj.get_id():
                     return obj
         return None
 
