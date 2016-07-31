@@ -1,6 +1,6 @@
-from pbxproj import PBXGenericObject
+from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
-class PBXHeadersBuildPhase(PBXGenericObject):
+class PBXHeadersBuildPhase(PBXGenericBuildPhase):
     def _get_comment(self):
         return u'Headers'

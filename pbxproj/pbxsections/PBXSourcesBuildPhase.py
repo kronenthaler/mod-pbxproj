@@ -1,6 +1,6 @@
-from pbxproj import PBXGenericObject
+from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
-class PBXSourcesBuildPhase(PBXGenericObject):
+class PBXSourcesBuildPhase(PBXGenericBuildPhase):
     def _get_comment(self):
         return u'Sources'

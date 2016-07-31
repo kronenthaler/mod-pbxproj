@@ -25,8 +25,7 @@ class ProjectGroups:
         """
         group = PBXGroup.create(name=name, path=path, tree=source_tree)
 
-        if parent is None:
-            parent = self.get_groups_by_name(None)[0]
+        parent = self._get_parent_group(parent)
 
         parent.add_child(group.get_id())
         self.objects[group.get_id()] = group
@@ -109,11 +108,18 @@ class ProjectGroups:
         if not name:
             return None
 
-        if not parent:
-            parent = self.get_groups_by_name(None)[0]
-
         groups = self.get_groups_by_name(name, parent)
         if groups.__len__() > 0:
             return groups[0]
 
         return self.add_group(name, path, parent)
+
+    def _get_parent_group(self, parent):
+        if parent is None:
+            return self.get_groups_by_name(None)[0]
+
+        # it's not a group instance, assume it's an id
+        if not isinstance(parent, PBXGroup):
+            return self.objects[parent]
+
+        return parent
