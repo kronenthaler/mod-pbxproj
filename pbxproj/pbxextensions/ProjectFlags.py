@@ -26,7 +26,7 @@ class ProjectFlags:
         """
         Removes the given flags to the flag_name section of the target on the configurations
         :param flag_name: name of the flag to be removed the values from
-        :param flags: A string or array of strings
+        :param flags: A string or array of strings. If none, removes all values from the flag.
         :param target_name: Target name to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
