@@ -1,7 +1,7 @@
-from pbxproj import PBXGenericObject
+from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
-class PBXShellScriptBuildPhase(PBXGenericObject):
+class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
     @classmethod
     def create(cls, script, shell_path=u"/bin/sh", files=[], input_paths=[], output_paths=[], show_in_log='0'):
         return cls().parse({
