@@ -1,4 +1,5 @@
 from pbxproj.PBXGenericObject import *
+from pbxproj.pbxsections import *
 
 
 class PBXGroup(PBXGenericObject):
@@ -33,12 +34,16 @@ class PBXGroup(PBXGenericObject):
 
         return child in self.children
 
-    def add_child(self, children_id):
-        self.children.append(children_id)
+    def add_child(self, children):
+        # if it's not the right type of children for the group
+        if not isinstance(children, PBXGroup) and not isinstance(children, PBXFileReference):
+            return
 
-    def remove_child(self, children_id):
-        if self.has_child(children_id):
-            self.children.remove(children_id)
+        self.children.append(children.get_id())
+
+    def remove_child(self, children):
+        if self.has_child(children.get_id()):
+            self.children.remove(children.get_id())
 
     def remove(self, recursive=True):
         # remove from the objects reference
