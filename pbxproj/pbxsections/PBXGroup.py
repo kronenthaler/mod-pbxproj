@@ -37,13 +37,17 @@ class PBXGroup(PBXGenericObject):
     def add_child(self, children):
         # if it's not the right type of children for the group
         if not isinstance(children, PBXGroup) and not isinstance(children, PBXFileReference):
-            return
+            return False
 
         self.children.append(children.get_id())
+        return True
 
     def remove_child(self, children):
         if self.has_child(children.get_id()):
             self.children.remove(children.get_id())
+            return True
+
+        return False
 
     def remove(self, recursive=True):
         # remove from the objects reference
@@ -53,10 +57,7 @@ class PBXGroup(PBXGenericObject):
         if recursive:
             for subgroup_id in self.children:
                 subgroup = self._parent[subgroup_id]
-                if subgroup is None:
-                    return False
-
-                if not subgroup.remove(recursive):
+                if subgroup is None or not subgroup.remove(recursive):
                     return False
 
         return True
