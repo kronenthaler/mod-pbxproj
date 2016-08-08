@@ -27,7 +27,7 @@ class ProjectGroups:
 
         parent = self._get_parent_group(parent)
 
-        parent.add_child(group.get_id())
+        parent.add_child(group)
         self.objects[group.get_id()] = group
 
         return group
@@ -48,8 +48,8 @@ class ProjectGroups:
             return False
 
         # remove the reference from any other group object that could be containing it.
-        for group in self.objects.get_objects_in_section(u'PBXGroup'):
-            group.remove_child(group_id)
+        for other_group in self.objects.get_objects_in_section(u'PBXGroup'):
+            other_group.remove_child(group)
 
         return True
 

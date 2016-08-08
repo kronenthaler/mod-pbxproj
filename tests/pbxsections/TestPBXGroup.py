@@ -31,3 +31,8 @@ class PBXGroupTests(unittest.TestCase):
     def testHasChildIncomplete(self):
         group = PBXGroup().parse({'name':'group'})
         self.assertFalse(group.has_child('child1'))
+
+    def testAddInvalidChild(self):
+        group = PBXGroup().parse({'name':'group'})
+        group.add_child(PBXGenericObject().parse({'_id':"not-a-group"}))
+        self.assertFalse(group.has_child('not-a-group'))
