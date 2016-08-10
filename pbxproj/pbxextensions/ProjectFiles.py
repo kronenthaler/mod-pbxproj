@@ -49,8 +49,8 @@ class ProjectFiles:
         u'.xcdatamodeld'
     ]
 
-    def add_file(self, path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False,
-                 ignore_unknown_type=False, target_name=None):
+    def add_file(self, path, parent=None, tree='SOURCE_ROOT', target_name=None, create_build_files=True, weak=False,
+                 ignore_unknown_type=False):
         # returns a list of elements that were added to the project successfully as PBXBuildFile objects
 
         # decide the proper tree and path to add
@@ -75,17 +75,21 @@ class ProjectFiles:
         if not create_build_files:
             return []
 
+        attributes = [u'Weak'] if weak else None
+
         # get target to match the given name or all
         results = []
         for target in self.objects.get_targets(target_name):
             for build_phase_id in target.buildPhases:
                 target_build_phase = self.objects[build_phase_id]
                 if type(target_build_phase).__name__ == build_phase:
-                    build_file = PBXBuildFile.create(file_ref, weak)
+                    build_file = PBXBuildFile.create(file_ref, attributes)
                     target_build_phase.add_build_file(build_file)
                     self.objects[build_file.get_id()] = build_file
 
                     results.append(build_file)
+
+        # todo: check if frameworks need to be added to the embedded copy phase too
 
         # check if there is anything else to do
         if abs_path is None or tree != u'SOURCE_ROOT' or build_phase != u'PBXFrameworksBuildPhase':
