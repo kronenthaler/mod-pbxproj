@@ -119,7 +119,7 @@ class PBXGenericObject(object):
         return None
 
     def __setitem__(self, key, value):
-        if isinstance(value, list):
+        if type(value) == list:
             if value.__len__() == 1:
                 value = value[0]
             if value.__len__() == 0:

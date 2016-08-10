@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from pbxproj.PBXList import PBXList
 from pbxproj.PBXGenericObject import PBXGenericObject
 from pbxproj.PBXObjects import objects
 from pbxproj.PBXRootObject import rootObject
