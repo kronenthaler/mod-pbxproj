@@ -14,11 +14,13 @@ class PBXFileReference(PBXGenericObject):
         })
 
     def set_explicit_file_type(self, file_type):
-        del self[u'lastKnownFileType']
+        if u'lastKnownFileType' in self:
+            del self[u'lastKnownFileType']
         self[u'explicitFileType'] = file_type
 
     def set_last_known_file_type(self, file_type):
-        del self[u'explicitFileType']
+        if u'explicitFileType' in self:
+            del self[u'explicitFileType']
         self[u'lastKnownFileType'] = file_type
 
     def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
