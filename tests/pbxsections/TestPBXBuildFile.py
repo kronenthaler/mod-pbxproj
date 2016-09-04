@@ -84,16 +84,9 @@ class PBXBuildFileTest(unittest.TestCase):
 
         self.assertIsNone(dobj[u'settings'])
 
-    def testRemoveCompilerFlagsWithoutSettings(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=u'x Weak y')
+    def testRemoveCompilerFlagsWithSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=u'Weak')
 
         dobj.remove_compiler_flags('Weak')
-
-        self.assertEquals(dobj.settings.COMPILER_FLAGS, u'x  y')
-
-    def testRemoveCompilerFlagsWithoutSettings(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=u'x Weak y')
-
-        dobj.remove_compiler_flags(['Weak','x','y'])
 
         self.assertIsNone(dobj[u'settings'])
