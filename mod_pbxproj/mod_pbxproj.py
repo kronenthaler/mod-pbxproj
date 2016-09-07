@@ -1413,7 +1413,7 @@ class XcodeProject(PBXDict):
 
     @classmethod
     def addslashes(cls, s):
-        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n"}
+        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n", "\t":"\\t"}
         return ''.join(d.get(c, c) for c in s)
 
     def _printNewXCodeFormat(self, out, root, deep, enters=True, sort=False):
