@@ -2,6 +2,21 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
+    _EMBEDDED_FRAMEWORKS = u'Embed Frameworks'
+
+    @classmethod
+    def create(cls, name=None, files=[], dest_path=u'', dest_subfolder_spec=10):
+        return cls().parse({
+            u'_id': cls._generate_id(),
+            u'isa': cls.__name__,
+            u'name': name,
+            u'files': files,
+            u'buildActionMask': 0x7FFFFFFF,
+            u'dstSubfolderSpec': dest_subfolder_spec,
+            u'dstPath': dest_path,
+            u'runOnlyForDeploymentPostprocessing': 0
+        })
+
     def _get_comment(self):
         comment = super(type(self), self)._get_comment()
         if comment is None:

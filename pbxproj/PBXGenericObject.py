@@ -53,12 +53,14 @@ class PBXGenericObject(object):
 
     def _get_instance(self, type, content):
         # check if the key maps to a kind of object
+        return self._get_class_reference(type)(self).parse(content)
+
+    def _get_class_reference(self, type):
         module = __import__(u'pbxproj')
         if hasattr(module, type):
             class_ = getattr(module, type)
-            return class_(self).parse(content)
-
-        return PBXGenericObject(self).parse(content)
+            return class_
+        return PBXGenericObject
 
     def __repr__(self):
         return self._print_object()

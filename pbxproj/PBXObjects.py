@@ -72,6 +72,9 @@ class objects(PBXGenericObject):
     def __contains__(self, item):
         return self[item] is not None
 
+    def __len__(self):
+        return sum([section.__len__() for section in self._sections])
+
     def get_objects_in_section(self, name):
         if name in self._sections:
             return self._sections[name]
