@@ -3,6 +3,17 @@ from pbxproj.pbxsections import *
 
 
 class PBXGenericBuildPhase(PBXGenericObject):
+    @classmethod
+    def create(cls, name=None, files=[]):
+        return cls().parse({
+            u'_id': cls._generate_id(),
+            u'isa': cls.__name__,
+            u'name': name,
+            u'files': files,
+            u'buildActionMask': 0x7FFFFFFF,
+            u'runOnlyForDeploymentPostprocessing': 0
+        })
+
     def add_build_file(self, build_file):
         if not isinstance(build_file, PBXBuildFile):
             return False

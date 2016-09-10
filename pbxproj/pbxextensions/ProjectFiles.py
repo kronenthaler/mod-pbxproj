@@ -1,6 +1,12 @@
 from pbxproj.pbxsections import *
 
 
+class BuildOptions:
+    CREATE_BUILD_FILE_FLAG = 1
+    WEAK_LINK_FLAG = 1 << 1
+    EMBED_FRAMEWORK = 1 << 2
+
+
 class ProjectFiles:
     _FILE_TYPES = {
         u'.a': (u'archive.ar', u'PBXFrameworksBuildPhase'),
@@ -49,9 +55,20 @@ class ProjectFiles:
         u'.xcdatamodeld'
     ]
 
-    def add_file(self, path, parent=None, tree='SOURCE_ROOT', target_name=None, create_build_files=True, weak=False,
-                 ignore_unknown_type=False):
-        # returns a list of elements that were added to the project successfully as PBXBuildFile objects
+    def __init__(self):
+        raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
+
+    def add_file(self, path, parent=None, tree='SOURCE_ROOT', target_name=None, ignore_unknown_type=False,
+                 options=BuildOptions.CREATE_BUILD_FILE_FLAG|BuildOptions.EMBED_FRAMEWORK):
+        """
+        :param path: Path to the file to be added
+        :param parent: Parent group to be added under
+        :param tree: Tree where the path is relative to
+        :param target_name: Target name where the file should be added (none for every target)
+        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
+        :param options: Bit mask options for the creation of the PBXBuildFile phase.
+        :return: a list of elements that were added to the project successfully as PBXBuildFile objects
+        """
 
         # decide the proper tree and path to add
         abs_path, path, tree = self._get_path_and_tree(path, tree)
@@ -62,7 +79,7 @@ class ProjectFiles:
         file_ref = PBXFileReference.create(path, tree)
 
         # determine the type of the new file:
-        file_type, build_phase = self._determine_file_type(file_ref, unknown_type_allowed=ignore_unknown_type)
+        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, unknown_type_allowed=ignore_unknown_type)
 
         # set the file type on the file ref add the files
         file_ref.set_last_known_file_type(file_type)
@@ -72,38 +89,44 @@ class ProjectFiles:
         self._get_parent_group(parent).add_child(file_ref.get_id())
 
         # no need to create the build_files, done
-        if not create_build_files:
+        if (options & BuildOptions.CREATE_BUILD_FILE_FLAG) == 0:
             return []
 
-        attributes = [u'Weak'] if weak else None
+        attributes = [u'Weak'] if (options & BuildOptions.WEAK_LINK_FLAG) != 0 else None
 
         # get target to match the given name or all
         results = []
         for target in self.objects.get_targets(target_name):
-            for build_phase_id in target.buildPhases:
-                target_build_phase = self.objects[build_phase_id]
-                if type(target_build_phase).__name__ == build_phase:
-                    build_file = PBXBuildFile.create(file_ref, attributes)
-                    target_build_phase.add_build_file(build_file)
-                    self.objects[build_file.get_id()] = build_file
+            # determine if there is a suitable build phase created
+            build_phases = target.get_or_create_build_phase(expected_build_phase)
 
-                    results.append(build_file)
+            # if it's a framework and it needs to be embedded
+            if (options & BuildOptions.EMBED_FRAMEWORK) != 0 and expected_build_phase == u'PBXFrameworksBuildPhase':
+                build_phases.extend(target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase', (PBXCopyFilesBuildPhase._EMBEDDED_FRAMEWORKS,)))
 
-        # todo: check if frameworks need to be added to the embedded copy phase too
+            # create the build file and add it to the phase
+            for target_build_phase in build_phases:
+                build_file = PBXBuildFile.create(file_ref, attributes)
+                self.objects[build_file.get_id()] = build_file
+                target_build_phase.add_build_file(build_file)
 
-        # check if there is anything else to do
-        if abs_path is None or tree != u'SOURCE_ROOT' or build_phase != u'PBXFrameworksBuildPhase':
+                results.append(build_file)
+
+        # special case for the frameworks and libraries to update the search paths
+        if tree != u'SOURCE_ROOT' or not os.path.isabs(file_ref.path):
             return results
 
-        library_path = os.path.join(u'$(SRCROOT)', os.path.split(path)[0])
-        if os.path.isfile(abs_path):
+        # the path is absolute and it's outside the scope of the project for linking purposes
+        library_path = os.path.join(u'$(SRCROOT)', os.path.split(file_ref.path)[0])
+        if os.path.isfile(file_ref.path):
             self.add_library_search_paths([library_path], recursive=False)
         else:
             self.add_framework_search_paths([library_path, u'$(inherited)'], recursive=False)
 
         return results
 
-    def _determine_file_type(self, file_ref, unknown_type_allowed):
+    @classmethod
+    def _determine_file_type(cls, file_ref, unknown_type_allowed):
         ext = os.path.splitext(file_ref.name)[1]
         if os.path.isdir(file_ref.path) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
@@ -113,8 +136,8 @@ class ProjectFiles:
             file_type, build_phase = ProjectFiles._FILE_TYPES.get(ext, (None, u'PBXResourcesBuildPhase'))
 
         if not unknown_type_allowed and file_type is None:
-            raise ValueError(u'Unknown file extension: %s' % os.path.splitext(file_ref.name)[1],\
-                             u'Please add the extension and Xcode type to ProjectFiles._FILE_TYPES')
+            raise ValueError(u'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES'\
+                             .format(os.path.splitext(file_ref.name)[1]))
 
         return file_type, build_phase
 
@@ -125,7 +148,7 @@ class ProjectFiles:
             abs_path = path
 
             if not os.path.exists(path):
-                return None, None
+                return None, None, None
 
             if tree == 'SOURCE_ROOT':
                 path = os.path.relpath(path, self._source_root)
