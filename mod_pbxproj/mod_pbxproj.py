@@ -180,6 +180,7 @@ class PBXFileReference(PBXType):
         '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase'),
         '.xcassets': ('folder.assetcatalog', 'PBXResourcesBuildPhase'),
         '.tbd': ('sourcecode.text-based-dylib-definition', 'PBXFrameworksBuildPhase'),
+        '.storyboardc': ('wrapper.storyboardc', 'PBXResourcesBuildPhase'),
     }
 
     trees = [
@@ -284,6 +285,22 @@ class PBXBuildFile(PBXType):
         flags.append(flag)
 
         self[k_settings][k_attributes] = ' '.join(flags)
+
+    def add_code_sign_on_copy(self):
+        k_settings = 'settings'
+        k_attributes = 'ATTRIBUTES'
+        if k_settings not in self:
+            self[k_settings] = PBXDict()
+        if k_attributes not in self[k_settings]:
+            attrs = PBXList()
+            attrs.add("CodeSignOnCopy")
+            attrs.add("RemoveHeadersOnCopy")
+            self[k_settings][k_attributes]=attrs
+        else:
+            attrs = self[k_settings][k_attributes]
+            attrs.add("CodeSignOnCopy")
+            attrs.add("RemoveHeadersOnCopy")
+        return True
 
     @classmethod
     def Create(cls, file_ref, weak=False):
@@ -453,7 +470,17 @@ class PBXSourcesBuildPhase(PBXBuildPhase):
 
 
 class PBXCopyFilesBuildPhase(PBXBuildPhase):
-    pass
+     @classmethod
+     def Create(cls, buildActionMask):
+         bf = cls()
+         bf.id = cls.GenerateId()
+         bf['buildActionMask'] = str(buildActionMask)
+         bf['dstPath'] = ""
+         bf['dstSubfolderSpec'] = '10'
+         bf['name'] = "Embed Frameworks"
+         bf['runOnlyForDeploymentPostprocessing'] = '0'
+
+         return bf
 
 
 class XCBuildConfiguration(PBXType):
@@ -548,7 +575,7 @@ class XCBuildConfiguration(PBXType):
         return modified
 
     def remove_other_ldflags(self, flags):
-        return self.remove_flag('OTHER_LD_FLAGS', flags)
+        return self.remove_flag('OTHER_LDFLAGS', flags)
 
     # Set a single-valued flag under buildSettings
     def add_single_valued_flag(self, flag, value):
@@ -582,7 +609,7 @@ class XCConfigurationList(PBXType):
 
 class XcodeProject(PBXDict):
     plutil_path = 'plutil'
-    special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld']
+    special_folders = ['.bundle', '.framework', '.xcodeproj', '.xcassets', '.xcdatamodeld', '.storyboardc']
 
     def __init__(self, d=None, path=None):
         if not path:
@@ -697,6 +724,63 @@ class XcodeProject(PBXDict):
 
             if b.remove_single_valued_flag(flag):
                 self.modified = True
+
+    def add_embed_binaries(self, embed_binaries):
+        if len(embed_binaries) > 0:
+            self.modified = True
+            self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Release")
+            self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Debug")
+            for binary in embed_binaries:
+                self.add_embed_framework(binary)
+
+    def add_embed_framework(self,file_name):
+        file_refs = self.get_files_by_name(os.path.basename(file_name))
+        if len(file_refs) > 0:
+            file_ref = file_refs[0]
+            embedPhase = self.add_embed_framework_build_phase()
+            if embedPhase == None:
+                print "AddEmbedFrameworkBuildPhase Failed."
+                return
+            buildFile = PBXBuildFile.Create(file_ref)
+
+            buildFile.add_code_sign_on_copy()
+            self.objects[buildFile.id] = buildFile
+            embedPhase.add_build_file(buildFile)
+        else:
+            print "Embed Framework must added already: " + file_name
+
+    def add_embed_framework_build_phase(self):
+        phase = None
+        naviTarget = self.get_target_by_name("Unity-iPhone")
+        if naviTarget == None :
+            print "Not found Correct NativeTarget."
+            return phase
+        copyBuildPhase = self.get_copy_file_build_phase()
+        for buildPhase in copyBuildPhase:
+            if buildPhase.has_key('name'):
+                Name = buildPhase.get('name')
+                if Name == "Embed Frameworks":
+                    return buildPhase
+        build_action_mask = self.get_build_action_mask()
+        phase = PBXCopyFilesBuildPhase.Create(build_action_mask)
+
+        buildPhases = naviTarget.get("buildPhases")
+        buildPhases.append(phase.id)
+        self.objects[phase.id] = phase
+        return phase
+
+    def get_copy_file_build_phase(self):
+        Ls = [b for b in self.objects.values() if b.get('isa') == 'PBXCopyFilesBuildPhase']
+        return Ls
+
+    def get_build_action_mask(self):
+        build_action_mask = 0
+        copy_file = [b for b in self.objects.values() if b.get('isa') == 'PBXCopyFilesBuildPhase']
+        for obj in copy_file:
+            build_action_mask = obj.get("buildActionMask")
+            break
+        return build_action_mask
+
 
     def get_obj(self, id):
         return self.objects.get(id)
@@ -1329,7 +1413,7 @@ class XcodeProject(PBXDict):
 
     @classmethod
     def addslashes(cls, s):
-        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n"}
+        d = {'"': '\\"', "'": "\\'", "\0": "\\\0", "\\": "\\\\", "\n":"\\n", "\t":"\\t"}
         return ''.join(d.get(c, c) for c in s)
 
     def _printNewXCodeFormat(self, out, root, deep, enters=True, sort=False):
