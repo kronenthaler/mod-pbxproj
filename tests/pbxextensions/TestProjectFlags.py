@@ -6,11 +6,13 @@ class ProjectFlagsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3', 'buildPhases': ['compile']},
-                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4', 'buildPhases': ['compile']},
+                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
+                      'buildPhases': ['compile']},
+                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
-                '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'} },
+                '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'}},
                 '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
                 '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
                 '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
@@ -23,7 +25,7 @@ class ProjectFlagsTest(unittest.TestCase):
 
     def testAddFlags(self):
         project = XcodeProject(self.obj)
-        project.add_flags('flag','-flag')
+        project.add_flags('flag', '-flag')
 
         self.assertEqual(project.objects['5'].buildSettings.flag, '-flag')
         self.assertEqual(project.objects['6'].buildSettings.flag, '-flag')

@@ -10,6 +10,7 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups, 
     the project's content, add/remove files, add/remove libraries/frameworks, query sections. For more advanced
     operations, underlying objects are exposed that can be manipulated using said objects.
     """
+
     def __init__(self, tree=None, path=None):
         self._parent = None
 

@@ -19,4 +19,3 @@ class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
 
     def _get_comment(self):
         return u'ShellScript'
-

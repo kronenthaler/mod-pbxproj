@@ -15,4 +15,3 @@ class PBXKey(unicode):
 
     def _get_comment(self):
         return self._parent._resolve_comment(self)
-

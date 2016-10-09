@@ -27,7 +27,8 @@ class PBXGenericObjectTest(unittest.TestCase):
 
     def testEscapeItem(self):
         self.assertEqual(PBXGenericObject._escape("/bin/sh"), "/bin/sh")
-        self.assertEqual(PBXGenericObject._escape("abcdefghijklmnopqrstuvwyz0123456789"), "abcdefghijklmnopqrstuvwyz0123456789")
+        self.assertEqual(PBXGenericObject._escape("abcdefghijklmnopqrstuvwyz0123456789"),
+                         "abcdefghijklmnopqrstuvwyz0123456789")
         self.assertEqual(PBXGenericObject._escape("some spaces"), '"some spaces"')
         self.assertEqual(PBXGenericObject._escape("a.valid_id."), "a.valid_id.")
         self.assertEqual(PBXGenericObject._escape("a-invalid-id"), '"a-invalid-id"')

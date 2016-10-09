@@ -7,11 +7,13 @@ class ProjectFilesTest(unittest.TestCase):
         self.obj = {
             'objects': {
                 '0': {'isa': 'PBXGroup', 'children': [], 'sourceTree': "<group>"},
-                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3', 'buildPhases': ['compile']},
-                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4', 'buildPhases': ['compile']},
+                '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
+                      'buildPhases': ['compile']},
+                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
-                '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'} },
+                '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'}},
                 '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
                 '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
                 '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
@@ -103,3 +105,14 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(project.objects[build_file[1].fileRef].sourceTree, '<absolute>')
         self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, '<absolute>')
         self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, '<absolute>')
+
+    def testAddFileIfExists(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file_if_doesnt_exist("file.m")
+
+        # 2 source files are created 1 x target
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 2)
+        self.assertEqual(build_file.__len__(), 2)
+
+        build_file = project.add_file_if_doesnt_exist("file.m")
+        self.assertEqual(build_file, [])

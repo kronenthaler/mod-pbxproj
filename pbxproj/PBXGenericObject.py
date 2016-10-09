@@ -65,18 +65,22 @@ class PBXGenericObject(object):
     def __repr__(self):
         return self._print_object()
 
-    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
+                      indentation_increment=u'\t'):
         ret = u'{' + object_start
 
         for key in self._get_keys():
-            value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start, indentation_increment)
+            value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start,
+                                 indentation_increment)
 
             # use key decorators, could simplify the generation of the comments.
-            ret += indentation_depth + u'{3}{0} = {1};{2}'.format(PBXGenericObject._escape(key), value, entry_separator, indentation_increment)
+            ret += indentation_depth + u'{3}{0} = {1};{2}'.format(PBXGenericObject._escape(key), value, entry_separator,
+                                                                  indentation_increment)
         ret += indentation_depth + u'}'
         return ret
 
-    def _print_list(self, obj, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+    def _print_list(self, obj, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
+                    indentation_increment=u'\t'):
         ret = u'(' + object_start
         for item in obj:
             value = self._format(item, indentation_depth, entry_separator, object_start, indentation_increment)
@@ -85,7 +89,8 @@ class PBXGenericObject(object):
         ret += indentation_depth + u')'
         return ret
 
-    def _format(self, value, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n', indentation_increment=u'\t'):
+    def _format(self, value, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
+                indentation_increment=u'\t'):
         if hasattr(value, u'_print_object'):
             value = value._print_object(indentation_depth + indentation_increment,
                                         entry_separator,

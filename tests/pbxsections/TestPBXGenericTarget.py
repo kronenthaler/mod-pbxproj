@@ -7,7 +7,7 @@ class PBXGenericTargetTest(unittest.TestCase):
     def testGetBuildPhase(self):
         project = XcodeProject({
             "objects": {
-                "1": {"isa": "PBXGenericTarget", "buildPhases":["2"] },
+                "1": {"isa": "PBXGenericTarget", "buildPhases": ["2"]},
                 "2": {"isa": "PBXGenericBuildPhase"}
             }
         })
