@@ -165,3 +165,16 @@ class ProjectGroupsTest(unittest.TestCase):
 
         self.assertIsNotNone(group)
         self.assertIn(group.get_id(), self.obj['objects'])
+
+    def testGetParentGroupCreateDefault(self):
+        project = XcodeProject({'objects':{}})
+        group = project._get_parent_group(None)
+
+        self.assertIsNotNone(group)
+        self.assertEqual(project.objects[group.get_id()], group)
+
+    def testGetParentGroupWithID(self):
+        project = XcodeProject(self.obj)
+        parent = project._get_parent_group('5p')
+
+        self.assertEqual(parent, project.objects['5p'])
