@@ -45,7 +45,7 @@ class ProjectFilesTest(unittest.TestCase):
     def testAddFileNoCreateBuildFiles(self):
         project = XcodeProject(self.obj)
         items = project.objects.__len__()
-        build_file = project.add_file(".", options=~BuildOptions.CREATE_BUILD_FILE_FLAG)
+        build_file = project.add_file(".", create_build_files=False)
 
         # no create build file flag
         self.assertGreater(project.objects.__len__(), items)
@@ -61,9 +61,45 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileFrameworkEmbedded(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file("file.framework", options=BuildOptions.WEAK_LINK_FLAG|BuildOptions.CREATE_BUILD_FILE_FLAG|BuildOptions.EMBED_FRAMEWORK)
+        build_file = project.add_file("file.framework", create_build_files=True, weak=True, embed_framework=True)
 
         # 2 source files are created 1 x target
         self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 4)
+
+    def testAddFileFrameworkWithAbsolutePath(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file(os.path.abspath("samples/test.framework"))
+
+        expected_flags = ["$(SRCROOT)/tests/samples", "$(inherited)"]
+        self.assertListEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
+        self.assertListEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
+        self.assertListEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
+        self.assertListEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
+
+    def testAddFileLibraryWithAbsolutePath(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file(os.path.abspath("samples/testLibrary.a"))
+
+        expected_flags = "$(SRCROOT)/tests/samples"
+        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
+        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
+        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
+        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
+
+    def testAddFileWithAbsolutePathDoesNotExist(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file(os.path.abspath("samples/unexistingFile.m"))
+
+        # nothing to do if the file is absolute but doesn't exist
+        self.assertListEqual(build_file, [])
+
+    def testAddFileWithAbsolutePathOnUnknownTree(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file(os.path.abspath("samples/test.framework"), tree='DEVELOPER_DIR')
+
+        self.assertEqual(project.objects[build_file[0].fileRef].sourceTree, '<absolute>')
+        self.assertEqual(project.objects[build_file[1].fileRef].sourceTree, '<absolute>')
+        self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, '<absolute>')
+        self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, '<absolute>')

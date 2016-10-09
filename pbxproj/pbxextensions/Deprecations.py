@@ -23,7 +23,7 @@ def deprecated(func):
 
 class Deprecations:
     """
-    This class contains all methods that will be deprecated on the near future.
+    This class contains all methods that will be deprecated in the near future.
     It provides a compatibility layer meanwhile using old methods signatures as an alias of the new version available.
     """
 

@@ -1,10 +1,13 @@
 from pbxproj.pbxsections import *
 
 
-class BuildOptions:
-    CREATE_BUILD_FILE_FLAG = 1
-    WEAK_LINK_FLAG = 1 << 1
-    EMBED_FRAMEWORK = 1 << 2
+class TreeType:
+    ABSOLUTE = u'<absolute>'
+    GROUP = u'<group>'
+    BUILT_PRODUCT_DIR = u'BUILT_PRODUCTS_DIR'
+    DEVELOPER_DIR = u'DEVELOPER_DIR'
+    SDKROOT = u'SDKROOT'
+    SOURCE_ROOT = u'SOURCE_ROOT'
 
 
 class ProjectFiles:
@@ -39,14 +42,6 @@ class ProjectFiles:
         u'.xcassets': (u'folder.assetcatalog', u'PBXResourcesBuildPhase'),
         u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
     }
-    _TREES = [
-        u'<absolute>',
-        u'<group>',
-        u'BUILT_PRODUCTS_DIR',
-        u'DEVELOPER_DIR',
-        u'SDKROOT',
-        u'SOURCE_ROOT',
-    ]
     _SPECIAL_FOLDERS = [
         u'.bundle',
         u'.framework',
@@ -58,15 +53,17 @@ class ProjectFiles:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_file(self, path, parent=None, tree='SOURCE_ROOT', target_name=None, ignore_unknown_type=False,
-                 options=BuildOptions.CREATE_BUILD_FILE_FLAG|BuildOptions.EMBED_FRAMEWORK):
+    def add_file(self, path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False,
+                 ignore_unknown_type=False, target_name=None, embed_framework=True):
         """
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param target_name: Target name where the file should be added (none for every target)
+        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
+        :param weak: When adding a framework set it as a weak reference
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
-        :param options: Bit mask options for the creation of the PBXBuildFile phase.
+        :param target_name: Target name where the file should be added (none for every target)
+        :param embed_framework: When adding a framework sets the embed section
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
 
@@ -89,10 +86,10 @@ class ProjectFiles:
         self._get_parent_group(parent).add_child(file_ref.get_id())
 
         # no need to create the build_files, done
-        if (options & BuildOptions.CREATE_BUILD_FILE_FLAG) == 0:
+        if not create_build_files:
             return []
 
-        attributes = [u'Weak'] if (options & BuildOptions.WEAK_LINK_FLAG) != 0 else None
+        attributes = [u'Weak'] if weak else None
 
         # get target to match the given name or all
         results = []
@@ -101,7 +98,7 @@ class ProjectFiles:
             build_phases = target.get_or_create_build_phase(expected_build_phase)
 
             # if it's a framework and it needs to be embedded
-            if (options & BuildOptions.EMBED_FRAMEWORK) != 0 and expected_build_phase == u'PBXFrameworksBuildPhase':
+            if embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase':
                 build_phases.extend(target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase', (PBXCopyFilesBuildPhase._EMBEDDED_FRAMEWORKS,)))
 
             # create the build file and add it to the phase
@@ -113,12 +110,12 @@ class ProjectFiles:
                 results.append(build_file)
 
         # special case for the frameworks and libraries to update the search paths
-        if tree != u'SOURCE_ROOT' or not os.path.isabs(file_ref.path):
+        if tree != TreeType.SOURCE_ROOT or abs_path is None:
             return results
 
         # the path is absolute and it's outside the scope of the project for linking purposes
         library_path = os.path.join(u'$(SRCROOT)', os.path.split(file_ref.path)[0])
-        if os.path.isfile(file_ref.path):
+        if os.path.isfile(abs_path):
             self.add_library_search_paths([library_path], recursive=False)
         else:
             self.add_framework_search_paths([library_path, u'$(inherited)'], recursive=False)
@@ -150,9 +147,9 @@ class ProjectFiles:
             if not os.path.exists(path):
                 return None, None, None
 
-            if tree == 'SOURCE_ROOT':
+            if tree == TreeType.SOURCE_ROOT:
                 path = os.path.relpath(path, self._source_root)
             else:
-                tree = '<absolute>'
+                tree = TreeType.ABSOLUTE
 
         return abs_path, path, tree

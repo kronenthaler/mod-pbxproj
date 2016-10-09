@@ -116,7 +116,15 @@ class ProjectGroups:
 
     def _get_parent_group(self, parent):
         if parent is None:
-            return self.get_groups_by_name(None)[0]
+            parent = self.get_groups_by_name(None)
+
+            # if there is no parent, create and empty parent group, add it to the objects
+            if parent.__len__() > 0:
+                return parent[0]
+
+            parent = PBXGroup.create(path=None, name=None)
+            self.objects[parent.get_id()] = parent
+            return parent
 
         # it's not a group instance, assume it's an id
         if not isinstance(parent, PBXGroup):
