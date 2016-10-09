@@ -11,7 +11,7 @@ class XCConfigurationList(PBXGenericObject):
         target = self.get_id()
 
         for obj in objects.get_objects_in_section(u'PBXNativeTarget') + \
-                          objects.get_objects_in_section(u'PBXAggregateTarget'):
+                objects.get_objects_in_section(u'PBXAggregateTarget'):
             if target in obj.buildConfigurationList:
                 return obj.isa, obj.name
 

@@ -12,7 +12,7 @@ def deprecated(func):
     def new_func(*args, **kwargs):
         warnings.filterwarnings('default', category=DeprecationWarning)
         warnings.warn("Call to deprecated function {}.".format(func.__name__),
-            category=DeprecationWarning)
+                      category=DeprecationWarning)
         return func(*args, **kwargs)
 
     new_func.__name__ = func.__name__
@@ -60,5 +60,3 @@ class Deprecations:
     def remove_flags(self, pairs, configuration='All'):
         for flag_name in pairs:
             self.remove_flags(flag_name, pairs[flag_name], target_name=None, configuration_name=configuration)
-
-

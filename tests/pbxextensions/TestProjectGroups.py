@@ -6,8 +6,8 @@ class ProjectGroupsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                'root': {'isa': 'PBXGroup', 'children': ['1','1p']},
-                '1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2','3']},
+                'root': {'isa': 'PBXGroup', 'children': ['1', '1p']},
+                '1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2', '3']},
                 '2': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
                 '3': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
                 '4': {'isa': 'PBXGroup', 'name': 'root', 'children': ['5', '6']},
@@ -167,7 +167,7 @@ class ProjectGroupsTest(unittest.TestCase):
         self.assertIn(group.get_id(), self.obj['objects'])
 
     def testGetParentGroupCreateDefault(self):
-        project = XcodeProject({'objects':{}})
+        project = XcodeProject({'objects': {}})
         group = project._get_parent_group(None)
 
         self.assertIsNotNone(group)

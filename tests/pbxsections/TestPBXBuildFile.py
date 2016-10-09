@@ -17,7 +17,7 @@ class PBXBuildFileTest(unittest.TestCase):
             'objects': {
                 '1': {"isa": "PBXBuildFile", "name": "something", 'fileRef': 'FDDF6A571C68E5B100D7A645'},
                 'FDDF6A571C68E5B100D7A645': {'isa': 'PBXFileReference', "name": "real name"},
-                "X": {'isa':'phase', 'name': 'X', 'files': ['1'] }
+                "X": {'isa': 'phase', 'name': 'X', 'files': ['1']}
             }
         }
         dobj = XcodeProject().parse(obj)
@@ -45,7 +45,7 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.add_attributes(u'Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, [u'x',u'Weak'])
+        self.assertEquals(dobj.settings.ATTRIBUTES, [u'x', u'Weak'])
 
     def testRemoveAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
