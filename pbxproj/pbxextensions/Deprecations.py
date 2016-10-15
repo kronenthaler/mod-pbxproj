@@ -60,3 +60,22 @@ class Deprecations:
     def remove_flags(self, pairs, configuration='All'):
         for flag_name in pairs:
             self.remove_flags(flag_name, pairs[flag_name], target_name=None, configuration_name=configuration)
+
+    @deprecated
+    def get_groups_by_os_path(self, path):
+        return self.get_groups_by_path(path)
+
+    @deprecated
+    def get_files_by_os_path(self, os_path, tree='SOURCE_ROOT'):
+        return self.get_files_by_path(os_path, tree)
+
+    @deprecated
+    def remove_file(self, id, recursive=True):
+        return self.remove_file_by_id(id)
+
+    @deprecated
+    def get_file_id_by_path(self, f_path):
+        file_ref = self.get_file_id_by_path(f_path)[0]
+        if file_ref is not None:
+            return file_ref.get_id()
+        return None
