@@ -1,4 +1,5 @@
 from pbxproj.PBXGenericObject import *
+from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXGenericTarget(PBXGenericObject):
@@ -25,4 +26,10 @@ class PBXGenericTarget(PBXGenericObject):
         self.buildPhases.insert(position, build_phase.get_id())
 
     def remove_build_phase(self, build_phase):
-        self.buildPhases.remove(build_phase)
+        if not isinstance(build_phase, PBXGenericBuildPhase):
+            return False
+
+        self.buildPhases.remove(build_phase.get_id())
+        del self._parent[build_phase.get_id()]
+
+        return True

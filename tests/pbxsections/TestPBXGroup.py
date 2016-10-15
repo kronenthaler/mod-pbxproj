@@ -34,5 +34,6 @@ class PBXGroupTests(unittest.TestCase):
 
     def testAddInvalidChild(self):
         group = PBXGroup().parse({'name': 'group'})
-        group.add_child(PBXGenericObject().parse({'_id': "not-a-group"}))
-        self.assertFalse(group.has_child('not-a-group'))
+        invalid_group = PBXGenericObject().parse({'_id': "not-a-group"})
+        group.add_child(invalid_group)
+        self.assertFalse(group.has_child(invalid_group))

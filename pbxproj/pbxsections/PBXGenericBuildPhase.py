@@ -20,3 +20,12 @@ class PBXGenericBuildPhase(PBXGenericObject):
 
         self.files.append(build_file.get_id())
         return True
+
+    def remove_build_file(self, build_file):
+        if not isinstance(build_file, PBXBuildFile):
+            return False
+
+        self.files.remove(build_file.get_id())
+        del self._parent[build_file.get_id()]
+
+        return True

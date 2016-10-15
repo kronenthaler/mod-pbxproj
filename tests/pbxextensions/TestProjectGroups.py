@@ -68,13 +68,13 @@ class ProjectGroupsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group")
 
-        self.assertTrue(project.objects['root'].has_child(group.get_id()))
+        self.assertTrue(project.objects['root'].has_child(group))
 
     def testAddGroupToParent(self):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group", parent=project.objects['1'])
 
-        self.assertTrue(project.objects['1'].has_child(group.get_id()))
+        self.assertTrue(project.objects['1'].has_child(group))
 
     def testRemoveByIdNotFound(self):
         project = XcodeProject(self.obj)
@@ -83,20 +83,22 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByIdRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
         result = project.remove_group_by_id('1', recursive=True)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child(group1))
         self.assertIsNone(project.objects['1'])
         self.assertIsNone(project.objects['2'])
         self.assertIsNone(project.objects['3'])
 
     def testRemoveByIdNonRecursive(self):
         project = XcodeProject(self.obj)
+        group = project.objects['1']
         result = project.remove_group_by_id('1', recursive=False)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child(group))
         self.assertIsNone(project.objects['1'])
         self.assertIsNotNone(project.objects['2'])
         self.assertIsNotNone(project.objects['3'])
@@ -108,11 +110,13 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByNameRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
+        group1p = project.objects['1p']
         result = project.remove_group_by_name('root', recursive=True)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
-        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertFalse(project.objects['root'].has_child(group1))
+        self.assertFalse(project.objects['root'].has_child(group1p))
         self.assertIsNone(project.objects['1'])
         self.assertIsNone(project.objects['2'])
         self.assertIsNone(project.objects['3'])
@@ -122,11 +126,13 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByNameNonRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
+        group1p = project.objects['1p']
         result = project.remove_group_by_name('root', recursive=False)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
-        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertFalse(project.objects['root'].has_child(group1))
+        self.assertFalse(project.objects['root'].has_child(group1p))
         self.assertIsNone(project.objects['1'])
         self.assertIsNotNone(project.objects['2'])
         self.assertIsNotNone(project.objects['3'])

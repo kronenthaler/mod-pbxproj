@@ -118,10 +118,11 @@ class ProjectFlags:
         :return:
         """
         for target in self.objects.get_targets(target_name):
-            for buildPhase in target.buildPhases:
-                if not isinstance(self.objects[buildPhase], PBXShellScriptBuildPhase):
+            for build_phase_id in target.buildPhases:
+                build_phase = self.objects[build_phase_id]
+                if not isinstance(build_phase, PBXShellScriptBuildPhase):
                     continue
 
-                if self.objects[buildPhase].shellScript == script:
-                    del self.objects[buildPhase]
-                    target.remove_build_phase(buildPhase)
+                if build_phase.shellScript == script:
+                    del self.objects[build_phase_id]
+                    target.remove_build_phase(build_phase)

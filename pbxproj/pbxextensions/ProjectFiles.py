@@ -151,22 +151,102 @@ class ProjectFiles:
                              embed_framework)
 
     def get_file_by_id(self, id):
-        files = self.objects.get_objects_in_section(u'PBXFileReference')
-        return files[id]
+        """
+        Gets the PBXFileReference to the given id
+        :param id: Identifier of the PBXFileReference to be retrieved.
+        :return: A PBXFileReference if the id is found, None otherwise.
+        """
+        file_ref = self.objects[id]
+        if not isinstance(file_ref, PBXFileReference):
+            return None
+        return file_ref
 
-    def get_file_by_name(self, name, parent=None):
-        pass
+    def get_files_by_name(self, name, parent=None):
+        """
+        Gets all the files references that have the given name, under the especified parent PBXGroup object or
+        PBXGroup id.
+        :param name: name of the file to be retrieved
+        :param parent: PBXGroup that should be used to narrow the search or None to retrieve files from all project
+        :return: List of all PBXFileReference that match the name and parent criteria.
+        """
+        if parent is not None:
+            parent = self._get_parent_group(parent)
 
-    def get_file_by_path(self, path, tree=TreeType.SOURCE_ROOT):
-        pass
+        files = []
+        for file in self.objects.get_objects_in_section(u'PBXFileReference'):
+            if file.name == name and (parent is None or parent.has_child(file.get_id())):
+                files.append(file)
 
-    def remove_file_by_id(self, id, recursive=True):
-        pass
+        return files
 
-    def remove_file_by_path(self, path, recursive=True):
-        pass
+    def get_files_by_path(self, path, tree=TreeType.SOURCE_ROOT):
+        """
+        Gets the files under the given tree type that match the given path.
+        :param path: Path to the file relative to the tree root
+        :param tree: Tree type to look for the path. By default the SOURCE_ROOT
+        :return: List of all PBXFileReference that match the path and tree criteria.
+        """
+        files = []
+        for file in self.objects.get_objects_in_section(u'PBXFileReference'):
+            if file.path == path and file.sourceTree == tree:
+                files.append(file)
 
-    # miscellaneous functions, candidates to be extracted and decouple implemenation
+        return files
+
+    def remove_file_by_id(self, id, target_name=None):
+        """
+        Removes the file id from given target name. If no target name is given, the file is removed
+        from all targets
+        :param id: identifier of the file to be removed
+        :param target_name: The target name to remove the file from, if None, it's removed from all targets.
+        :return: True if the file id was removed. False if the file was not removed.
+        """
+
+        file_ref = self.get_file_by_id(id)
+        if file_ref is None:
+            return False
+
+        for target in self.objects.get_targets(target_name):
+            build_phases = list(target.buildPhases)
+            for build_phase_id in build_phases:
+                build_phase = self.objects[build_phase_id]
+
+                build_files = list(build_phase.files)
+                for build_file_id in build_files:
+                    build_file = self.objects[build_file_id]
+
+                    if build_file.fileRef == file_ref.get_id():
+                        # remove the build file from the phase
+                        build_phase.remove_build_file(build_file)
+
+                # if the build_phase is empty remove it too
+                if build_phase.files.__len__() == 0:
+                    # remove the build phase from the target
+                    target.remove_build_phase(build_phase)
+
+        # remove it iff it's removed from all targets or no build file reference it
+        for build_file in self.objects.get_objects_in_section(u'PBXBuildFile'):
+            if build_file.fileRef == file_ref.get_id():
+                return True
+
+        # the file is not referenced in any build file, remove it
+        del self.objects[file_ref.get_id()]
+        return True
+
+    def remove_files_by_path(self, path, tree=TreeType.SOURCE_ROOT):
+        """
+        Removes all files for the given path under the same tree
+        :param path: Path to the file relative to the tree root
+        :param tree: Tree type to look for the path. By default the SOURCE_ROOT
+        :return: True if all the files were removed without problems. False if at least one file failed.
+        """
+        result = True
+        for file_ref in self.get_files_by_path(path, tree):
+            result &= self.remove_file_by_id(file_ref.get_id())
+
+        return result
+
+    # miscellaneous functions, candidates to be extracted and decouple implementation
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
         ext = os.path.splitext(file_ref.name)[1]
