@@ -6,9 +6,9 @@ class ProjectFilesTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                '0': {'isa': 'PBXGroup', 'children': [], 'sourceTree': "<group>"},
+                '0': {'isa': 'PBXGroup', 'children': ['group1'], 'sourceTree': "<group>"},
                 '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
-                      'buildPhases': ['compile']},
+                      'buildPhases': ['compile1']},
                 '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
                       'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
@@ -17,6 +17,18 @@ class ProjectFilesTest(unittest.TestCase):
                 '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
                 '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
                 '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                # groups
+                'group1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['group2', 'group3']},
+                'group2': {'isa': 'PBXGroup', 'name': 'app', 'children': ['file1', 'file2']},
+                'group3': {'isa': 'PBXGroup', 'name': 'app', 'children': ['file3', 'group4']},
+                'group4': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
+                'file1': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SOURCE_ROOT'},
+                'file2': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SOURCE_ROOT'},
+                'file3': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SDKROOT'},
+                'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
+                'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
+                'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
+                'compile1': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file2']}
             }
         }
 
@@ -50,7 +62,7 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file(".", create_build_files=False)
 
         # no create build file flag
-        self.assertGreater(project.objects.__len__(), items)
+        self.assertEqual(project.objects.__len__(), items)
         self.assertEqual(build_file, [])
 
     def testAddFileSource(self):
@@ -116,3 +128,69 @@ class ProjectFilesTest(unittest.TestCase):
 
         build_file = project.add_file_if_doesnt_exist("file.m")
         self.assertEqual(build_file, [])
+
+    def testGetFilesByNameWithNoParent(self):
+        project = XcodeProject(self.obj)
+        files = project.get_files_by_name('file')
+
+        self.assertEqual(files.__len__(), 3)
+
+    def testGetFilesByNameWithParent(self):
+        project = XcodeProject(self.obj)
+
+        files = project.get_files_by_name('file', 'group2')
+        self.assertEqual(files.__len__(), 2)
+
+        files = project.get_files_by_name('file', 'group3')
+        self.assertEqual(files.__len__(), 1)
+
+    def testGetFileByPathWithNoTree(self):
+        project = XcodeProject(self.obj)
+
+        files = project.get_files_by_path('file')
+        self.assertEqual(files.__len__(), 2)
+
+    def testGetFileByPathWithTree(self):
+        project = XcodeProject(self.obj)
+
+        files = project.get_files_by_path('file', TreeType.SDKROOT)
+        self.assertEqual(files.__len__(), 1)
+
+    def testRemoveFileById(self):
+        project = XcodeProject(self.obj)
+        original = project.__str__()
+        build_files = project.add_file("file.m")
+
+        file = project.get_files_by_name('file.m')[0]
+        result = project.remove_file_by_id(file.get_id())
+
+        self.assertTrue(result)
+        self.assertEqual(project.__str__(), original)
+
+    def testRemoveFileByIdFromTarget(self):
+        project = XcodeProject(self.obj)
+        build_files = project.add_file("file.m")
+
+        file = project.get_files_by_name('file.m')[0]
+        result = project.remove_file_by_id(file.get_id(), target_name='report')
+
+        self.assertTrue(result)
+        self.assertIsNotNone(project.objects[file.get_id()])
+        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 3)
+        self.assertEqual(project.objects.get_objects_in_section('PBXSourcesBuildPhase').__len__(), 1)
+
+    def testRemoveFileByIdOnlyFiles(self):
+        project = XcodeProject(self.obj)
+        result = project.remove_file_by_id('group1')
+
+        self.assertFalse(result)
+
+    def testRemoveFilesByName(self):
+        project = XcodeProject(self.obj)
+        original = project.__str__()
+        build_files = project.add_file("file.m")
+
+        result = project.remove_files_by_path('file.m')
+
+        self.assertTrue(result)
+        self.assertEqual(project.__str__(), original)

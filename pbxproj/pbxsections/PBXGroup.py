@@ -29,22 +29,30 @@ class PBXGroup(PBXGenericObject):
         return None
 
     def has_child(self, child):
+        """
+        Checks if the given child id
+        :param child: The id to check if it's a child of the group
+        :return: True if the given id it's a child of this group, False otherwise
+        """
         if u'children' not in self:
             return False
 
+        if not isinstance(child, basestring):
+            child = child.get_id()
+
         return child in self.children
 
-    def add_child(self, children):
+    def add_child(self, child):
         # if it's not the right type of children for the group
-        if not isinstance(children, PBXGroup) and not isinstance(children, PBXFileReference):
+        if not isinstance(child, PBXGroup) and not isinstance(child, PBXFileReference):
             return False
 
-        self.children.append(children.get_id())
+        self.children.append(child.get_id())
         return True
 
-    def remove_child(self, children):
-        if self.has_child(children.get_id()):
-            self.children.remove(children.get_id())
+    def remove_child(self, child):
+        if self.has_child(child):
+            self.children.remove(child.get_id())
             return True
 
         return False

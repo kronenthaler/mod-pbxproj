@@ -84,7 +84,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_name() == name]
 
         if parent:
-            return [group for group in groups if parent.has_child(group.get_id())]
+            return [group for group in groups if parent.has_child(group)]
 
         return groups
 
@@ -100,7 +100,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_path() == path]
 
         if parent:
-            return [group for group in groups if parent.has_child(group.get_id())]
+            return [group for group in groups if parent.has_child(group)]
 
         return groups
 

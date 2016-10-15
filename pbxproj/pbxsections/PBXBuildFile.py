@@ -62,7 +62,7 @@ class PBXBuildFile(PBXGenericObject):
     def remove_attributes(self, attributes):
         if u'settings' not in self or u'ATTRIBUTES' not in self.settings:
             # nothing to remove
-            return
+            return False
 
         if not isinstance(attributes, list):
             attributes = [attributes]
@@ -70,7 +70,7 @@ class PBXBuildFile(PBXGenericObject):
         for attribute in self.settings.ATTRIBUTES:
             self.settings.ATTRIBUTES.remove(attribute)
 
-        self._clean_up_settings()
+        return self._clean_up_settings()
 
     def add_compiler_flags(self, compiler_flags):
         if isinstance(compiler_flags, list):
@@ -88,7 +88,7 @@ class PBXBuildFile(PBXGenericObject):
     def remove_compiler_flags(self, compiler_flags):
         if u'settings' not in self or u'COMPILER_FLAGS' not in self.settings:
             # nothing to remove
-            return
+            return False
 
         if not isinstance(compiler_flags, list):
             compiler_flags = [compiler_flags]
@@ -96,7 +96,8 @@ class PBXBuildFile(PBXGenericObject):
         for flag in compiler_flags:
             self.settings[u'COMPILER_FLAGS'] = self.settings[u'COMPILER_FLAGS'].replace(flag, u'')
         self.settings[u'COMPILER_FLAGS'] = self.settings[u'COMPILER_FLAGS'].strip()
-        self._clean_up_settings()
+
+        return self._clean_up_settings()
 
     def _clean_up_settings(self):
         # no attributes remain, remove the element
@@ -109,3 +110,5 @@ class PBXBuildFile(PBXGenericObject):
 
         if self.settings._get_keys().__len__() == 0:
             del self[u'settings']
+
+        return True

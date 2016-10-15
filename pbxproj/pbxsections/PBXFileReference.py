@@ -27,3 +27,4 @@ class PBXFileReference(PBXGenericObject):
                       indentation_increment=u'\t'):
         return super(type(self), self)._print_object(u'', entry_separator=u' ', object_start=u'',
                                                      indentation_increment=u'')
+

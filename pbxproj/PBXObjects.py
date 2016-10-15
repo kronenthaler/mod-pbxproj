@@ -66,8 +66,13 @@ class objects(PBXGenericObject):
 
     def __delitem__(self, key):
         obj = self[key]
-        phase = self._sections[obj.isa]
-        phase.remove(obj)
+        if obj is not None:
+            phase = self._sections[obj.isa]
+            phase.remove(obj)
+
+            # remove empty phases
+            if phase.__len__() == 0:
+                del self._sections[obj.isa]
 
     def __contains__(self, item):
         return self[item] is not None
@@ -75,9 +80,10 @@ class objects(PBXGenericObject):
     def __len__(self):
         return sum([section.__len__() for section in self._sections])
 
-    def get_objects_in_section(self, name):
-        if name in self._sections:
-            return self._sections[name]
+    def get_objects_in_section(self, *sections):
+        for name in sections:
+            if name in self._sections:
+                return self._sections[name]
         return []
 
     def get_targets(self, name=None):
