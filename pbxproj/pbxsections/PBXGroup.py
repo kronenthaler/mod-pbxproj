@@ -4,11 +4,11 @@ from pbxproj.pbxsections import *
 
 class PBXGroup(PBXGenericObject):
     @classmethod
-    def create(cls, path=None, name=None, tree=u'<group>', children=[]):
+    def create(cls, path=None, name=None, tree=u'<group>', children=None):
         return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
-            u'children': children,
+            u'children': children if children else [],
             u'name': name,
             u'path': path,
             u'sourceTree': tree

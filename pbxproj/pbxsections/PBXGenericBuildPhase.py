@@ -4,12 +4,12 @@ from pbxproj.pbxsections import *
 
 class PBXGenericBuildPhase(PBXGenericObject):
     @classmethod
-    def create(cls, name=None, files=[]):
+    def create(cls, name=None, files=None):
         return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
             u'name': name,
-            u'files': files,
+            u'files': files if files else [],
             u'buildActionMask': 0x7FFFFFFF,
             u'runOnlyForDeploymentPostprocessing': 0
         })

@@ -5,12 +5,12 @@ class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
     _EMBEDDED_FRAMEWORKS = u'Embed Frameworks'
 
     @classmethod
-    def create(cls, name=None, files=[], dest_path=u'', dest_subfolder_spec=10):
+    def create(cls, name=None, files=None, dest_path=u'', dest_subfolder_spec=10):
         return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
             u'name': name,
-            u'files': files,
+            u'files': files if files else [],
             u'buildActionMask': 0x7FFFFFFF,
             u'dstSubfolderSpec': dest_subfolder_spec,
             u'dstPath': dest_path,

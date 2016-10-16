@@ -47,7 +47,8 @@ class ProjectFiles:
         u'.framework',
         u'.xcodeproj',
         u'.xcassets',
-        u'.xcdatamodeld'
+        u'.xcdatamodeld',
+        u'.storyboardc'
     ]
 
     def __init__(self):
@@ -245,6 +246,26 @@ class ProjectFiles:
             result &= self.remove_file_by_id(file_ref.get_id())
 
         return result
+
+    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_build_files=True):
+        pass
+
+    def verify_files(self, file_list, parent=None):
+        """
+        Verifies what file names in the list are not currently in the project under the given parent.
+
+        :param file_list: List of file names to check
+        :param parent: Parent group to look for, None for the project group
+        :return: Set of file names that are in the file_list but not in the project under the given parent
+        """
+        if not file_list:
+            return []
+
+        existing_files = []
+        for file_ref in file_list:
+            existing_files += [f.name for f in self.get_files_by_name(file_ref, parent)]
+
+        return set(file_list).difference(existing_files)
 
     # miscellaneous functions, candidates to be extracted and decouple implementation
     @classmethod
