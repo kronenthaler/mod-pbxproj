@@ -20,11 +20,12 @@ class ProjectFilesTest(unittest.TestCase):
                 # groups
                 'group1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['group2', 'group3']},
                 'group2': {'isa': 'PBXGroup', 'name': 'app', 'children': ['file1', 'file2']},
-                'group3': {'isa': 'PBXGroup', 'name': 'app', 'children': ['file3', 'group4']},
+                'group3': {'isa': 'PBXGroup', 'name': 'app', 'children': ['file3', 'group4', 'file4']},
                 'group4': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
                 'file1': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SOURCE_ROOT'},
                 'file2': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SOURCE_ROOT'},
                 'file3': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SDKROOT'},
+                'file4': {'isa': 'PBXFileReference', 'name': 'file1', 'path': 'file1', 'sourceTree': 'SOURCE_ROOT'},
                 'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
@@ -185,7 +186,7 @@ class ProjectFilesTest(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def testRemoveFilesByName(self):
+    def testRemoveFilesByPath(self):
         project = XcodeProject(self.obj)
         original = project.__str__()
         build_files = project.add_file("file.m")
@@ -194,3 +195,15 @@ class ProjectFilesTest(unittest.TestCase):
 
         self.assertTrue(result)
         self.assertEqual(project.__str__(), original)
+
+    def testVerifyFilesFromGroup(self):
+        project = XcodeProject(self.obj)
+        missing_files = project.verify_files(['file', 'file1'], 'group2')
+
+        self.assertSetEqual(missing_files, set(['file1']))
+
+    def testVerifyFilesFromProject(self):
+        project = XcodeProject(self.obj)
+        missing_files = project.verify_files(['file', 'file1'])
+
+        self.assertSetEqual(missing_files, set())
