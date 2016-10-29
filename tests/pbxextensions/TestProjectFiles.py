@@ -1,6 +1,6 @@
 import unittest
 from pbxproj.XcodeProject import *
-
+import sys
 
 class ProjectFilesTest(unittest.TestCase):
     def setUp(self):
@@ -196,14 +196,55 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(project.__str__(), original)
 
-    def testVerifyFilesFromGroup(self):
+    def testAddFolderNotAFolder(self):
         project = XcodeProject(self.obj)
-        missing_files = project.verify_files(['file', 'file1'], 'group2')
+        result = project.add_folder('samples/testLibrary.a')
 
-        self.assertSetEqual(missing_files, set(['file1']))
+        self.assertListEqual(result, [])
 
-    def testVerifyFilesFromProject(self):
+    def testAddFolderNonRecursive(self):
         project = XcodeProject(self.obj)
-        missing_files = project.verify_files(['file', 'file1'])
+        result = project.add_folder('samples/', recursive=False)
 
-        self.assertSetEqual(missing_files, set())
+        # should add test.framework and testLibrary.a and 2 groups, samples, dirA
+        samples = project.get_groups_by_name('samples')
+        dirA = project.get_groups_by_name('dirA')
+        dirB = project.get_groups_by_name('dirB')
+        self.assertNotEqual(samples, [])
+        self.assertNotEqual(dirA, [])
+        self.assertEqual(dirB, [])
+
+        self.assertEqual(samples[0].children.__len__(), 3) # dirA, test.framework, testLibrary.a
+        self.assertEqual(dirA[0].children.__len__(), 0)
+
+    def testAddFolderRecursive(self):
+        project = XcodeProject(self.obj)
+        result = project.add_folder('samples')
+
+        # should add test.framework and testLibrary.a and 2 groups, samples, dirA
+        samples = project.get_groups_by_name('samples')
+        dirA = project.get_groups_by_name('dirA')
+        dirB = project.get_groups_by_name('dirB')
+        self.assertNotEqual(samples, [])
+        self.assertNotEqual(dirA, [])
+        self.assertNotEqual(dirB, [])
+
+        self.assertEqual(samples[0].children.__len__(), 3) # dirA, test.framework, testLibrary.a
+        self.assertEqual(dirA[0].children.__len__(), 2)  # dirB, fileA.m
+        self.assertEqual(dirB[0].children.__len__(), 1)  # fileB.m
+
+    def testAddFolderWithExclusions(self):
+        project = XcodeProject(self.obj)
+        result = project.add_folder('samples', excludes=['file.\\.m', 'test.*'])
+
+        # should add test.framework and testLibrary.a and 2 groups, samples, dirA
+        samples = project.get_groups_by_name('samples')
+        dirA = project.get_groups_by_name('dirA')
+        dirB = project.get_groups_by_name('dirB')
+        self.assertNotEqual(samples, [])
+        self.assertNotEqual(dirA, [])
+        self.assertNotEqual(dirB, [])
+
+        self.assertEqual(samples[0].children.__len__(), 1)  # dirA, -test.framework, -testLibrary.a
+        self.assertEqual(dirA[0].children.__len__(), 1)  # dirB, -fileA.m
+        self.assertEqual(dirB[0].children.__len__(), 0)  # -fileB.m

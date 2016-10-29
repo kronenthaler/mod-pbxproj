@@ -89,7 +89,7 @@ class ProjectFiles:
         self.objects[file_ref.get_id()] = file_ref
 
         # determine the parent and add it to it
-        self._get_parent_group(parent).add_child(file_ref.get_id())
+        self._get_parent_group(parent).add_child(file_ref)
 
         # no need to create the build_files, done
         if not create_build_files:
@@ -164,7 +164,7 @@ class ProjectFiles:
 
     def get_files_by_name(self, name, parent=None):
         """
-        Gets all the files references that have the given name, under the especified parent PBXGroup object or
+        Gets all the files references that have the given name, under the specified parent PBXGroup object or
         PBXGroup id.
         :param name: name of the file to be retrieved
         :param parent: PBXGroup that should be used to narrow the search or None to retrieve files from all project
@@ -230,6 +230,11 @@ class ProjectFiles:
             if build_file.fileRef == file_ref.get_id():
                 return True
 
+        # remove the file from any groups if there is no reference from any target
+        for group in self.objects.get_objects_in_section(u'PBXGroup'):
+            if file_ref.get_id() in group.children:
+                group.remove_child(file_ref)
+
         # the file is not referenced in any build file, remove it
         del self.objects[file_ref.get_id()]
         return True
@@ -247,25 +252,59 @@ class ProjectFiles:
 
         return result
 
-    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_build_files=True):
-        pass
-
-    def verify_files(self, file_list, parent=None):
+    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_build_files=True, weak=False,
+                   ignore_unknown_type=False, target_name=None, embed_framework=True):
         """
-        Verifies what file names in the list are not currently in the project under the given parent.
+        Given a directory, it will create the equivalent group structure and add all files in the process.
+        If groups matching the logical path already exist, it will use them instead of creating a new one. Same
+        apply for file within a group, if the file name already exists it will be ignored.
 
-        :param file_list: List of file names to check
-        :param parent: Parent group to look for, None for the project group
-        :return: Set of file names that are in the file_list but not in the project under the given parent
+        :param path: OS path to the directory to be added.
+        :param parent: Parent group to be added under
+        :param excludes: list of regexs to ignore
+        :param recursive: add folders recursively or stop in the first level
+        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
+        :param weak: When adding a framework set it as a weak reference
+        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
+        :param target_name: Target name where the file should be added (none for every target)
+        :param embed_framework: When adding a framework sets the embed section
+        :return:
         """
-        if not file_list:
+        if not os.path.isdir(path):
             return []
 
-        existing_files = []
-        for file_ref in file_list:
-            existing_files += [f.name for f in self.get_files_by_name(file_ref, parent)]
+        if not excludes:
+            excludes = []
 
-        return set(file_list).difference(existing_files)
+        results = []
+
+        # add the top folder as a group, make it the new parent
+        path = os.path.abspath(path)
+        parent = self.get_or_create_group(os.path.split(path)[1], os.path.split(path)[1], parent)
+
+        # iterate over the objects in the directory
+        for child in os.listdir(path):
+            # exclude dirs or files matching any of the expressions
+            if [pattern for pattern in excludes if re.match(pattern, child)]:
+                continue
+
+            full_path = os.path.join(path, child)
+            children = []
+            if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS:
+                # check if the file exists already, if not add it
+                children = self.add_file_if_doesnt_exist(full_path, parent, create_build_files=create_build_files,
+                                                         weak=weak, ignore_unknown_type=ignore_unknown_type,
+                                                         target_name=target_name, embed_framework=embed_framework)
+            else:
+                # if recursive is true, go deeper, otherwise create the group here.
+                if recursive:
+                    children = self.add_folder(full_path, parent, excludes, recursive, create_build_files, target_name)
+                else:
+                    subgroup = self.get_or_create_group(child, child, parent)
+
+            results.extend(children)
+
+        return results
 
     # miscellaneous functions, candidates to be extracted and decouple implementation
     @classmethod
