@@ -55,7 +55,7 @@ class ProjectFiles:
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
     def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, create_build_files=True, weak=False,
-                 ignore_unknown_type=False, target_name=None, embed_framework=True):
+                 ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
         """
         Adds a file to the project, taking care of the type of the file and creating additional structures depending on
         the file type. For instance, frameworks will be linked, embedded and search paths will be adjusted automatically.
@@ -69,6 +69,7 @@ class ProjectFiles:
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
         :param embed_framework: When adding a framework sets the embed section
+        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
 
@@ -81,8 +82,7 @@ class ProjectFiles:
         file_ref = PBXFileReference.create(path, tree)
 
         # determine the type of the new file:
-        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref,
-                                                                            unknown_type_allowed=ignore_unknown_type)
+        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, ignore_unknown_type)
 
         # set the file type on the file ref add the files
         file_ref.set_last_known_file_type(file_type)
@@ -95,7 +95,10 @@ class ProjectFiles:
         if not create_build_files:
             return []
 
+        # additional attributes in for libraries/embed frameworks
         attributes = [u'Weak'] if weak else None
+        if code_sign_on_copy:
+            attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
 
         # get target to match the given name or all
         results = []
@@ -107,6 +110,9 @@ class ProjectFiles:
             if embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and file_ref.lastKnownFileType == u'wrapper.framework':
                 embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
                                                                (PBXCopyFilesBuildPhase._EMBEDDED_FRAMEWORKS,))
+                # add runpath search flag
+                self.add_flags(XCBuildConfiguration._LD_RUNPATH_SEARCH_PATHS,
+                               u'$(inherited) @executable_path/Frameworks', target_name)
                 build_phases.extend(embed_phase)
 
             # create the build file and add it to the phase
@@ -131,7 +137,7 @@ class ProjectFiles:
         return results
 
     def add_file_if_doesnt_exist(self, path, parent=None, tree=TreeType.SOURCE_ROOT, create_build_files=True,
-                                 weak=False, ignore_unknown_type=False, target_name=None, embed_framework=True):
+                                 weak=False, ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
         """
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
@@ -141,6 +147,7 @@ class ProjectFiles:
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
         :param embed_framework: When adding a framework sets the embed section
+        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
         for section in self.objects._get_keys():
@@ -253,7 +260,7 @@ class ProjectFiles:
         return result
 
     def add_folder(self, path, parent=None, excludes=None, recursive=True, create_build_files=True, weak=False,
-                   ignore_unknown_type=False, target_name=None, embed_framework=True):
+                   ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
         """
         Given a directory, it will create the equivalent group structure and add all files in the process.
         If groups matching the logical path already exist, it will use them instead of creating a new one. Same
@@ -268,7 +275,8 @@ class ProjectFiles:
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
         :param embed_framework: When adding a framework sets the embed section
-        :return:
+        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
         if not os.path.isdir(path):
             return []
@@ -294,11 +302,13 @@ class ProjectFiles:
                 # check if the file exists already, if not add it
                 children = self.add_file_if_doesnt_exist(full_path, parent, create_build_files=create_build_files,
                                                          weak=weak, ignore_unknown_type=ignore_unknown_type,
-                                                         target_name=target_name, embed_framework=embed_framework)
+                                                         target_name=target_name, embed_framework=embed_framework,
+                                                         code_sign_on_copy=code_sign_on_copy)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
                 if recursive:
-                    children = self.add_folder(full_path, parent, excludes, recursive, create_build_files, target_name)
+                    children = self.add_folder(full_path, parent, excludes, recursive, create_build_files, weak,
+                                               ignore_unknown_type, target_name, embed_framework, code_sign_on_copy)
                 else:
                     subgroup = self.get_or_create_group(child, child, parent)
 
