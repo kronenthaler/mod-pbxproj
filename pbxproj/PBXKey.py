@@ -13,5 +13,8 @@ class PBXKey(unicode):
 
         return u'{0}{1}'.format(self.__str__(), comment)
 
+    def get_parent(self):
+        return self._parent
+
     def _get_comment(self):
-        return self._parent._resolve_comment(self)
+        return self.get_parent()._resolve_comment(self)
