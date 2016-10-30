@@ -1,9 +1,11 @@
 from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
-class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
-    _EMBEDDED_FRAMEWORKS = u'Embed Frameworks'
+class PBXCopyFilesBuildPhaseNames:
+    EMBEDDED_FRAMEWORKS = u'Embed Frameworks'
 
+
+class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
     @classmethod
     def create(cls, name=None, files=None, dest_path=u'', dest_subfolder_spec=10):
         return cls().parse({
@@ -18,7 +20,7 @@ class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
         })
 
     def _get_comment(self):
-        comment = super(type(self), self)._get_comment()
+        comment = super(PBXCopyFilesBuildPhase, self)._get_comment()
         if comment is None:
             return u'CopyFiles'
         return comment

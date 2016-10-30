@@ -55,10 +55,10 @@ class PBXGenericObject(object):
         # check if the key maps to a kind of object
         return self._get_class_reference(class_type)(self).parse(content)
 
-    def _get_class_reference(self, type):
+    def _get_class_reference(self, class_type):
         module = __import__(u'pbxproj')
-        if hasattr(module, type):
-            class_ = getattr(module, type)
+        if hasattr(module, class_type):
+            class_ = getattr(module, class_type)
             return class_
         return PBXGenericObject
 

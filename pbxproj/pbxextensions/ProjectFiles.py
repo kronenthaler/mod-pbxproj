@@ -109,7 +109,7 @@ class ProjectFiles:
             # if it's a framework and it needs to be embedded
             if embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and file_ref.lastKnownFileType == u'wrapper.framework':
                 embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
-                                                               (PBXCopyFilesBuildPhase._EMBEDDED_FRAMEWORKS,))
+                                                               (PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
                 # add runpath search flag
                 self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
                                u'$(inherited) @executable_path/Frameworks', target_name)
@@ -158,13 +158,13 @@ class ProjectFiles:
         return self.add_file(path, parent, tree, create_build_files, weak, ignore_unknown_type, target_name,
                              embed_framework)
 
-    def get_file_by_id(self, id):
+    def get_file_by_id(self, file_id):
         """
         Gets the PBXFileReference to the given id
-        :param id: Identifier of the PBXFileReference to be retrieved.
+        :param file_id: Identifier of the PBXFileReference to be retrieved.
         :return: A PBXFileReference if the id is found, None otherwise.
         """
-        file_ref = self.objects[id]
+        file_ref = self.objects[file_id]
         if not isinstance(file_ref, PBXFileReference):
             return None
         return file_ref
@@ -201,16 +201,16 @@ class ProjectFiles:
 
         return files
 
-    def remove_file_by_id(self, id, target_name=None):
+    def remove_file_by_id(self, file_id, target_name=None):
         """
         Removes the file id from given target name. If no target name is given, the file is removed
         from all targets
-        :param id: identifier of the file to be removed
+        :param file_id: identifier of the file to be removed
         :param target_name: The target name to remove the file from, if None, it's removed from all targets.
         :return: True if the file id was removed. False if the file was not removed.
         """
 
-        file_ref = self.get_file_by_id(id)
+        file_ref = self.get_file_by_id(file_id)
         if file_ref is None:
             return False
 

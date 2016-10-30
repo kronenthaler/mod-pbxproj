@@ -4,7 +4,7 @@ from pbxproj import PBXGenericObject
 
 class objects(PBXGenericObject):
     def __init__(self, parent=None):
-        super(type(self), self).__init__(parent)
+        super(objects, self).__init__(parent)
 
         # sections: dict<isa, [tuple(id, obj)]>
         # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
@@ -26,7 +26,7 @@ class objects(PBXGenericObject):
             return self
 
         # safe-guard: delegate to the parent how to deal with non-object values
-        return super(type(self), self).parse(object_data)
+        return super(objects, self).parse(object_data)
 
     def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
                       indentation_increment=u'\t'):
