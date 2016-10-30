@@ -8,6 +8,7 @@ class XCBuildConfiguration(PBXGenericObject):
     _HEADER_SEARCH_PATHS = u'HEADER_SEARCH_PATHS'
     _LIBRARY_SEARCH_PATHS = u'LIBRARY_SEARCH_PATHS'
     _FRAMEWORK_SEARCH_PATHS = u'FRAMEWORK_SEARCH_PATHS'
+    _LD_RUNPATH_SEARCH_PATHS = u'LD_RUNPATH_SEARCH_PATHS'
 
     def add_flags(self, flag_name, flags):
         if u'buildSettings' not in self:
