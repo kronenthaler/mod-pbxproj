@@ -25,10 +25,9 @@ class ProjectGroups:
         """
         group = PBXGroup.create(name=name, path=path, tree=source_tree)
 
-        if parent is None:
-            parent = self.get_groups_by_name(None)[0]
+        parent = self._get_parent_group(parent)
 
-        parent.add_child(group.get_id())
+        parent.add_child(group)
         self.objects[group.get_id()] = group
 
         return group
@@ -49,8 +48,8 @@ class ProjectGroups:
             return False
 
         # remove the reference from any other group object that could be containing it.
-        for group in self.objects.get_objects_in_section(u'PBXGroup'):
-            group.remove_child(group_id)
+        for other_group in self.objects.get_objects_in_section(u'PBXGroup'):
+            other_group.remove_child(group)
 
         return True
 
@@ -85,7 +84,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_name() == name]
 
         if parent:
-            return [group for group in groups if parent.has_child(group.get_id())]
+            return [group for group in groups if parent.has_child(group)]
 
         return groups
 
@@ -101,7 +100,7 @@ class ProjectGroups:
         groups = [group for group in groups if group.get_path() == path]
 
         if parent:
-            return [group for group in groups if parent.has_child(group.get_id())]
+            return [group for group in groups if parent.has_child(group)]
 
         return groups
 
@@ -109,11 +108,26 @@ class ProjectGroups:
         if not name:
             return None
 
-        if not parent:
-            parent = self.get_groups_by_name(None)[0]
-
         groups = self.get_groups_by_name(name, parent)
         if groups.__len__() > 0:
             return groups[0]
 
         return self.add_group(name, path, parent)
+
+    def _get_parent_group(self, parent):
+        if parent is None:
+            parent = self.get_groups_by_name(None)
+
+            # if there is no parent, create and empty parent group, add it to the objects
+            if parent.__len__() > 0:
+                return parent[0]
+
+            parent = PBXGroup.create(path=None, name=None)
+            self.objects[parent.get_id()] = parent
+            return parent
+
+        # it's not a group instance, assume it's an id
+        if not isinstance(parent, PBXGroup):
+            return self.objects[parent]
+
+        return parent

@@ -4,12 +4,13 @@ from pbxproj import *
 from pbxproj.pbxextensions import *
 
 
-class XcodeProject(PBXGenericObject, ProjectFlags, ProjectGroups, Deprecations):
+class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups, Deprecations):
     """
     Top level class, handles the project CRUD operations, new, load, save, delete. Also, exposes methods to manipulate
     the project's content, add/remove files, add/remove libraries/frameworks, query sections. For more advanced
     operations, underlying objects are exposed that can be manipulated using said objects.
     """
+
     def __init__(self, tree=None, path=None):
         self._parent = None
 

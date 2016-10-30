@@ -8,6 +8,7 @@ class XCBuildConfiguration(PBXGenericObject):
     _HEADER_SEARCH_PATHS = u'HEADER_SEARCH_PATHS'
     _LIBRARY_SEARCH_PATHS = u'LIBRARY_SEARCH_PATHS'
     _FRAMEWORK_SEARCH_PATHS = u'FRAMEWORK_SEARCH_PATHS'
+    _LD_RUNPATH_SEARCH_PATHS = u'LD_RUNPATH_SEARCH_PATHS'
 
     def add_flags(self, flag_name, flags):
         if u'buildSettings' not in self:
@@ -29,7 +30,7 @@ class XCBuildConfiguration(PBXGenericObject):
     def remove_flags(self, flag_name, flags):
         if u'buildSettings' not in self or self.buildSettings[flag_name] is None:
             # nothing to remove
-            return
+            return False
 
         current_flags = self.buildSettings[flag_name]
         if not isinstance(current_flags, list):
@@ -42,6 +43,7 @@ class XCBuildConfiguration(PBXGenericObject):
             flags = [flags]
 
         self.buildSettings[flag_name] = [x for x in current_flags if x not in flags]
+        return True
 
     def add_search_paths(self, key, paths, recursive=False, escape=False):
         if not isinstance(paths, list):
@@ -65,4 +67,4 @@ class XCBuildConfiguration(PBXGenericObject):
         self.add_flags(key, flags)
 
     def remove_search_paths(self, key, paths):
-        self.remove_flags(key, paths)
+        return self.remove_flags(key, paths)

@@ -12,16 +12,16 @@ class XCConfigurationListTest(unittest.TestCase):
 
     def testGetSectionOnTarget(self):
         objs = objects(None).parse(
-                {
-                    "1": {
-                        "isa": "PBXNativeTarget",
-                        "buildConfigurationList": ['2'],
-                        "name": "the-target-name"
-                        },
-                    "2": {
-                        'isa':'XCConfigurationList'
-                    }
-                })
+            {
+                "1": {
+                    "isa": "PBXNativeTarget",
+                    "buildConfigurationList": ['2'],
+                    "name": "the-target-name"
+                },
+                "2": {
+                    'isa': 'XCConfigurationList'
+                }
+            })
         config = objs['2']
         self.assertEqual(config._get_comment(), 'Build configuration list for PBXNativeTarget "the-target-name"')
 
@@ -40,4 +40,3 @@ class XCConfigurationListTest(unittest.TestCase):
             })
         config = objs['2']
         self.assertEqual(config._get_comment(), 'Build configuration list for PBXProject "the-target-name"')
-

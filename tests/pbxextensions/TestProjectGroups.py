@@ -6,8 +6,8 @@ class ProjectGroupsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                'root': {'isa': 'PBXGroup', 'children': ['1','1p']},
-                '1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2','3']},
+                'root': {'isa': 'PBXGroup', 'children': ['1', '1p']},
+                '1': {'isa': 'PBXGroup', 'name': 'root', 'children': ['2', '3']},
                 '2': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
                 '3': {'isa': 'PBXGroup', 'name': 'app', 'children': []},
                 '4': {'isa': 'PBXGroup', 'name': 'root', 'children': ['5', '6']},
@@ -68,13 +68,13 @@ class ProjectGroupsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group")
 
-        self.assertTrue(project.objects['root'].has_child(group.get_id()))
+        self.assertTrue(project.objects['root'].has_child(group))
 
     def testAddGroupToParent(self):
         project = XcodeProject(self.obj)
         group = project.add_group("my_group", parent=project.objects['1'])
 
-        self.assertTrue(project.objects['1'].has_child(group.get_id()))
+        self.assertTrue(project.objects['1'].has_child(group))
 
     def testRemoveByIdNotFound(self):
         project = XcodeProject(self.obj)
@@ -83,20 +83,22 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByIdRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
         result = project.remove_group_by_id('1', recursive=True)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child(group1))
         self.assertIsNone(project.objects['1'])
         self.assertIsNone(project.objects['2'])
         self.assertIsNone(project.objects['3'])
 
     def testRemoveByIdNonRecursive(self):
         project = XcodeProject(self.obj)
+        group = project.objects['1']
         result = project.remove_group_by_id('1', recursive=False)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
+        self.assertFalse(project.objects['root'].has_child(group))
         self.assertIsNone(project.objects['1'])
         self.assertIsNotNone(project.objects['2'])
         self.assertIsNotNone(project.objects['3'])
@@ -108,11 +110,13 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByNameRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
+        group1p = project.objects['1p']
         result = project.remove_group_by_name('root', recursive=True)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
-        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertFalse(project.objects['root'].has_child(group1))
+        self.assertFalse(project.objects['root'].has_child(group1p))
         self.assertIsNone(project.objects['1'])
         self.assertIsNone(project.objects['2'])
         self.assertIsNone(project.objects['3'])
@@ -122,11 +126,13 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByNameNonRecursive(self):
         project = XcodeProject(self.obj)
+        group1 = project.objects['1']
+        group1p = project.objects['1p']
         result = project.remove_group_by_name('root', recursive=False)
 
         self.assertTrue(result)
-        self.assertFalse(project.objects['root'].has_child('1'))
-        self.assertFalse(project.objects['root'].has_child('1p'))
+        self.assertFalse(project.objects['root'].has_child(group1))
+        self.assertFalse(project.objects['root'].has_child(group1p))
         self.assertIsNone(project.objects['1'])
         self.assertIsNotNone(project.objects['2'])
         self.assertIsNotNone(project.objects['3'])
@@ -165,3 +171,16 @@ class ProjectGroupsTest(unittest.TestCase):
 
         self.assertIsNotNone(group)
         self.assertIn(group.get_id(), self.obj['objects'])
+
+    def testGetParentGroupCreateDefault(self):
+        project = XcodeProject({'objects': {}})
+        group = project._get_parent_group(None)
+
+        self.assertIsNotNone(group)
+        self.assertEqual(project.objects[group.get_id()], group)
+
+    def testGetParentGroupWithID(self):
+        project = XcodeProject(self.obj)
+        parent = project._get_parent_group('5p')
+
+        self.assertEqual(parent, project.objects['5p'])

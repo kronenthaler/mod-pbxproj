@@ -12,7 +12,7 @@ def deprecated(func):
     def new_func(*args, **kwargs):
         warnings.filterwarnings('default', category=DeprecationWarning)
         warnings.warn("Call to deprecated function {}.".format(func.__name__),
-            category=DeprecationWarning)
+                      category=DeprecationWarning)
         return func(*args, **kwargs)
 
     new_func.__name__ = func.__name__
@@ -23,7 +23,7 @@ def deprecated(func):
 
 class Deprecations:
     """
-    This class contains all methods that will be deprecated on the near future.
+    This class contains all methods that will be deprecated in the near future.
     It provides a compatibility layer meanwhile using old methods signatures as an alias of the new version available.
     """
 
@@ -61,4 +61,21 @@ class Deprecations:
         for flag_name in pairs:
             self.remove_flags(flag_name, pairs[flag_name], target_name=None, configuration_name=configuration)
 
+    @deprecated
+    def get_groups_by_os_path(self, path):
+        return self.get_groups_by_path(path)
 
+    @deprecated
+    def get_files_by_os_path(self, os_path, tree='SOURCE_ROOT'):
+        return self.get_files_by_path(os_path, tree)
+
+    @deprecated
+    def remove_file(self, id, recursive=True):
+        return self.remove_file_by_id(id)
+
+    @deprecated
+    def get_file_id_by_path(self, f_path):
+        file_ref = self.get_file_id_by_path(f_path)[0]
+        if file_ref is not None:
+            return file_ref.get_id()
+        return None
