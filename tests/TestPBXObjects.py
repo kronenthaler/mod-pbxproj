@@ -40,7 +40,10 @@ class PBXObjectTest(unittest.TestCase):
 
     def testGetObjectsInsection(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
-        self.assertEqual(dobj.get_objects_in_section('phase1'), dobj._sections['phase1'])
+        sections = dobj.get_objects_in_section('phase1', 'phase2')
+
+        self.assertSetEqual(set(sections).intersection(dobj._sections['phase1']), set(dobj._sections['phase1']))
+        self.assertSetEqual(set(sections).intersection(dobj._sections['phase2']), set(dobj._sections['phase2']))
         self.assertEqual(dobj.get_objects_in_section('phaseX'), [])
 
     def testGetTargets(self):

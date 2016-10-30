@@ -111,7 +111,7 @@ class ProjectFiles:
                 embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
                                                                (PBXCopyFilesBuildPhase._EMBEDDED_FRAMEWORKS,))
                 # add runpath search flag
-                self.add_flags(XCBuildConfiguration._LD_RUNPATH_SEARCH_PATHS,
+                self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
                                u'$(inherited) @executable_path/Frameworks', target_name)
                 build_phases.extend(embed_phase)
 

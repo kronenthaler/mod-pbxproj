@@ -10,10 +10,10 @@ class objects(PBXGenericObject):
         # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
         self._sections = {}
 
-    def parse(self, object):
+    def parse(self, object_data):
         # iterate over the keys and fill the sections
-        if isinstance(object, dict):
-            for key, value in object.iteritems():
+        if isinstance(object_data, dict):
+            for key, value in object_data.iteritems():
                 key = self._parse_string(key)
                 obj_type = key
                 if 'isa' in value:
@@ -26,7 +26,7 @@ class objects(PBXGenericObject):
             return self
 
         # safe-guard: delegate to the parent how to deal with non-object values
-        return super(type(self), self).parse(object)
+        return super(type(self), self).parse(object_data)
 
     def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
                       indentation_increment=u'\t'):

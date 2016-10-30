@@ -36,8 +36,8 @@ class Deprecations:
         return cls.load(path)
 
     @deprecated
-    def remove_group(self, id, recursive=True):
-        return self.remove_group_by_id(id, recursive)
+    def remove_group(self, group_id, recursive=True):
+        return self.remove_group_by_id(group_id, recursive)
 
     @deprecated
     def add_run_script_all_targets(self, script=None):
