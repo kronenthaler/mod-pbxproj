@@ -4,13 +4,19 @@ from pbxproj.PBXObjects import objects
 
 
 class PBXObjectTest(unittest.TestCase):
-    MINIMUM_OBJ = {'1': {'isa': 'phase1'}, '2': {'isa': 'phase1'}, '3': {'isa': 'phase2'}}
+    MINIMUM_OBJ = {'3': {'isa': 'phase2'}, '1': {'isa': 'phase1'}, '2': {'isa': 'phase1'}}
 
     def testParseNonObject(self):
         obj = [1, 2, 3]
         dobj = objects().parse(obj)
 
         self.assertIsInstance(dobj, list)
+
+    def testGetKeys(self):
+        dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
+        keys = dobj.get_keys()
+
+        self.assertListEqual(keys, ['1', '2', '3'])
 
     def testParseGroupsPhases(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
