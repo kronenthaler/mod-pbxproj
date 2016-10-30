@@ -10,6 +10,34 @@ class TreeType:
     SOURCE_ROOT = u'SOURCE_ROOT'
 
 
+class FileOptions:
+    """
+    Wrapper class for all file parameters required at the moment of adding a file to the project.
+    """
+    def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
+                 code_sign_on_copy=False):
+        """
+        Creates an object specifying options to be consided during the file creation into the project.
+
+        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
+        :param weak: When adding a framework set it as a weak reference
+        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
+        :param embed_framework: When adding a framework sets the embed section
+        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        """
+        self.create_build_files = create_build_files
+        self.weak = weak
+        self.ignore_unknown_type = ignore_unknown_type
+        self.embed_framework = embed_framework
+        self.code_sign_on_copy = code_sign_on_copy
+
+    def get_attributes(self):
+        attributes = [u'Weak'] if self.weak else None
+        if self.code_sign_on_copy:
+            attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+        return attributes
+
+
 class ProjectFiles:
     _FILE_TYPES = {
         u'.a': (u'archive.ar', u'PBXFrameworksBuildPhase'),
@@ -54,8 +82,7 @@ class ProjectFiles:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, create_build_files=True, weak=False,
-                 ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
+    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, file_options=FileOptions()):
         """
         Adds a file to the project, taking care of the type of the file and creating additional structures depending on
         the file type. For instance, frameworks will be linked, embedded and search paths will be adjusted automatically.
@@ -64,12 +91,8 @@ class ProjectFiles:
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
-        :param weak: When adding a framework set it as a weak reference
-        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
-        :param embed_framework: When adding a framework sets the embed section
-        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
 
@@ -82,7 +105,7 @@ class ProjectFiles:
         file_ref = PBXFileReference.create(path, tree)
 
         # determine the type of the new file:
-        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, ignore_unknown_type)
+        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, file_options.ignore_unknown_type)
 
         # set the file type on the file ref add the files
         file_ref.set_last_known_file_type(file_type)
@@ -92,13 +115,11 @@ class ProjectFiles:
         self._get_parent_group(parent).add_child(file_ref)
 
         # no need to create the build_files, done
-        if not create_build_files:
+        if not file_options.create_build_files:
             return []
 
         # additional attributes in for libraries/embed frameworks
-        attributes = [u'Weak'] if weak else None
-        if code_sign_on_copy:
-            attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+        attributes = file_options.get_attributes()
 
         # get target to match the given name or all
         results = []
@@ -107,7 +128,8 @@ class ProjectFiles:
             build_phases = target.get_or_create_build_phase(expected_build_phase)
 
             # if it's a framework and it needs to be embedded
-            if embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and file_ref.lastKnownFileType == u'wrapper.framework':
+            if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
+                    file_ref.lastKnownFileType == u'wrapper.framework':
                 embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
                                                                (PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
                 # add runpath search flag
@@ -136,18 +158,13 @@ class ProjectFiles:
 
         return results
 
-    def add_file_if_doesnt_exist(self, path, parent=None, tree=TreeType.SOURCE_ROOT, create_build_files=True,
-                                 weak=False, ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
+    def add_file_if_doesnt_exist(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, file_options=FileOptions()):
         """
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
-        :param weak: When adding a framework set it as a weak reference
-        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
-        :param embed_framework: When adding a framework sets the embed section
-        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
         for section in self.objects._get_keys():
@@ -155,8 +172,7 @@ class ProjectFiles:
                 if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
                     return []
 
-        return self.add_file(path, parent, tree, create_build_files, weak, ignore_unknown_type, target_name,
-                             embed_framework)
+        return self.add_file(path, parent, tree, target_name, file_options)
 
     def get_file_by_id(self, file_id):
         """
@@ -259,8 +275,7 @@ class ProjectFiles:
 
         return result
 
-    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_build_files=True, weak=False,
-                   ignore_unknown_type=False, target_name=None, embed_framework=True, code_sign_on_copy=False):
+    def add_folder(self, path, parent=None, excludes=None, recursive=True, target_name=None, file_options=FileOptions()):
         """
         Given a directory, it will create the equivalent group structure and add all files in the process.
         If groups matching the logical path already exist, it will use them instead of creating a new one. Same
@@ -270,12 +285,8 @@ class ProjectFiles:
         :param parent: Parent group to be added under
         :param excludes: list of regexs to ignore
         :param recursive: add folders recursively or stop in the first level
-        :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
-        :param weak: When adding a framework set it as a weak reference
-        :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param target_name: Target name where the file should be added (none for every target)
-        :param embed_framework: When adding a framework sets the embed section
-        :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
         if not os.path.isdir(path):
@@ -300,15 +311,13 @@ class ProjectFiles:
             children = []
             if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS:
                 # check if the file exists already, if not add it
-                children = self.add_file_if_doesnt_exist(full_path, parent, create_build_files=create_build_files,
-                                                         weak=weak, ignore_unknown_type=ignore_unknown_type,
-                                                         target_name=target_name, embed_framework=embed_framework,
-                                                         code_sign_on_copy=code_sign_on_copy)
+                children = self.add_file_if_doesnt_exist(full_path, parent, target_name=target_name,
+                                                         file_options=file_options)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
                 if recursive:
-                    children = self.add_folder(full_path, parent, excludes, recursive, create_build_files, weak,
-                                               ignore_unknown_type, target_name, embed_framework, code_sign_on_copy)
+                    children = self.add_folder(full_path, parent, excludes, recursive, target_name=target_name,
+                                               file_options=file_options)
                 else:
                     subgroup = self.get_or_create_group(child, child, parent)
 

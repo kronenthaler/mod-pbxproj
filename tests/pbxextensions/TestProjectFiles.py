@@ -44,7 +44,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileUnknownAllowed(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file("file.unknowntype", ignore_unknown_type=True)
+        build_file = project.add_file("file.unknowntype", file_options=FileOptions(ignore_unknown_type=True))
 
         # unknown files are added as resources
         self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
@@ -60,7 +60,7 @@ class ProjectFilesTest(unittest.TestCase):
     def testAddFileNoCreateBuildFiles(self):
         project = XcodeProject(self.obj)
         items = project.objects.__len__()
-        build_file = project.add_file(".", create_build_files=False)
+        build_file = project.add_file(".", file_options=FileOptions(create_build_files=False))
 
         # no create build file flag
         self.assertEqual(project.objects.__len__(), items)
@@ -76,7 +76,8 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileFrameworkEmbedded(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file("file.framework", create_build_files=True, weak=True, embed_framework=True, code_sign_on_copy=True)
+        options = FileOptions(create_build_files=True, weak=True, embed_framework=True, code_sign_on_copy=True)
+        build_file = project.add_file("file.framework", file_options=options)
 
         # 2 source files are created 1 x target
         self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
