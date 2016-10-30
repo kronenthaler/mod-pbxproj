@@ -81,10 +81,11 @@ class objects(PBXGenericObject):
         return sum([section.__len__() for section in self._sections])
 
     def get_objects_in_section(self, *sections):
+        result = []
         for name in sections:
             if name in self._sections:
-                return self._sections[name]
-        return []
+                result.extend(self._sections[name])
+        return result
 
     def get_targets(self, name=None):
         """
