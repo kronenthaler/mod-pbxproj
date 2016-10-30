@@ -70,12 +70,12 @@ class Deprecations:
         return self.get_files_by_path(os_path, tree)
 
     @deprecated
-    def remove_file(self, id, recursive=True):
-        return self.remove_file_by_id(id)
+    def remove_file(self, file_id, recursive=True):
+        return self.remove_file_by_id(file_id)
 
     @deprecated
-    def get_file_id_by_path(self, f_path):
-        file_ref = self.get_file_id_by_path(f_path)[0]
+    def get_file_id_by_path(self, path):
+        file_ref = self.get_file_id_by_path(path)[0]
         if file_ref is not None:
             return file_ref.get_id()
         return None
