@@ -12,7 +12,7 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups, 
     """
 
     def __init__(self, tree=None, path=None):
-        self._parent = None
+        super(XcodeProject, self).__init__(parent=None)
 
         if path is None:
             path = os.path.join(os.getcwd(), 'project.pbxproj')
