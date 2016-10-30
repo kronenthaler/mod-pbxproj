@@ -32,7 +32,7 @@ class objects(PBXGenericObject):
                       indentation_increment=u'\t'):
         # override to change the way the object is printed out
         result = u'{\n'
-        for section in self._get_keys():
+        for section in self.get_sections():
             phase = self._sections[section]
             phase.sort(key=lambda x: x.get_id())
             result += u'\n/* Begin {0} section */\n'.format(section)
@@ -44,13 +44,25 @@ class objects(PBXGenericObject):
         result += indentation_depth + u'}'
         return result
 
-    def _get_keys(self):
+    def get_keys(self):
+        """
+        :return: all the keys of the object (ids of objects)
+        """
+        keys = []
+        for section in self.get_sections():
+            phase = self._sections[section]
+            for obj in phase:
+                keys += obj.get_id()
+        keys.sort()
+        return keys
+
+    def get_sections(self):
         sections = self._sections.keys()
         sections.sort()
         return sections
 
     def __getitem__(self, key):
-        for section in self._sections.iterkeys():
+        for section in self.get_sections():
             phase = self._sections[section]
             for obj in phase:
                 if key == obj.get_id():
@@ -94,7 +106,7 @@ class objects(PBXGenericObject):
         :return: A list of target objects
         """
         targets = []
-        for section in self._sections.iterkeys():
+        for section in self.get_sections():
             if section.endswith(u'Target'):
                 targets += [value for value in self._sections[section]]
 

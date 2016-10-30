@@ -41,7 +41,7 @@ class PBXBuildFile(PBXGenericObject):
         objects = self._parent
         target = self.get_id()
 
-        for section in objects._get_keys():
+        for section in objects.get_sections():
             for obj in objects.get_objects_in_section(section):
                 if u'files' in obj and target in obj.files:
                     return obj._get_comment()
@@ -108,7 +108,7 @@ class PBXBuildFile(PBXGenericObject):
         if u'COMPILER_FLAGS' in self.settings and self.settings.COMPILER_FLAGS.__len__() == 0:
             del self.settings[u'COMPILER_FLAGS']
 
-        if self.settings._get_keys().__len__() == 0:
+        if self.settings.get_keys().__len__() == 0:
             del self[u'settings']
 
         return True

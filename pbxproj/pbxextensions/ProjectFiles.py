@@ -167,7 +167,7 @@ class ProjectFiles:
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
-        for section in self.objects._get_keys():
+        for section in self.objects.get_sections():
             for obj in self.objects.get_objects_in_section(section):
                 if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
                     return []

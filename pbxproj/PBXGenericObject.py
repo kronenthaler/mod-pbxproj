@@ -69,7 +69,7 @@ class PBXGenericObject(object):
                       indentation_increment=u'\t'):
         ret = u'{' + object_start
 
-        for key in self._get_keys():
+        for key in self.get_keys():
             value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start,
                                  indentation_increment)
 
@@ -108,7 +108,7 @@ class PBXGenericObject(object):
 
         return value
 
-    def _get_keys(self):
+    def get_keys(self):
         fields = list([x for x in dir(self) if not x.startswith(u'_') and not hasattr(getattr(self, x), '__call__')])
         if u'isa' in fields:
             fields.remove(u'isa')
