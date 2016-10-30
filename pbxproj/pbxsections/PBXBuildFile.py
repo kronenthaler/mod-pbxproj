@@ -38,7 +38,7 @@ class PBXBuildFile(PBXGenericObject):
         return u'{0} in {1}'.format(self.fileRef._get_comment(), self._get_section())
 
     def _get_section(self):
-        objects = self._parent
+        objects = self.get_parent()
         target = self.get_id()
 
         for section in objects.get_sections():

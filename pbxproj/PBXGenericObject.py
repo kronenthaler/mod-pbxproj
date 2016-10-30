@@ -14,6 +14,9 @@ class PBXGenericObject(object):
     def __init__(self, parent=None):
         self._parent = parent
 
+    def get_parent(self):
+        return self._parent
+
     def parse(self, value):
         if isinstance(value, dict):
             return self._parse_dict(value)
@@ -142,13 +145,14 @@ class PBXGenericObject(object):
         return hasattr(self, item)
 
     def _resolve_comment(self, key):
+        parent = self.get_parent()
         if key in self:
             return self[key]._get_comment()
 
-        if self._parent is None:
+        if parent is None:
             return None
 
-        return self._parent._resolve_comment(key)
+        return parent._resolve_comment(key)
 
     def get_id(self):
         return self['_id']

@@ -26,6 +26,6 @@ class PBXGenericBuildPhase(PBXGenericObject):
             return False
 
         self.files.remove(build_file.get_id())
-        del self._parent[build_file.get_id()]
+        del self.get_parent()[build_file.get_id()]
 
         return True
