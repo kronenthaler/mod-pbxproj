@@ -124,6 +124,13 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, '<absolute>')
         self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, '<absolute>')
 
+    def testAddReferenceFile(self):
+        project = XcodeProject(self.obj, path="tests/project.pbxproj")
+        build_file = project.add_file(os.path.abspath("samples/dirA"))
+
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
+        self.assertEqual(build_file.__len__(), 2)
+
     def testAddFileIfExists(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file_if_doesnt_exist("file.m")
