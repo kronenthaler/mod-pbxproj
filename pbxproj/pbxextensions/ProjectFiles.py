@@ -231,12 +231,10 @@ class ProjectFiles:
             return False
 
         for target in self.objects.get_targets(target_name):
-            build_phases = list(target.buildPhases)
-            for build_phase_id in build_phases:
+            for build_phase_id in target.buildPhases:
                 build_phase = self.objects[build_phase_id]
 
-                build_files = list(build_phase.files)
-                for build_file_id in build_files:
+                for build_file_id in build_phase.files:
                     build_file = self.objects[build_file_id]
 
                     if build_file.fileRef == file_ref.get_id():
@@ -332,7 +330,6 @@ class ProjectFiles:
         if os.path.isdir(os.path.abspath(file_ref.path)) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
             build_phase = u'PBXResourcesBuildPhase'
-            ext = ''
         else:
             file_type, build_phase = ProjectFiles._FILE_TYPES.get(ext, (None, u'PBXResourcesBuildPhase'))
 
