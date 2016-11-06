@@ -329,9 +329,9 @@ class ProjectFiles:
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
         ext = os.path.splitext(file_ref.name)[1]
-        if os.path.isdir(file_ref.path) and ext not in ProjectFiles._SPECIAL_FOLDERS:
+        if os.path.isdir(os.path.abspath(file_ref.path)) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
-            build_phase = None
+            build_phase = u'PBXResourcesBuildPhase'
             ext = ''
         else:
             file_type, build_phase = ProjectFiles._FILE_TYPES.get(ext, (None, u'PBXResourcesBuildPhase'))
