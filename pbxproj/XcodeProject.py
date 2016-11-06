@@ -40,6 +40,22 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups, 
     def __repr__(self):
         return u'// !$*UTF8*$!\n' + super(type(self), self).__repr__()
 
+    def get_ids(self):
+        return self.objects.get_keys()
+
+    def get_build_phases_by_name(self, phase_name):
+        return self.objects.get_objects_in_section(phase_name)
+
+    def get_build_files_for_file(self, file_id):
+        return [build_file for build_file in self.objects.get_objects_in_section(u'PBXBuildFile')
+                if build_file.fileRef == file_id]
+
+    def get_target_by_name(self, name):
+        targets = self.objects.get_targets(name)
+        if targets.__len__() > 0:
+            return targets[0]
+        return None
+
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
