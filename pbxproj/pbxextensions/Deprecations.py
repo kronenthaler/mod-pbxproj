@@ -79,3 +79,15 @@ class Deprecations:
         if file_ref is not None:
             return file_ref.get_id()
         return None
+
+    @deprecated
+    def get_keys_for_files_by_name(self, name):
+        return map(lambda x: x.get_id(), self.get_files_by_name(name))
+
+    @deprecated
+    def get_build_files(self, file_id):
+        return self.get_build_files_for_file(file_id)
+
+    @deprecated
+    def get_build_phases(self, phase_name):
+        return self.get_build_phases_by_name(phase_name)
