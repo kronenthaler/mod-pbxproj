@@ -27,15 +27,16 @@ class NoseTestCoverage(TestCommand):
         nose.run_exit(argv=['nosetests',
                             '--with-coverage',
                             '--cover-erase',
+                            '--cover-branches',
                             '--cover-package=pbxproj',
                             '-w', 'tests'])
 
 
 setup(name='mod_pbxproj',
       author='Ignacio Calderon',
-      description='XCode Project Generator for Python',
+      description='XCode Project manipulation library for Python',
       url="http://github.com/kronenthaler/mod-pbxproj",
-      version='1.3.1',
+      version='2.0.0',
       license='BSD License',
       install_requires=['openstep_parser'],
       packages=find_packages(exclude=['tests']),

@@ -126,3 +126,27 @@ class ProjectFlags:
                 if build_phase.shellScript == script:
                     del self.objects[build_phase_id]
                     target.remove_build_phase(build_phase)
+
+    def add_code_sign(self, code_sign_identity, development_team, provisioning_profile_uuid,
+                      provisioning_profile_specifier, target_name=None, configuration_name=None):
+        """
+        Adds the code sign information to the project and creates the appropriate flags in the configuration.
+        In xcode 8+ the provisioning_profile_uuid becomes optional, and the provisioning_profile_specifier becomes
+        mandatory. Contrariwise, in xcode 8< provisioning_profile_uuid becomes mandatory and
+        provisioning_profile_specifier becomes optional.
+
+        :param code_sign_identity: Code sign identity name. Usually formatted as: 'iPhone Distribution[: <Company name> (MAAYFEXXXX)]'
+        :param development_team: Development team identifier string. Usually formatted as: 'MAAYFEXXXX'
+        :param provisioning_profile_uuid: Provisioning profile UUID string. Usually formatted as: '6f1ffc4d-xxxx-xxxx-xxxx-6dc186280e1e'
+        :param provisioning_profile_specifier: Provisioning profile specifier (a.k.a. name) string.
+        :param target_name: Target name to add the flag to or None for every target
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return:
+        """
+        self.add_flags(u'CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
+        self.add_flags(u'DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
+        self.add_flags(u'PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
+        self.add_flags(u'PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
+
+        for target in self.objects.get_targets(target_name):
+            self.objects[self.rootObject].set_provisioning_style(PBXProvioningTypes.MANUAL, target)

@@ -11,7 +11,7 @@ install:
 
 script:
   - python setup.py test
-  - coverage run --source=pbxproj setup.py test
+  - coverage run --branch --source=pbxproj setup.py test
 
 after_success:
   - coveralls
