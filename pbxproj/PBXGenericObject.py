@@ -36,8 +36,7 @@ class PBXGenericObject(object):
                 continue
 
             key = self._parse_string(key)
-            if not hasattr(self, key):
-                setattr(self, key, self._get_instance(key, value))
+            setattr(self, key, self._get_instance(key, value))
 
         return self
 
