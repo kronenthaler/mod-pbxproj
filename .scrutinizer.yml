@@ -1,0 +1,35 @@
+
+checks:
+    python:
+        code_rating: true
+        duplicate_code: true
+        variables_redefined_builtin: true
+        classes_bad_classmethod_argument: true
+        basic_exec_used: true
+        basic_eval_used: true
+        basic_dangerous_default_value: true
+        classes_method_hidden: true
+        classes_bad_mcs_method_argument: true
+        classes_super_init_not_called: true
+        design_abstract_class_little_used: true
+        variables_redefined_builtin: true
+        newstyle_bad_super_call: true
+        logging_not_lazy: true
+        exceptions_broad_except: true
+        exceptions_bare_except: true
+        classes_protected_access: true
+        classes_no_self_argument: true
+        classes_bad_classmethod_argument: true
+        basic_lost_exception: true
+        basic_function_redefined: true
+
+
+
+filter:
+    excluded_paths:
+        - tests/*
+        - spec/*
+        - unit/*
+        
+tools:
+    external_code_coverage: true

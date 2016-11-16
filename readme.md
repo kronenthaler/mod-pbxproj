@@ -1,4 +1,6 @@
-[![PyPI](https://img.shields.io/pypi/dm/mod_pbxproj.svg)](https://pypi.python.org/pypi/mod_pbxproj/)
+[![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=refactor)](https://travis-ci.org/kronenthaler/mod-pbxproj)
+[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=refactor)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=refactor)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=refactor)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=refactor)
 
 # mod-pbxproj
 
