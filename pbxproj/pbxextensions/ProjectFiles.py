@@ -15,7 +15,7 @@ class FileOptions:
     Wrapper class for all file parameters required at the moment of adding a file to the project.
     """
     def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
-                 code_sign_on_copy=False):
+                 code_sign_on_copy=True):
         """
         Creates an object specifying options to be consided during the file creation into the project.
 
