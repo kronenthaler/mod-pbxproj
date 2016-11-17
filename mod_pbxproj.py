@@ -30,12 +30,12 @@ from distutils.core import run_setup, setup
 import site
 
 __author__ = 'kronenthaler'
-__version__ = '1.3.1'
+__version__ = '2.0.0'
 __package_name__ = 'mod_pbxproj_installer'
 
 try:
     # check if file exists
-    from mod_pbxproj import XcodeProject
+    from pbxproj import XcodeProject
 except:
     # install it if not present
     print 'Installing package...'
@@ -48,4 +48,4 @@ except:
 reload(site)
 
 # import publicly
-from mod_pbxproj import *
+from pbxproj import *
