@@ -269,5 +269,3 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertListEqual(project.get_groups_by_name('samples'), [])
         self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 2)
-
-        sys.stderr.write(project.__str__())
