@@ -32,7 +32,7 @@ class NoseTestCoverage(TestCommand):
                             '-w', 'tests'])
 
 
-setup(name='mod_pbxproj',
+setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
       url="http://github.com/kronenthaler/mod-pbxproj",
