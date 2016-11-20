@@ -6,6 +6,7 @@ class ProjectFlagsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
+                '0': {'isa': 'PBXProject'},
                 '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
                       'buildPhases': ['compile']},
                 '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
@@ -16,7 +17,8 @@ class ProjectFlagsTest(unittest.TestCase):
                 '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
                 '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
                 '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
-            }
+            },
+            'rootObject': '0'
         }
 
     def testInit(self):
@@ -193,3 +195,81 @@ class ProjectFlagsTest(unittest.TestCase):
         project.remove_run_script(u'ls')
         self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
         self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+
+    def testAddCodeSignAllTargetAllConfigurations(self):
+        project = XcodeProject(self.obj)
+
+        project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name')
+
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.MANUAL)
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'2'].ProvisioningStyle,
+                         PBXProvioningTypes.MANUAL)
+
+        self.assertEqual(project.objects['5'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+        self.assertEqual(project.objects['6'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+        self.assertEqual(project.objects['7'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+        self.assertEqual(project.objects['8'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+
+        self.assertEqual(project.objects['5'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+        self.assertEqual(project.objects['6'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+        self.assertEqual(project.objects['7'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+        self.assertEqual(project.objects['8'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+        self.assertEqual(project.objects['6'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+        self.assertEqual(project.objects['7'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+        self.assertEqual(project.objects['8'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+        self.assertEqual(project.objects['6'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+        self.assertEqual(project.objects['7'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+        self.assertEqual(project.objects['8'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+
+    def testAddCodeSignOneTargetAllConfigurations(self):
+        project = XcodeProject(self.obj)
+
+        project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name', target_name='app')
+
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle,
+                         PBXProvioningTypes.MANUAL)
+        self.assertIsNone(project.objects['0'].attributes.TargetAttributes[u'2'])
+
+        self.assertIsNone(project.objects['7']['buildSettings'])
+        self.assertIsNone(project.objects['8']['buildSettings'])
+
+        self.assertEqual(project.objects['5'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+        self.assertEqual(project.objects['6'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+
+        self.assertEqual(project.objects['5'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+        self.assertEqual(project.objects['6'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+        self.assertEqual(project.objects['6'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+        self.assertEqual(project.objects['6'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+
+    def testAddCodeSignAllTargetOneConfigurations(self):
+        project = XcodeProject(self.obj)
+
+        project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name', configuration_name='Release')
+
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.MANUAL)
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'2'].ProvisioningStyle,
+                         PBXProvioningTypes.MANUAL)
+
+        self.assertIsNone(project.objects['6']['buildSettings'])
+        self.assertIsNone(project.objects['8']['buildSettings'])
+        self.assertEqual(project.objects['5'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+        self.assertEqual(project.objects['7'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
+
+        self.assertEqual(project.objects['5'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+        self.assertEqual(project.objects['7'].buildSettings['DEVELOPMENT_TEAM'], 'MYTEAM')
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+        self.assertEqual(project.objects['7'].buildSettings['PROVISIONING_PROFILE'], '0x0x0x0x0')
+
+        self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+        self.assertEqual(project.objects['7'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
+
