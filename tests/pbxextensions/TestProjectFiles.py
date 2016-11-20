@@ -2,6 +2,7 @@ import unittest
 from pbxproj.XcodeProject import *
 import sys
 
+
 class ProjectFilesTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
@@ -260,3 +261,13 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(samples[0].children.__len__(), 1)  # dirA, -test.framework, -testLibrary.a
         self.assertEqual(dirA[0].children.__len__(), 1)  # dirB, -fileA.m
         self.assertEqual(dirB[0].children.__len__(), 0)  # -fileB.m
+
+    def testAddFolderAsReference(self):
+        project = XcodeProject(self.obj,path="tests/project.pbxproj")
+        build_file = project.add_folder('samples', create_groups=False)
+
+        self.assertListEqual(project.get_groups_by_name('samples'), [])
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
+        self.assertEqual(build_file.__len__(), 2)
+
+        sys.stderr.write(project.__str__())
