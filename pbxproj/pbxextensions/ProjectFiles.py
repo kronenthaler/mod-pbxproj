@@ -34,6 +34,8 @@ class FileOptions:
     def get_attributes(self):
         attributes = [u'Weak'] if self.weak else None
         if self.code_sign_on_copy:
+            if attributes is None:
+                attributes = []
             attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
         return attributes
 
@@ -273,7 +275,8 @@ class ProjectFiles:
 
         return result
 
-    def add_folder(self, path, parent=None, excludes=None, recursive=True, target_name=None, file_options=FileOptions()):
+    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_groups=True, target_name=None,
+                   file_options=FileOptions()):
         """
         Given a directory, it will create the equivalent group structure and add all files in the process.
         If groups matching the logical path already exist, it will use them instead of creating a new one. Same
@@ -283,6 +286,7 @@ class ProjectFiles:
         :param parent: Parent group to be added under
         :param excludes: list of regexs to ignore
         :param recursive: add folders recursively or stop in the first level
+        :param create_groups: add folders recursively as groups or references
         :param target_name: Target name where the file should be added (none for every target)
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
@@ -297,6 +301,9 @@ class ProjectFiles:
 
         # add the top folder as a group, make it the new parent
         path = os.path.abspath(path)
+        if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
+            return self.add_file_if_doesnt_exist(path, parent, target_name=target_name, file_options=file_options)
+
         parent = self.get_or_create_group(os.path.split(path)[1], os.path.split(path)[1], parent)
 
         # iterate over the objects in the directory
@@ -307,7 +314,8 @@ class ProjectFiles:
 
             full_path = os.path.join(path, child)
             children = []
-            if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS:
+            if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS or \
+                    not create_groups:
                 # check if the file exists already, if not add it
                 children = self.add_file_if_doesnt_exist(full_path, parent, target_name=target_name,
                                                          file_options=file_options)
