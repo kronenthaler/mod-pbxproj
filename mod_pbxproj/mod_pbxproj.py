@@ -734,10 +734,10 @@ class XcodeProject(PBXDict):
             self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Release")
             self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Debug")
             for binary in embed_binaries:
-                self.add_embed_framework(pbx_native_target,binary)
+                self.add_embed_framework(binary,pbx_native_target)
 
     #"Unity-iPhone"
-    def add_embed_framework(self,pbx_native_target,file_name):
+    def add_embed_framework(self,file_name,pbx_native_target='Unity-iPhone'):
         file_refs = self.get_files_by_name(os.path.basename(file_name))
         if len(file_refs) > 0:
             file_ref = file_refs[0]
