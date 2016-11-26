@@ -472,6 +472,8 @@ class PBXSourcesBuildPhase(PBXBuildPhase):
 class PBXCopyFilesBuildPhase(PBXBuildPhase):
      @classmethod
      def Create(cls, buildActionMask):
+         '''Note: special treatment for unity,may not be generic,
+         through the export xcodeproject unity reverse out of the parameters'''
          bf = cls()
          bf.id = cls.GenerateId()
          bf['buildActionMask'] = str(buildActionMask)
@@ -725,19 +727,21 @@ class XcodeProject(PBXDict):
             if b.remove_single_valued_flag(flag):
                 self.modified = True
 
-    def add_embed_binaries(self, embed_binaries):
+
+    def add_embed_binaries(self,embed_binaries,pbx_native_target='Unity-iPhone'):
         if len(embed_binaries) > 0:
             self.modified = True
             self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Release")
             self.add_single_valued_flag("LD_RUNPATH_SEARCH_PATHS", "$(inherited) @executable_path/Frameworks", "Debug")
             for binary in embed_binaries:
-                self.add_embed_framework(binary)
+                self.add_embed_framework(binary,pbx_native_target)
 
-    def add_embed_framework(self,file_name):
+    #"Unity-iPhone"
+    def add_embed_framework(self,file_name,pbx_native_target='Unity-iPhone'):
         file_refs = self.get_files_by_name(os.path.basename(file_name))
         if len(file_refs) > 0:
             file_ref = file_refs[0]
-            embedPhase = self.add_embed_framework_build_phase()
+            embedPhase = self.add_embed_framework_build_phase(pbx_native_target)
             if embedPhase == None:
                 print "AddEmbedFrameworkBuildPhase Failed."
                 return
@@ -749,9 +753,9 @@ class XcodeProject(PBXDict):
         else:
             print "Embed Framework must added already: " + file_name
 
-    def add_embed_framework_build_phase(self):
+    def add_embed_framework_build_phase(self,pbx_native_target):
         phase = None
-        naviTarget = self.get_target_by_name("Unity-iPhone")
+        naviTarget = self.get_target_by_name(pbx_native_target)
         if naviTarget == None :
             print "Not found Correct NativeTarget."
             return phase
@@ -781,6 +785,62 @@ class XcodeProject(PBXDict):
             break
         return build_action_mask
 
+    ##================support xcode8 CODE_SIGN_IDENTITY =====================
+    ## pbx_native_target: Unity-iphone
+    ## code_sign_identity: iPhone Distribution
+    ## development_team:'MAAYFEXXXX'
+    ## provisioning_profile:'XXXXXXDISHOC'
+    ## provisioning_profile_specifier:'6f1ffc4d-xxxx-xxxx-xxxx-6dc186280e1e'
+    def add_code_sign(self,pbx_native_target,code_sign_identity,development_team,provisioning_profile,provisioning_profile_specifier):
+        self.modify_provisioning_stype_manual(pbx_native_target)
+        target = self.get_target_by_name(pbx_native_target)
+        build_config_id = target.get('buildConfigurationList')
+        config_list_obj = self.get_obj(build_config_id)
+        buildConfigurations = config_list_obj.get('buildConfigurations')
+        for id in buildConfigurations:
+            build_obj = self.get_obj(id)
+            buildSettings = build_obj.get('buildSettings')
+            buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = code_sign_identity
+            buildSettings['DEVELOPMENT_TEAM'] = development_team
+            if provisioning_profile != None:
+                buildSettings['PROVISIONING_PROFILE'] = provisioning_profile
+            buildSettings['PROVISIONING_PROFILE_SPECIFIER'] = provisioning_profile_specifier
+            pass
+
+    ## pbx_native_target: Unity-iphone
+    def modify_provisioning_stype_manual(self,pbx_native_target):
+        self.modify_provisioning_stype(pbx_native_target,'Manual')
+
+    ## pbx_native_target: Unity-iphone
+    def modify_provisioning_stype_automatic(self,pbx_native_target):
+        self.modify_provisioning_stype(pbx_native_target,'Automatic')
+
+    ## pbx_native_target: Unity-iphone
+    ## type:"Manual"|"Automatic"
+    def modify_provisioning_stype(self,pbx_native_target,type):
+        project = self.get_project_object()
+        target = self.get_target_by_name(pbx_native_target)
+        attrbutes = project.get('attributes')
+        if attrbutes == None:
+            attrbutes = PBXDict()
+            project['attributes'] = attrbutes
+        target_attributes = attrbutes.get('TargetAttributes')
+        if target_attributes == None:
+            target_attributes = PBXDict()
+            attrbutes['TargetAttributes'] = target_attributes
+        target_info = target_attributes.get(target.id)
+        if target_info == None:
+            target_info = PBXDict()
+            target_attributes[target.id] = target_info
+        target_info['ProvisioningStyle'] = type
+        self.modified = True
+        pass
+
+    def get_project_object(self):
+        ls = self.get_build_phases('PBXProject')
+        return ls[0]
+
+    ##================end support CODE_SIGN_IDENTITY =====================
 
     def get_obj(self, id):
         return self.objects.get(id)
