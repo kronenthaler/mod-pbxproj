@@ -9,6 +9,11 @@ class TreeType:
     SDKROOT = u'SDKROOT'
     SOURCE_ROOT = u'SOURCE_ROOT'
 
+    @classmethod
+    def options(cls):
+        return [TreeType.SOURCE_ROOT, TreeType.SDKROOT, TreeType.GROUP, TreeType.ABSOLUTE,
+                TreeType.DEVELOPER_DIR, TreeType.BUILT_PRODUCT_DIR]
+
 
 class FileOptions:
     """
