@@ -106,7 +106,7 @@ class ProjectFiles:
         # decide the proper tree and path to add
         abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
         if path is None or tree is None:
-            return []
+            return None
 
         # create a PBXFileReference for the new file
         file_ref = PBXFileReference.create(path, tree)
@@ -117,19 +117,19 @@ class ProjectFiles:
         # set the file type on the file ref add the files
         file_ref.set_last_known_file_type(file_type)
         self.objects[file_ref.get_id()] = file_ref
+        results = [] # add the file_ref here?
 
         # determine the parent and add it to it
         self._get_parent_group(parent).add_child(file_ref)
 
         # no need to create the build_files, done
         if not file_options.create_build_files:
-            return []
+            return results
 
         # additional attributes in for libraries/embed frameworks
         attributes = file_options.get_attributes()
 
         # get target to match the given name or all
-        results = []
         for target in self.objects.get_targets(target_name):
             # determine if there is a suitable build phase created
             build_phases = target.get_or_create_build_phase(expected_build_phase)

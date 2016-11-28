@@ -56,7 +56,7 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file(".", tree=None)
 
         # no tree or no path cannot be added
-        self.assertEqual(build_file, [])
+        self.assertIsNone(build_file)
 
     def testAddFileNoCreateBuildFiles(self):
         project = XcodeProject(self.obj)
@@ -114,7 +114,7 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file(os.path.abspath("samples/unexistingFile.m"))
 
         # nothing to do if the file is absolute but doesn't exist
-        self.assertListEqual(build_file, [])
+        self.assertIsNone(build_file)
 
     def testAddFileWithAbsolutePathOnUnknownTree(self):
         project = XcodeProject(self.obj)
