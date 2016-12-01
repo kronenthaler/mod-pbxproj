@@ -267,16 +267,17 @@ class ProjectFiles:
         del self.objects[file_ref.get_id()]
         return True
 
-    def remove_files_by_path(self, path, tree=TreeType.SOURCE_ROOT):
+    def remove_files_by_path(self, path, tree=TreeType.SOURCE_ROOT, target_name=None):
         """
         Removes all files for the given path under the same tree
         :param path: Path to the file relative to the tree root
         :param tree: Tree type to look for the path. By default the SOURCE_ROOT
+        :param target_name: Target name where the file should be added (none for every target)
         :return: True if all the files were removed without problems. False if at least one file failed.
         """
         result = True
         for file_ref in self.get_files_by_path(path, tree):
-            result &= self.remove_file_by_id(file_ref.get_id())
+            result &= self.remove_file_by_id(file_ref.get_id(), target_name=target_name)
 
         return result
 
