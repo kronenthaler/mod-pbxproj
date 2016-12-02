@@ -7,8 +7,8 @@ def main():
     subcommands = parser.add_subparsers()
 
     PBXCLIFile(subcommands)
-    # PBXCLIFlag(subscommands)
-    # PBXCLIFolder(subscommands)
+    PBXCLIFlag(subcommands)
+    PBXCLIFolder(subcommands)
 
     # parse and trigger the parser
     args = parser.parse_args()

@@ -2,21 +2,25 @@ from pbxproj.pbxcli import *
 from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
 
 
-class PBXCLIFile:
+class PBXCLIFolder:
     def __init__(self, parser):
-        file_parser = parser.add_parser(u'file', help=u'Manipulate files in the project')
+        file_parser = parser.add_parser(u'folder', help=u'Manipulate folders in the project')
         # common parameters
         standard_parameters(file_parser)
-        file_parser.add_argument(u'path', help=u'file path to be added to the project')
-        file_parser.add_argument(u'--tree', choices=TreeType.options(), default=TreeType.SOURCE_ROOT,
-                                 help=u'tree relative to the origin of the file to be added.')
+        file_parser.add_argument(u'path', help=u'folder path to be added to the project')
 
         # remove parameters
-        remove_parser = file_parser.add_argument_group(u'Remove file options')
+        remove_parser = file_parser.add_argument_group(u'Remove folder options')
         remove_parser.add_argument(u'--delete', u'-D', action=u'store_true', help=u'')
 
         # add parameters
-        add_parser = file_parser.add_argument_group(u'Add file options')
+        add_parser = file_parser.add_argument_group(u'Add folder options')
+        add_parser.add_argument(u'--exclude', u'-e', action=u'append',
+                                help=u'regular expression to exclude from the adding process')
+        add_parser.add_argument(u'--recursive', u'-r', action=u'store_true', help=u'add folders recursively')
+        add_parser.add_argument(u'--no-create-groups', u'-G', action=u'store_true', dest=u'create_groups',
+                                help=u'add folders as groups instead of references that will be also added as resources'
+                                )
         add_parser.add_argument(u'--weak', u'-w', action=u'store_true', help=u'link framework weakly.')
         add_parser.add_argument(u'--no-embed', u'-E', action=u'store_false', dest=u'embed',
                                 help=u'do not embed framework on the application')
@@ -27,7 +31,7 @@ class PBXCLIFile:
         add_parser.add_argument(u'--no-create-build-files', u'-C', action=u'store_false', dest=u'create_build_files',
                                 help=u'when adding a file, do not create any associated build file section required.')
 
-        file_parser.set_defaults(func=command_parser(PBXCLIFile._process_command))
+        file_parser.set_defaults(func=command_parser(PBXCLIFolder._process_command))
 
     @classmethod
     def _process_command(cls, project, args):
@@ -43,8 +47,10 @@ class PBXCLIFile:
                               ignore_unknown_type=args.ignore_unknown_types,
                               embed_framework=args.embed,
                               code_sign_on_copy=args.code_sign_on_copy)
-        build_files = project.add_file_if_doesnt_exist(args.path, tree=args.tree, target_name=args.target,
-                                                       file_options=options)
+
+        build_files = project.add_folder(args.path, excludes=args.excludes, recursive=args.recursive,
+                                         create_groups=args.create_groups, target_name=args.target,
+                                         file_options=options)
         # print some information about the build files created.
         if build_files is None:
             return u'No files were added to the project'
