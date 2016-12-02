@@ -46,3 +46,5 @@ def standard_parameters(parser):
 
 # import class files after the definitions here so the classes can use this definitions
 from pbxproj.pbxcli.PBXCLIFile import *
+from pbxproj.pbxcli.PBXCLIFlag import *
+from pbxproj.pbxcli.PBXCLIFolder import *
