@@ -28,7 +28,7 @@ from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
 from docopt import docopt
 
 
-def main(project, args):
+def execute(project, args):
     # make a decision of what function to call based on the -D flag
     if args[u'--delete']:
         return _remove(project, args)
@@ -69,5 +69,9 @@ def _remove(project, args):
     return u'An error occurred removing one of the files.'
 
 
+def main():
+    command_parser(execute)(docopt(__doc__))
+
+
 if __name__ == '__main__':
-    command_parser(main)(docopt(__doc__))
+    main()
