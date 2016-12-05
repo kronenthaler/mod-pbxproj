@@ -9,7 +9,7 @@ class PBXCLIFlag:
         standard_parameters(flag_parser)
         flag_parser.add_argument(u'flag_name', help=u'flag name to modify')
         flag_parser.add_argument(u'value', help=u'flag value')
-        flag_parser.add_argument(u'-c', u'--configuration', choices=[u'Debug', u'Release'], default=None,
+        flag_parser.add_argument(u'--configuration', u'-c', choices=[u'Debug', u'Release'], default=None,
                                  help="configuration to modify, if not specified affects all configurations.")
 
         # remove parameters
