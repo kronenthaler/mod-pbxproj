@@ -35,10 +35,16 @@ class NoseTestCoverage(TestCommand):
 setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
+      entry_points={
+        "console_scripts": [
+            'pbxproj = pbxproj.__main__:main',
+            'pbxproj-file = pbxproj.pbxcli.pbxproj_file:main'
+        ]
+      },
       url="http://github.com/kronenthaler/mod-pbxproj",
       version='2.0.0',
       license='BSD License',
-      install_requires=['openstep_parser'],
+      install_requires=['openstep_parser', 'docopt'],
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
       cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage})
