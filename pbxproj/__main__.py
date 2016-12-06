@@ -16,10 +16,6 @@ See pbxproj <command> --help, for more information about a specific command.
 from pbxproj.pbxcli import *
 from docopt import docopt
 
-# Usage:
-#     pbxproj folder (--delete | -D) project path [(--target | -t) target]
-#     pbxproj folder project path [(--target | -t) target] [(--exclude | -e) regex] [--recursive | -r] [--no-create-groups | -G] [--weak | -w] [--no-embed | -E] [--sign-on-copy | -s] [--ignore-unknown-types | -i] [--no-create-build-files | -C]
-
 
 def main():
     args = docopt(__doc__, options_first=True, version=u'pbxproj version 2.0.0')
