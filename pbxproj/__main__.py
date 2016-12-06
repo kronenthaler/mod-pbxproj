@@ -17,8 +17,6 @@ from pbxproj.pbxcli import *
 from docopt import docopt
 
 # Usage:
-#     pbxproj flag (--delete | -D) project flag value [(--target | -t) target] [(--configuration | -c) configuration]
-#     pbxproj flag project flag value [(--target | -t) target] [(--configuration | -c) configuration]
 #     pbxproj folder (--delete | -D) project path [(--target | -t) target]
 #     pbxproj folder project path [(--target | -t) target] [(--exclude | -e) regex] [--recursive | -r] [--no-create-groups | -G] [--weak | -w] [--no-embed | -E] [--sign-on-copy | -s] [--ignore-unknown-types | -i] [--no-create-build-files | -C]
 
@@ -34,7 +32,8 @@ def main():
         import pbxproj.pbxcli.pbxproj_file as pbxproj_file
         command_parser(pbxproj_file.execute)(docopt(pbxproj_file.__doc__, argv=argv))
     elif args['<command>'] == 'flag':
-        pass
+        import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
+        command_parser(pbxproj_flag.execute)(docopt(pbxproj_flag.__doc__, argv=argv))
     elif args['<command>'] == 'folder':
         pass
 

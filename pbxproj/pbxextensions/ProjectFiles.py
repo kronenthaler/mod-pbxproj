@@ -204,9 +204,9 @@ class ProjectFiles:
             parent = self._get_parent_group(parent)
 
         files = []
-        for file in self.objects.get_objects_in_section(u'PBXFileReference'):
-            if file.name == name and (parent is None or parent.has_child(file.get_id())):
-                files.append(file)
+        for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
+            if file_ref.name == name and (parent is None or parent.has_child(file_ref.get_id())):
+                files.append(file_ref)
 
         return files
 
@@ -218,9 +218,9 @@ class ProjectFiles:
         :return: List of all PBXFileReference that match the path and tree criteria.
         """
         files = []
-        for file in self.objects.get_objects_in_section(u'PBXFileReference'):
-            if file.path == path and file.sourceTree == tree:
-                files.append(file)
+        for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
+            if file_ref.path == path and file_ref.sourceTree == tree:
+                files.append(file_ref)
 
         return files
 
