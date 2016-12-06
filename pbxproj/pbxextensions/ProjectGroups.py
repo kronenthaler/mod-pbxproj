@@ -58,7 +58,7 @@ class ProjectGroups:
         Remove the groups matching the given name. If recursive is True, all descendants of this group are also removed.
         This method could cause the removal of multiple groups that not necessarily are intended to be removed, use with
         caution
-        :param name: The group name to be removed
+        :param group_name: The group name to be removed
         :param recursive: All descendants should be removed as well
         :return: True if the element was removed successfully, False otherwise
         """

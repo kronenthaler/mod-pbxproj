@@ -1,27 +1,32 @@
 """
 usage:
-    pbxproj file [options] <project> <path> [--weak] [--no-embed] [--sign-on-copy] [--ignore-unknown-types] [--no-create-build-files]
+    pbxproj file [options] <project> <path> [(--weak | -w)]
+                                            [(--no-embed | -E)]
+                                            [(--sign-on-copy | -s)]
+                                            [(--ignore-unknown-types | -i)]
+                                            [(--no-create-build-files | -C)]
     pbxproj file [options] (--delete | -D) <project> <path>
 
 positional arguments:
-    <project>                       Project path to the .xcodeproj folder
-    <path>                          Path of the file to add to the project.
+    <project>                      Project path to the .xcodeproj folder.
+    <path>                         Path of the file to add to the project.
 
 generic options:
-    -h, --help                      This message
-    --tree <tree>                   Tree name [default: SOURCE_ROOT]
-    -t, --target <target>           Target name
-    -b, --backup                    Creates a backup before start processing the command.
+    -h, --help                     This message.
+    --tree <tree>                  Tree to add the file relative to. Available options: <absolute>, <group>,
+                                       SOURCE_ROOT, SDKROOT, DEVELOPER_DIR, BUILT_PRODUCTS_DIR. [default: SOURCE_ROOT]
+    -t, --target <target>          Target name to be modified. If there is no target specified, all targets are modified.
+    -b, --backup                   Creates a backup before start processing the command.
 
 delete options:
-    -D, --delete                    Delete the file
+    -D, --delete                   Delete the file.
 
 add options:
-    -w, --weak                      Weak flag
-    -E, --no-embed                  Do not embed frameworks when added
-    -s, --sign-on-copy              Sign frameworks when copied/embedded
-    -i, --ignore-unknown-types      Ignore unknown file types when added.
-    -C, --no-create-build-files     Do not create build file phases when adding a file
+    -w, --weak                     Add the weak flag when libraries or frameworks are added. Linking optional.
+    -E, --no-embed                 Do not embed frameworks when added.
+    -s, --sign-on-copy             Sign frameworks when copied/embedded.
+    -i, --ignore-unknown-types     Ignore unknown file types when added.
+    -C, --no-create-build-files    Do not create build file phases when adding a file.
 """
 from pbxproj.pbxcli import *
 from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions

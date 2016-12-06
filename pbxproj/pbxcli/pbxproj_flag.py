@@ -1,39 +1,61 @@
+"""
+usage:
+    pbxproj flag [options] <project> [--] (<flag_name> <flag_value>)...
+    pbxproj flag [options] (--delete | -D) <project> [--] (<flag_name> <flag_value>)...
+
+positional arguments:
+    <project>                               Project path to the .xcodeproj folder.
+    <flag_name>                             Flag name to be modified in the project's configuration(s).
+    <flag_value>                            Flag value to be modified in the project's configuration(s).
+
+generic options:
+    --                                      Force to read the flag_value's and flag_name's as they are, otherwise they
+                                                might be interpreted as an option and detected as such. Use when a
+                                                flag_value starts with -, like -ObjC
+    -h, --help                              This message.
+    -t, --target <target>                   Target name to be modified. If there is no target specified, all targets are
+                                                modified.
+    -b, --backup                            Creates a backup before start processing the command.
+    -c, --configuration <configuration>     Configuration name to modify the flags. If no configuration name is
+                                                provided, all configurations are affected.
+
+delete options:
+    -D, --delete                            Removes the given flag_value's from the pairing flag_name.
+"""
+
+# Future addition to the command line:
+# pbxproj flag [options] (--delete | -D) (--all | -A) <project> [--] <flag_name>...
+
 from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
+from docopt import docopt
 
 
-class PBXCLIFlag:
-    def __init__(self, parser):
-        flag_parser = parser.add_parser(u'flag', help=u'Manipulate flags in the project')
-        # common parameters
-        standard_parameters(flag_parser)
-        flag_parser.add_argument(u'flag_name', help=u'flag name to modify')
-        flag_parser.add_argument(u'value', help=u'flag value')
-        flag_parser.add_argument(u'--configuration', u'-c', choices=[u'Debug', u'Release'], default=None,
-                                 help="configuration to modify, if not specified affects all configurations.")
+def execute(project, args):
+    # make a decision of what function to call based on the -D flag
+    if args[u'--delete']:
+        return _remove(project, args)
+    else:
+        return _add(project, args)
 
-        # remove parameters
-        remove_parser = flag_parser.add_argument_group(u'Remove flag options')
-        remove_parser.add_argument(u'--delete', u'-D', action=u'store_true', help=u'')
 
-        # add parameters
-        add_parser = flag_parser.add_argument_group(u'Add flag options')
+def _add(project, args):
+    for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
+        project.add_flags(flag_name, flag_value, target_name=args[u'--target'],
+                          configuration_name=args[u'--configuration'])
+    return u'Flags added successfully'
 
-        flag_parser.set_defaults(func=command_parser(PBXCLIFlag._process_command))
 
-    @classmethod
-    def _process_command(cls, project, args):
-        if args.delete:
-            return cls._remove(project, args)
-        else:
-            return cls._add(project, args)
+def _remove(project, args):
+    for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
+        project.remove_flags(flag_name, flag_value, target_name=args[u'--target'],
+                             configuration_name=args[u'--configuration'])
+    return u'Flags removed successfully'
 
-    @classmethod
-    def _add(cls, project, args):
-        project.add_flags(args.flag_name, args.value, target_name=args.target, configuration_name=args.configuration)
-        return u'Flags added successfully'
 
-    @classmethod
-    def _remove(cls, project, args):
-        project.remove_flags(args.flag_name, args.value, target_name=args.target, configuration_name=args.configuration)
-        return u'Flags removed successfully'
+def main():
+    command_parser(execute)(docopt(__doc__))
+
+
+if __name__ == '__main__':
+    main()
+

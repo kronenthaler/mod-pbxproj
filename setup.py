@@ -39,6 +39,7 @@ setup(name='pbxproj',
         "console_scripts": [
             'pbxproj = pbxproj.__main__:main',
             'pbxproj-file = pbxproj.pbxcli.pbxproj_file:main'
+            'pbxproj-flag = pbxproj.pbxcli.pbxproj_flag:main'
         ]
       },
       url="http://github.com/kronenthaler/mod-pbxproj",
