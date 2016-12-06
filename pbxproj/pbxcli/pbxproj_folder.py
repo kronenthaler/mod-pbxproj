@@ -1,76 +1,97 @@
+"""
+usage:
+    pbxproj folder [options] <project> <path> [--exclude <regex>...]
+                                              [(--recursive | -r)]
+                                              [(--no-create-groups | -G)]
+                                              [(--weak | -w)]
+                                              [(--no-embed | -E)]
+                                              [(--sign-on-copy | -s)]
+                                              [(--ignore-unknown-types | -i)]
+                                              [(--no-create-build-files | -C)]
+    pbxproj folder [options] (--delete | -D) <project> <path> [--tree <tree>]
+
+positional arguments:
+    <project>                      Project path to the .xcodeproj folder.
+    <path>                         Path of the file to add to the project.
+
+generic options:
+    -h, --help                      This message.
+    -t, --target <target>           Target name to be modified. If there is no target specified, all targets are
+                                        modified.
+    -b, --backup                    Creates a backup before start processing the command.
+
+delete options:
+    -D, --delete                    Delete the file.
+    --tree <tree>                   Tree to add the file relative to. Available options: <absolute>, <group>,
+                                        SOURCE_ROOT, SDKROOT, DEVELOPER_DIR, BUILT_PRODUCTS_DIR. [default: SOURCE_ROOT]
+
+add options:
+    -e, --exclude <regex>           Pattern to exclude during the insertion of a folder. The pattern applies to file
+                                        names and folder names.
+    -r, --recursive                 Add folders and files recursively.
+    -G, --no-create-groups          Add the folder as a file reference instead of creating group(s).
+    -w, --weak                      Add the weak flag when libraries or frameworks are added. Linking optional.
+    -E, --no-embed                  Do not embed frameworks when added.
+    -s, --sign-on-copy              Sign frameworks when copied/embedded.
+    -i, --ignore-unknown-types      Ignore unknown file types when added.
+    -C, --no-create-build-files     Do not create build file phases when adding a file.
+"""
+
+# Future addition to the command line:
+# pbxproj folder (--delete | -D) (--group | -G) <project> <path>
+
 from pbxproj.pbxcli import *
 from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
+from docopt import docopt
 
 
-class PBXCLIFolder:
-    def __init__(self, parser):
-        file_parser = parser.add_parser(u'folder', help=u'Manipulate folders in the project')
-        # common parameters
-        standard_parameters(file_parser)
-        file_parser.add_argument(u'path', help=u'folder path to be added to the project')
+def execute(project, args):
+    print args
+    # make a decision of what function to call based on the -D flag
+    if args[u'--delete']:
+        return _remove(project, args)
+    else:
+        return _add(project, args)
 
-        # remove parameters
-        remove_parser = file_parser.add_argument_group(u'Remove folder options')
-        remove_parser.add_argument(u'--delete', u'-D', action=u'store_true', help=u'')
 
-        # add parameters
-        add_parser = file_parser.add_argument_group(u'Add folder options')
-        add_parser.add_argument(u'--exclude', u'-e', action=u'append',
-                                help=u'regular expression to exclude from the adding process')
-        add_parser.add_argument(u'--recursive', u'-r', action=u'store_true', help=u'add folders recursively')
-        add_parser.add_argument(u'--no-create-groups', u'-G', action=u'store_true', dest=u'create_groups',
-                                help=u'add folders as groups instead of references that will be also added as resources'
-                                )
-        add_parser.add_argument(u'--weak', u'-w', action=u'store_true', help=u'link framework weakly.')
-        add_parser.add_argument(u'--no-embed', u'-E', action=u'store_false', dest=u'embed',
-                                help=u'do not embed framework on the application')
-        add_parser.add_argument(u'--sign-on-copy', u'-csoc', action=u'store_true', dest=u'code_sign_on_copy',
-                                help=u'code sign frameworks when copied to the application.')
-        add_parser.add_argument(u'--ignore-unknown-types', u'-i', action=u'store_true', dest=u'ignore_unknown_types',
-                                help=u'ignore unknown types and add the file regardless.')
-        add_parser.add_argument(u'--no-create-build-files', u'-C', action=u'store_false', dest=u'create_build_files',
-                                help=u'when adding a file, do not create any associated build file section required.')
+def _add(project, args):
+    options = FileOptions(create_build_files=not args[u'--no-create-build-files'],
+                          weak=args[u'--weak'],
+                          ignore_unknown_type=args[u'--ignore-unknown-types'],
+                          embed_framework=not args[u'--no-embed'],
+                          code_sign_on_copy=args[u'--sign-on-copy'])
 
-        file_parser.set_defaults(func=command_parser(PBXCLIFolder._process_command))
+    build_files = project.add_folder(args[u'<path>'], excludes=args[u'--exclude'], recursive=args[u'--recursive'],
+                                     create_groups=not args[u'--no-create-groups'], target_name=args[u'--target'],
+                                     file_options=options)
+    # print some information about the build files created.
+    if build_files is None:
+        return u'No files were added to the project'
 
-    @classmethod
-    def _process_command(cls, project, args):
-        if args.delete:
-            return cls._remove(project, args)
-        else:
-            return cls._add(project, args)
+    if build_files is []:
+        return u'File added to the project, no build file sections created.'
 
-    @classmethod
-    def _add(cls, project, args):
-        options = FileOptions(create_build_files=args.create_build_files,
-                              weak=args.weak,
-                              ignore_unknown_type=args.ignore_unknown_types,
-                              embed_framework=args.embed,
-                              code_sign_on_copy=args.code_sign_on_copy)
+    info = {}
+    for build_file in build_files:
+        if build_file.isa not in info:
+            info[build_file.isa] = 0
+        info[build_file.isa] += 1
 
-        build_files = project.add_folder(args.path, excludes=args.excludes, recursive=args.recursive,
-                                         create_groups=args.create_groups, target_name=args.target,
-                                         file_options=options)
-        # print some information about the build files created.
-        if build_files is None:
-            return u'No files were added to the project'
+    summary = u'File added to the project.'
+    for k in info:
+        summary += u'\n{0} {1} sections created'.format(info[k], k)
+    return summary
 
-        if build_files is []:
-            return u'File added to the project, no build file sections created.'
 
-        info = {}
-        for build_file in build_files:
-            if build_file.isa not in info:
-                info[build_file.isa] = 0
-            info[build_file.isa] += 1
+def _remove(project, args):
+    if project.remove_files_by_path(args[u'<path>'], tree=args[u'--tree'], target_name=args[u'--target']):
+        return u'File removed from the project'
+    return u'An error occurred removing one of the files.'
 
-        summary = u'File added to the project.'
-        for k in info:
-            summary += u'\n{0} {1} sections created'.format(info[k], k)
-        return summary
 
-    @classmethod
-    def _remove(cls, project, args):
-        if project.remove_files_by_path(args.path, tree=args.tree, target_name=args.target):
-            return u'File removed from the project'
-        return u'An error occurred removing one of the files.'
+def main():
+    command_parser(execute)(docopt(__doc__))
+
+
+if __name__ == '__main__':
+    main()

@@ -35,7 +35,9 @@ def main():
         import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
         command_parser(pbxproj_flag.execute)(docopt(pbxproj_flag.__doc__, argv=argv))
     elif args['<command>'] == 'folder':
-        pass
+        import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
+        command_parser(pbxproj_folder.execute)(docopt(pbxproj_folder.__doc__, argv=argv))
+
 
 if __name__ == "__main__":
     main()
