@@ -47,13 +47,13 @@ def _add(project, args):
                           ignore_unknown_type=args[u'--ignore-unknown-types'],
                           embed_framework=not args[u'--no-embed'],
                           code_sign_on_copy=args[u'--sign-on-copy'])
-    build_files = project.add_file_if_doesnt_exist(args[u'<path>'], tree=args[u'--tree'], target_name=args[u'--target'],
-                                                   file_options=options)
+    build_files = project.add_file(args[u'<path>'], tree=args[u'--tree'], force=False, target_name=args[u'--target'],
+                                   file_options=options)
     # print some information about the build files created.
     if build_files is None:
-        return u'No files were added to the project'
+        return u'No files were added to the project.'
 
-    if build_files is []:
+    if not build_files:
         return u'File added to the project, no build file sections created.'
 
     info = {}
@@ -64,14 +64,14 @@ def _add(project, args):
 
     summary = u'File added to the project.'
     for k in info:
-        summary += u'\n{0} {1} sections created'.format(info[k], k)
+        summary += u'\n{0} {1} sections created.'.format(info[k], k)
     return summary
 
 
 def _remove(project, args):
     if project.remove_files_by_path(args[u'<path>'], tree=args[u'--tree'], target_name=args[u'--target']):
-        return u'File removed from the project'
-    return u'An error occurred removing one of the files.'
+        return u'File removed from the project.'
+    raise Exception(u'An error occurred removing one of the files.')
 
 
 def main():

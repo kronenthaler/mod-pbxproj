@@ -134,13 +134,13 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileIfExists(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file_if_doesnt_exist("file.m")
+        build_file = project.add_file("file.m", force=False)
 
         # 2 source files are created 1 x target
         self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 2)
 
-        build_file = project.add_file_if_doesnt_exist("file.m")
+        build_file = project.add_file("file.m", force=False)
         self.assertEqual(build_file, [])
 
     def testGetFilesByNameWithNoParent(self):

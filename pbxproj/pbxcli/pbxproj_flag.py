@@ -42,14 +42,14 @@ def _add(project, args):
     for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
         project.add_flags(flag_name, flag_value, target_name=args[u'--target'],
                           configuration_name=args[u'--configuration'])
-    return u'Flags added successfully'
+    return u'Flags added successfully.'
 
 
 def _remove(project, args):
     for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
         project.remove_flags(flag_name, flag_value, target_name=args[u'--target'],
                              configuration_name=args[u'--configuration'])
-    return u'Flags removed successfully'
+    return u'Flags removed successfully.'
 
 
 def main():

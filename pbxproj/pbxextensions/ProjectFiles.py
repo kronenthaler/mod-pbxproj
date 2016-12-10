@@ -89,7 +89,7 @@ class ProjectFiles:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, file_options=FileOptions()):
+    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, force=True, file_options=FileOptions()):
         """
         Adds a file to the project, taking care of the type of the file and creating additional structures depending on
         the file type. For instance, frameworks will be linked, embedded and search paths will be adjusted automatically.
@@ -99,9 +99,17 @@ class ProjectFiles:
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
         :param target_name: Target name where the file should be added (none for every target)
+        :param force: Add the file without checking if the file already exists
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
+        results = []
+        # if it's not forced to add the file stop if the file already exists.
+        if not force:
+            for section in self.objects.get_sections():
+                for obj in self.objects.get_objects_in_section(section):
+                    if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                        return results
 
         # decide the proper tree and path to add
         abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
@@ -117,7 +125,6 @@ class ProjectFiles:
         # set the file type on the file ref add the files
         file_ref.set_last_known_file_type(file_type)
         self.objects[file_ref.get_id()] = file_ref
-        results = [] # add the file_ref here?
 
         # determine the parent and add it to it
         self._get_parent_group(parent).add_child(file_ref)
@@ -164,22 +171,6 @@ class ProjectFiles:
             self.add_framework_search_paths([library_path, u'$(inherited)'], recursive=False)
 
         return results
-
-    def add_file_if_doesnt_exist(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, file_options=FileOptions()):
-        """
-        :param path: Path to the file to be added
-        :param parent: Parent group to be added under
-        :param tree: Tree where the path is relative to
-        :param target_name: Target name where the file should be added (none for every target)
-        :param file_options: FileOptions object to be used during the addition of the file to the project.
-        :return: a list of elements that were added to the project successfully as PBXBuildFile objects
-        """
-        for section in self.objects.get_sections():
-            for obj in self.objects.get_objects_in_section(section):
-                if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
-                    return []
-
-        return self.add_file(path, parent, tree, target_name, file_options)
 
     def get_file_by_id(self, file_id):
         """
@@ -275,11 +266,14 @@ class ProjectFiles:
         :param target_name: Target name where the file should be added (none for every target)
         :return: True if all the files were removed without problems. False if at least one file failed.
         """
-        result = True
-        for file_ref in self.get_files_by_path(path, tree):
-            result &= self.remove_file_by_id(file_ref.get_id(), target_name=target_name)
+        files = self.get_files_by_path(path, tree)
+        result = 0
+        total = files.__len__()
+        for file_ref in files:
+            if self.remove_file_by_id(file_ref.get_id(), target_name=target_name):
+                result += 1
 
-        return result
+        return result != 0 and result == total
 
     def add_folder(self, path, parent=None, excludes=None, recursive=True, create_groups=True, target_name=None,
                    file_options=FileOptions()):
@@ -308,7 +302,7 @@ class ProjectFiles:
         # add the top folder as a group, make it the new parent
         path = os.path.abspath(path)
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
-            return self.add_file_if_doesnt_exist(path, parent, target_name=target_name, file_options=file_options)
+            return self.add_file(path, parent, target_name=target_name, force=False, file_options=file_options)
 
         parent = self.get_or_create_group(os.path.split(path)[1], os.path.split(path)[1], parent)
 
@@ -323,8 +317,8 @@ class ProjectFiles:
             if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS or \
                     not create_groups:
                 # check if the file exists already, if not add it
-                children = self.add_file_if_doesnt_exist(full_path, parent, target_name=target_name,
-                                                         file_options=file_options)
+                children = self.add_file(full_path, parent, target_name=target_name, force=False,
+                                         file_options=file_options)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
                 if recursive:
