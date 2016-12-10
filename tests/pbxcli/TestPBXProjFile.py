@@ -1,9 +1,8 @@
 import unittest
-from pbxproj.pbxcli import *
-import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 import shutil
 import sys
-
+from pbxproj.pbxcli import *
+import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 
 class PBXProjFileTest(unittest.TestCase):
     def setUp(self):
