@@ -14,15 +14,12 @@ commands:
 See pbxproj <command> --help, for more information about a specific command.
 """
 from pbxproj.pbxcli import *
+import pbxproj
 from docopt import docopt
 
 
 def main():
-    args = docopt(__doc__, options_first=True, version=u'pbxproj version 2.0.0')
-    print('global arguments:')
-    print(args)
-    print('command arguments:')
-
+    args = docopt(__doc__, options_first=True, version=u'pbxproj version {0}'.format(pbxproj.__version__))
     argv = [args['<command>']] + args['<args>']
     if args['<command>'] == 'file':
         import pbxproj.pbxcli.pbxproj_file as pbxproj_file

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -45,7 +46,7 @@ setup(name='pbxproj',
       },
       url="http://github.com/kronenthaler/mod-pbxproj",
       version='2.0.0',
-      license='BSD License',
+      license='MIT License',
       install_requires=['openstep_parser', 'docopt'],
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
