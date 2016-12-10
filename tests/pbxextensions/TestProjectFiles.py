@@ -213,7 +213,7 @@ class ProjectFilesTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         result = project.add_folder('samples/testLibrary.a')
 
-        self.assertListEqual(result, [])
+        self.assertIsNone(result)
 
     def testAddFolderNonRecursive(self):
         project = XcodeProject(self.obj)

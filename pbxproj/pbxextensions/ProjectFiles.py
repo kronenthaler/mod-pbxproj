@@ -292,7 +292,7 @@ class ProjectFiles:
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
         if not os.path.isdir(path):
-            return []
+            return None
 
         if not excludes:
             excludes = []
