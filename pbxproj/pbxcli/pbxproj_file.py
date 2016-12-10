@@ -51,7 +51,7 @@ def _add(project, args):
                                    file_options=options)
     # print some information about the build files created.
     if build_files is None:
-        return u'No files were added to the project.'
+        raise Exception(u'No files were added to the project.')
 
     if not build_files:
         return u'File added to the project, no build file sections created.'
