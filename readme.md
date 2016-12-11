@@ -5,21 +5,20 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
 
 # pbxproj 
--- 
 
 This module can read, modify, and write a .pbxproj file from an Xcode 4+ projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle.
 
-# Installation
+## Installation
 For installation instructions visit the [wiki](wiki/Installation)
 
-# CLI
+## CLI
 For instructions and commands available visit the [wiki](wiki/CLI)
 
-# Documentation
+## Documentation
 For general documentation, visit the [wiki](wiki/).
 For technical documentation, the public functions are documented and contains details about what is expected.
 
-# Reporting bugs
+## Reporting bugs
 Did you find a bug? Too bad, but we want to help you, we need you to:
 
 * Provide as many details about the error you are having.
@@ -28,7 +27,7 @@ Did you find a bug? Too bad, but we want to help you, we need you to:
 
 We cannot help you if your issue is a title: "it does not work". Or if there is no sequence of steps to reproduce the error. Those kind of issues will be ignored or closed automatically.
 
-# Contributing
+## Contributing
 Do you want to fix an issue yourself? Great! some house rules:
 
 * Provide a description of what problem are you solving, what case was not being taking into account
@@ -36,5 +35,5 @@ Do you want to fix an issue yourself? Great! some house rules:
 * Adhere to the coding style and conventions of the project, for instance, target_name is used to specify the target across all functions that use this parameter. Changes will be requested on PRs that don't follow this.
 * Write descriptive commit messages.
 
-# License
+## License
 This project is licensed using MIT license.
