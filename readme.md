@@ -6,7 +6,28 @@
 
 # pbxproj 
 
-This module can read, modify, and write a .pbxproj file from an Xcode 4+ projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle.
+This module can read, modify, and write a .pbxproj file from an Xcode 4+ projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle. Because some task cannot be done by clicking on an UI or opening Xcode to do it for you, this python module lets you automate the modification process.
+
+## How to use it
+The typical tasks with an Xcode project are adding files to the project and setting some standard compilation flags.
+It can be achieved with a simple snippet like this:
+
+```python
+from pbxproj import XcodeProject
+# open the project
+project = XcodeProject.load('myapp.xcodeproj/project.pbxproj')
+
+# add a file to it, force=false to not add it if it's already in the project
+project.add_file('MyClass.swift', force=False)
+
+# set a Other Linker Flags
+project.add_other_ldflags('-ObjC')
+
+# save the project, otherwise your changes won't be picked up by Xcode
+project.save()
+```
+
+That's it. More details about available API's visit the [wiki](wiki/).
 
 ## Installation
 For installation instructions visit the [wiki](wiki/Installation)
