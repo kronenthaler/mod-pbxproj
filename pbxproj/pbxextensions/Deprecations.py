@@ -1,5 +1,6 @@
 import warnings
 from pbxproj.pbxsections import *
+from pbxproj.pbxextensions import ProjectFiles
 
 
 def deprecated(func):
@@ -91,3 +92,11 @@ class Deprecations:
     @deprecated
     def get_build_phases(self, phase_name):
         return self.get_build_phases_by_name(phase_name)
+
+    @deprecated
+    def add_file_if_doesnt_exist(self, f_path, parent=None, tree='SOURCE_ROOT', create_build_files=True, weak=False,
+                                 ignore_unknown_type=False, target=None):
+        file_options = ProjectFiles.FileOptions(create_build_files=create_build_files, weak=weak,
+                                                ignore_unknown_type=ignore_unknown_type)
+        return self.add_file(f_path, parent=parent, tree=tree, force=False, target_name=target,
+                             file_options=file_options)

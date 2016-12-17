@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=refactor)](https://travis-ci.org/kronenthaler/mod-pbxproj) 
-[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=refactor)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=refactor) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=refactor)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=refactor)
-[![PyPI](https://img.shields.io/pypi/v/mod-pbxproj.svg)]()
+[![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=master)](https://travis-ci.org/kronenthaler/mod-pbxproj) 
+[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=refactor) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=refactor)
+[![PyPI](https://img.shields.io/pypi/v/mod-pbxproj.svg)](https://pypi.python.org/pypi/mod_pbxproj)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
 
 # pbxproj 
@@ -28,6 +28,18 @@ project.save()
 ```
 
 That's it. More details about available API's visit the [wiki](wiki/).
+
+## Why refactor?
+The project has being rewritten entirely from version 1.3.1 to 2.0.0. This refactor had some goals in mind:
+
+1. Make the project more maintainable. By breaking the monolithic file into separated packages and classes.
+2. Add unit tests. The old implementation was not particularly testable. Tests will allow to make future changes with confidence that they won't break existing functionality.
+3. Improve the code quality. The code has being cleaned, responsibilities clearly separated and ambiguous APIs removed.
+4. Introduce new functionality in a clearer way. There were some functionality missing or half working. Some of this features were addresses by this refactor.
+5. Make the output as compatible as possible with Xcode's expectations. 
+6. Improve the fault tolerance. Whenever Xcode introduces new sections into its format things would've broken. Now, unknown sections are read and written back even if the project doesn't know about them.
+
+For more information about what API's were deprecated or completely removed check [wiki](wiki/Deprecations).
 
 ## Installation
 For installation instructions visit the [wiki](wiki/Installation)

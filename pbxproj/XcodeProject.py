@@ -56,6 +56,9 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups, 
             return targets[0]
         return None
 
+    def get_object(self, object_id):
+        return self.objects[object_id]
+
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
