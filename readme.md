@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=master)](https://travis-ci.org/kronenthaler/mod-pbxproj) 
-[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master&x=1)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master&x=1)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=master)
 [![PyPI](https://img.shields.io/pypi/v/pbxproj.svg)](https://pypi.python.org/pypi/pbxproj)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
  
