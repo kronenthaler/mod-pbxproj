@@ -3,7 +3,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=master)
 [![PyPI](https://img.shields.io/pypi/v/pbxproj.svg)](https://pypi.python.org/pypi/pbxproj)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
-
+ 
 # pbxproj 
 
 This module can read, modify, and write a .pbxproj file from an Xcode 4+ projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle. Because some task cannot be done by clicking on an UI or opening Xcode to do it for you, this python module lets you automate the modification process.
