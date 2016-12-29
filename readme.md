@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=master)](https://travis-ci.org/kronenthaler/mod-pbxproj) 
-[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=refactor) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=refactor)
-[![PyPI](https://img.shields.io/pypi/v/mod-pbxproj.svg)](https://pypi.python.org/pypi/mod_pbxproj)
+[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kronenthaler/mod-pbxproj/?branch=master)
+[![PyPI](https://img.shields.io/pypi/v/pbxproj.svg)](https://pypi.python.org/pypi/pbxproj)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
 
 # pbxproj 
@@ -63,7 +63,7 @@ We cannot help you if your issue is a title: "it does not work". Or if there is 
 ## Contributing
 Do you want to fix an issue yourself? Great! some house rules:
 
-* Provide a description of what problem are you solving, what case was not being taking into account
+* Provide a description of what problem you are solving, what case was not being taking into account
 * Provide unit tests for the case you have fixed. Pull request without unit test or PRs that decrease the coverage will not be approved until this changes.
 * Adhere to the coding style and conventions of the project, for instance, target_name is used to specify the target across all functions that use this parameter. Changes will be requested on PRs that don't follow this.
 * Write descriptive commit messages.
