@@ -26,7 +26,7 @@
 # of this script. Afterwards, it will import all necessary modules to the developer to make his/her own script work as
 # before.
 
-from distutils.core import run_setup, setup
+from setuptools import setup
 import site
 
 __author__ = 'kronenthaler'
@@ -41,7 +41,7 @@ except:
     print 'Installing package...'
     setup(name=__package_name__,
           license='MIT License',
-          install_requires=['mod-pbxproj'],
+          install_requires=['pbxproj'],
           script_args=['install', '--user', '--force', '--record', '.uninstall_files'])
 
 # force the refresh of the packages
