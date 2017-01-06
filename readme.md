@@ -27,7 +27,7 @@ project.add_other_ldflags('-ObjC')
 project.save()
 ```
 
-That's it. More details about available API's visit the [wiki](wiki/).
+That's it. More details about available API's visit the [wiki](https://github.com/kronenthaler/mod-pbxproj/wiki/).
 
 ## Why refactor?
 The project has being rewritten entirely from version 1.3.1 to 2.0.0. This refactor had some goals in mind:
@@ -39,16 +39,16 @@ The project has being rewritten entirely from version 1.3.1 to 2.0.0. This refac
 5. Make the output as compatible as possible with Xcode's expectations. 
 6. Improve the fault tolerance. Whenever Xcode introduces new sections into its format things would've broken. Now, unknown sections are read and written back even if the project doesn't know about them.
 
-For more information about what API's were deprecated or completely removed check [wiki](wiki/Deprecations).
+For more information about what API's were deprecated or completely removed check [wiki](https://github.com/kronenthaler/mod-pbxproj/wiki/Deprecations).
 
 ## Installation
-For installation instructions visit the [wiki](wiki/Installation)
+For installation instructions visit the [wiki](https://github.com/kronenthaler/mod-pbxproj/wiki/Installation)
 
 ## CLI
-For instructions and commands available visit the [wiki](wiki/CLI)
+For instructions and commands available visit the [wiki](https://github.com/kronenthaler/mod-pbxproj/wiki/CLI)
 
 ## Documentation
-For general documentation, visit the [wiki](wiki/).
+For general documentation, visit the [wiki](https://github.com/kronenthaler/mod-pbxproj/wiki/).
 For technical documentation, the public functions are documented and contains details about what is expected.
 
 ## Reporting bugs
