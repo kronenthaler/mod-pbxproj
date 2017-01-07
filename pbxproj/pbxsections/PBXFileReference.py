@@ -26,5 +26,11 @@ class PBXFileReference(PBXGenericObject):
     def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
                       indentation_increment=u'\t'):
         return super(PBXFileReference, self)._print_object(u'', entry_separator=u' ', object_start=u'',
-                                                     indentation_increment=u'')
+                                                           indentation_increment=u'')
+
+    def remove(self, recursive=True):
+        # search on the BuildFiles if there is a build file to be removed, and remove it
+        # search for each phase that has a reference to the build file and remove it from it.
+        # remove the file reference from it's parent
+        pass
 
