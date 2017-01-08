@@ -30,7 +30,7 @@ from setuptools import setup
 import site
 
 __author__ = 'kronenthaler'
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 __package_name__ = 'mod_pbxproj_installer'
 
 try:
