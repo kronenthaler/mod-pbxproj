@@ -21,6 +21,9 @@ class ProjectGroupsTest(unittest.TestCase):
                 '6p': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': []},
                 'broken': {'isa': 'PBXGroup', 'name': 'broken', 'path': '..', 'children': ['broken1']},
                 'broken1': {'isa': 'PBXGroup', 'name': 'b1', 'path': '..', 'children': ['broken2']},
+                'a': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': ['b']},
+                'b': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': ['c']},
+                'c': {'isa': 'PBXFileReference', 'name': 'app'},
             }
         }
 
@@ -139,6 +142,16 @@ class ProjectGroupsTest(unittest.TestCase):
         self.assertIsNone(project.objects['1p'])
         self.assertIsNotNone(project.objects['2p'])
         self.assertIsNotNone(project.objects['3p'])
+
+    def testRemoveByIdRecursivelyWithFiles(self):
+        project = XcodeProject(self.obj)
+        group1 = project.objects['a']
+        result = project.remove_group_by_id('a')
+
+        self.assertTrue(result)
+        self.assertIsNone(project.objects['a'])
+        self.assertIsNone(project.objects['b'])
+        self.assertIsNone(project.objects['c'])
 
     def testRemoveBrokenGroups(self):
         project = XcodeProject(self.obj)

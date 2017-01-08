@@ -43,9 +43,22 @@ class ProjectGroups:
         if group is None:
             return False
 
-        # error removing the element or any of its children
-        if not group.remove(recursive):
+        result = True
+        # iterate over the children and determine if they are file/group and call the right method.
+        for subgroup_id in list(group.children):
+            subgroup = self.objects[subgroup_id]
+            if subgroup is None:
+                return False
+
+            if recursive and isinstance(subgroup, PBXGroup):
+                result &= self.remove_group_by_id(subgroup.get_id(), recursive)
+            if isinstance(subgroup, PBXFileReference):
+                result &= self.remove_file_by_id(subgroup.get_id())
+
+        if not result:
             return False
+
+        del self.objects[group.get_id()]
 
         # remove the reference from any other group object that could be containing it.
         for other_group in self.objects.get_objects_in_section(u'PBXGroup'):
