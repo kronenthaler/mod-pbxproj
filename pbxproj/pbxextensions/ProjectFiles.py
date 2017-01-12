@@ -49,33 +49,33 @@ class ProjectFiles:
     _FILE_TYPES = {
         u'.a': (u'archive.ar', u'PBXFrameworksBuildPhase'),
         u'.app': (u'wrapper.application', None),
-        u'.s': (u'sourcecode.asm', u'PBXSourcesBuildPhase'),
+        u'.bundle': (u'wrapper.plug-in', u'PBXResourcesBuildPhase'),
         u'.c': (u'sourcecode.c.c', u'PBXSourcesBuildPhase'),
         u'.cpp': (u'sourcecode.cpp.cpp', u'PBXSourcesBuildPhase'),
+        u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
+        u'.dylib': (u'compiled.mach-o.dylib', u'PBXFrameworksBuildPhase'),
         u'.framework': (u'wrapper.framework', u'PBXFrameworksBuildPhase'),
         u'.h': (u'sourcecode.c.h', None),
         u'.hpp': (u'sourcecode.c.h', None),
-        u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
-        u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
         u'.icns': (u'image.icns', u'PBXResourcesBuildPhase'),
-        u'.m': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
         u'.j': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
+        u'.json': (u'text.json', u'PBXResourcesBuildPhase'),
+        u'.m': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
         u'.mm': (u'sourcecode.cpp.objcpp', u'PBXSourcesBuildPhase'),
         u'.nib': (u'wrapper.nib', u'PBXResourcesBuildPhase'),
         u'.plist': (u'text.plist.xml', u'PBXResourcesBuildPhase'),
-        u'.json': (u'text.json', u'PBXResourcesBuildPhase'),
         u'.png': (u'image.png', u'PBXResourcesBuildPhase'),
         u'.rtf': (u'text.rtf', u'PBXResourcesBuildPhase'),
+        u'.s': (u'sourcecode.asm', u'PBXSourcesBuildPhase'),
+        u'.strings': (u'text.plist.strings', u'PBXResourcesBuildPhase'),
+        u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
+        u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
         u'.tiff': (u'image.tiff', u'PBXResourcesBuildPhase'),
         u'.txt': (u'text', u'PBXResourcesBuildPhase'),
+        u'.xcassets': (u'folder.assetcatalog', u'PBXResourcesBuildPhase'),
+        u'.xcdatamodeld': (u'wrapper.xcdatamodel', u'PBXSourcesBuildPhase'),
         u'.xcodeproj': (u'wrapper.pb-project', None),
         u'.xib': (u'file.xib', u'PBXResourcesBuildPhase'),
-        u'.strings': (u'text.plist.strings', u'PBXResourcesBuildPhase'),
-        u'.bundle': (u'wrapper.plug-in', u'PBXResourcesBuildPhase'),
-        u'.dylib': (u'compiled.mach-o.dylib', u'PBXFrameworksBuildPhase'),
-        u'.xcdatamodeld': (u'wrapper.xcdatamodel', u'PBXSourcesBuildPhase'),
-        u'.xcassets': (u'folder.assetcatalog', u'PBXResourcesBuildPhase'),
-        u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
     }
     _SPECIAL_FOLDERS = [
         u'.bundle',
@@ -105,11 +105,8 @@ class ProjectFiles:
         """
         results = []
         # if it's not forced to add the file stop if the file already exists.
-        if not force:
-            for section in self.objects.get_sections():
-                for obj in self.objects.get_objects_in_section(section):
-                    if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
-                        return results
+        if not force and self._file_in_project(path):
+            return results
 
         # decide the proper tree and path to add
         abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
@@ -133,6 +130,9 @@ class ProjectFiles:
         if not file_options.create_build_files:
             return results
 
+        # check if the file_ref should be processed as a variant group
+        file_ref = self._create_variant_groups(file_ref)
+
         # additional attributes in for libraries/embed frameworks
         attributes = file_options.get_attributes()
 
@@ -144,20 +144,9 @@ class ProjectFiles:
             # if it's a framework and it needs to be embedded
             if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
                     file_ref.lastKnownFileType == u'wrapper.framework':
-                embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
-                                                               (PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
-                # add runpath search flag
-                self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
-                               u'$(inherited) @executable_path/Frameworks', target_name)
-                build_phases.extend(embed_phase)
+                self._embed_framework(file_ref, target, build_phases)
 
-            # create the build file and add it to the phase
-            for target_build_phase in build_phases:
-                build_file = PBXBuildFile.create(file_ref, attributes)
-                self.objects[build_file.get_id()] = build_file
-                target_build_phase.add_build_file(build_file)
-
-                results.append(build_file)
+            results.extend(self._create_build_files(file_ref, attributes, build_phases))
 
         # special case for the frameworks and libraries to update the search paths
         if tree != TreeType.SOURCE_ROOT or abs_path is None:
@@ -331,6 +320,57 @@ class ProjectFiles:
 
         return results
 
+    # private methods
+    def _create_build_files(self, file_ref, attributes, build_phases):
+        results = []
+        # create the build file and add it to the phase
+        for target_build_phase in build_phases:
+            build_file = PBXBuildFile.create(file_ref, attributes)
+            self.objects[build_file.get_id()] = build_file
+            target_build_phase.add_build_file(build_file)
+
+            results.append(build_file)
+
+        return results
+
+    def _embed_framework(self, file_ref, target, build_phases):
+        embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
+                                                       (PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
+        # add runpath search flag
+        self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
+                       u'$(inherited) @executable_path/Frameworks', target.name)
+        build_phases.extend(embed_phase)
+
+    def _create_variant_groups(self, file_ref):
+        if file_ref.lastKnownFileType != u'text.plist.strings':
+            return file_ref
+
+        variant_group = None
+        expected_name = os.path.split(file_ref.path)[1]
+        for variant in self.objects.get_objects_in_section(u'PBXVariantGroup'):
+            if variant.name == expected_name:
+                variant_group = variant
+                break
+
+        if variant_group is None:
+            variant_group = PBXVariantGroup.create(expected_name)
+            self.objects[variant_group.get_id()] = variant_group
+
+        variant_group.add_variant(file_ref)
+        return variant
+
+    def _file_in_project(self, path):
+        """
+        Checks if the path of the file already exists on the project on any section
+        :param path: Path of the file to check
+        :return: if the file exists on any section or not.
+        """
+        for section in self.objects.get_sections():
+            for obj in self.objects.get_objects_in_section(section):
+                if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                    return True
+        return False
+
     # miscellaneous functions, candidates to be extracted and decouple implementation
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
@@ -343,8 +383,8 @@ class ProjectFiles:
 
         if not unknown_type_allowed and file_type is None:
             raise ValueError(
-                u'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES' \
-                    .format(os.path.splitext(file_ref.name)[1]))
+                u'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES'
+                .format(os.path.splitext(file_ref.name)[1]))
 
         return file_type, build_phase
 
