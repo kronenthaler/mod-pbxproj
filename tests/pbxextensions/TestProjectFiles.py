@@ -143,6 +143,25 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.m", force=False)
         self.assertEqual(build_file, [])
 
+    def testAddVariantGroupFile(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file("en.proj/Texts.strings")
+
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXVariantGroup').__len__(), 1)
+        self.assertEqual(build_file.__len__(), 2)
+        self.assertEqual(build_file[0].fileRef, project.objects.get_objects_in_section(u'PBXVariantGroup')[0].get_id())
+        self.assertEqual(build_file[1].fileRef, project.objects.get_objects_in_section(u'PBXVariantGroup')[0].get_id())
+
+    def testAddVariantGroupFileToExistingGroup(self):
+        project = XcodeProject(self.obj)
+        build_file = project.add_file("en.proj/Texts.strings")
+        build_file = project.add_file("nl.proj/Texts.strings")
+
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXVariantGroup').__len__(), 1)
+        self.assertEqual(build_file.__len__(), 2)
+        self.assertEqual(build_file[0].fileRef, project.objects.get_objects_in_section(u'PBXVariantGroup')[0].get_id())
+        self.assertEqual(build_file[1].fileRef, project.objects.get_objects_in_section(u'PBXVariantGroup')[0].get_id())
+
     def testGetFilesByNameWithNoParent(self):
         project = XcodeProject(self.obj)
         files = project.get_files_by_name('file')
