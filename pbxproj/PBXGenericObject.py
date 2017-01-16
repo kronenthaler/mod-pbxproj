@@ -171,10 +171,11 @@ class PBXGenericObject(object):
     @classmethod
     def _escape(cls, item):
         if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
-            escaped = item.replace(u'\n', u'\\n')\
+            escaped = item.replace(u'\\', u'\\\\')\
+                .replace(u'\n', u'\\n')\
                 .replace(u'\"', u'\\"')\
                 .replace(u'\0', u'\\0')\
-                .replace(u'\'',u'\\\'')\
-                .replace(u'\t',u'\\\t')
+                .replace(u'\'', u'\\\'')\
+                .replace(u'\t', u'\\\t')
             return u'"{0}"'.format(escaped)
         return item
