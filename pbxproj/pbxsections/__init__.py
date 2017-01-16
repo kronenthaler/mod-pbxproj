@@ -14,3 +14,4 @@ from pbxproj.pbxsections.XCBuildConfiguration import *
 from pbxproj.pbxsections.PBXAggregatedTarget import *
 from pbxproj.pbxsections.PBXNativeTarget import *
 from pbxproj.pbxsections.PBXGroup import *
+from pbxproj.pbxsections.PBXVariantGroup import *

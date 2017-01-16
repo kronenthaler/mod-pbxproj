@@ -357,7 +357,7 @@ class ProjectFiles:
             self.objects[variant_group.get_id()] = variant_group
 
         variant_group.add_variant(file_ref)
-        return variant
+        return variant_group
 
     def _file_in_project(self, path):
         """

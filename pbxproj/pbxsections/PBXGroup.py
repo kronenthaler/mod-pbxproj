@@ -56,17 +56,3 @@ class PBXGroup(PBXGenericObject):
             return True
 
         return False
-
-    def remove(self, recursive=True):
-        parent = self.get_parent()
-        # remove from the objects reference
-        del parent[self.get_id()]
-
-        # remove children if necessary
-        if recursive:
-            for subgroup_id in self.children:
-                subgroup = parent[subgroup_id]
-                if subgroup is None or not subgroup.remove(recursive):
-                    return False
-
-        return True
