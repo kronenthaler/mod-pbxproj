@@ -7,7 +7,6 @@ python:
 install:
   - pip install .
   - pip install coveralls
-  - pip install scrutinizer-ocular
   - pip install codacy-coverage
 
 script:
@@ -16,7 +15,6 @@ script:
 
 after_success:
   - coveralls
-  - ocular --data-file ".coverage"
   - python-codacy-coverage -r coverage.xml
 
 deploy:
