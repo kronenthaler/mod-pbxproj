@@ -1,5 +1,4 @@
-from pbxproj.PBXGenericObject import *
-from pbxproj.pbxsections import *
+from pbxproj.pbxsections.PBXBuildFile import *
 
 
 class PBXGenericBuildPhase(PBXGenericObject):

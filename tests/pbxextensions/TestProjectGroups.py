@@ -145,7 +145,6 @@ class ProjectGroupsTest(unittest.TestCase):
 
     def testRemoveByIdRecursivelyWithFiles(self):
         project = XcodeProject(self.obj)
-        group1 = project.objects['a']
         result = project.remove_group_by_id('a')
 
         self.assertTrue(result)

@@ -41,7 +41,7 @@ add options:
 # pbxproj folder (--delete | -D) (--group | -G) <project> <path>
 
 from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
+from pbxproj.pbxextensions.ProjectFiles import FileOptions
 from docopt import docopt
 
 

@@ -7,14 +7,15 @@ python:
 install:
   - pip install .
   - pip install coveralls
-  - pip install scrutinizer-ocular
+  - pip install codacy-coverage
 
 script:
   - python setup.py coverage
+  - coverage xml
 
 after_success:
   - coveralls
-  - ocular --data-file ".coverage"
+  - python-codacy-coverage -r coverage.xml
 
 deploy:
   provider: pypi
@@ -25,3 +26,6 @@ deploy:
     tags: true
     distributions: sdist bdist_wheel
     repo: kronenthaler/mod-pbxproj
+
+env:
+  secure: "gkO3U+6A5Nspsz/lWcpKzeTkLRvER2B+L7fLhAULYlhJ7/ZvHw2rTdWSZkDfY38VojS/Q/bdEk4OHcBga2Lm0v71iD0pGsB0bH8WwDL5eDeL5dvwE3k8OoFIzk5WY1IDPBk8JH9Hr6nz+oQwtK9aQTOItZcz+NAJ+wY58XJSGu0="

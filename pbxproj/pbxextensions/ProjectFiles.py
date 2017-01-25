@@ -325,7 +325,7 @@ class ProjectFiles:
                     children = self.add_folder(full_path, parent, excludes, recursive, target_name=target_name,
                                                file_options=file_options)
                 else:
-                    subgroup = self.get_or_create_group(child, child, parent)
+                    self.get_or_create_group(child, child, parent)
 
             results.extend(children)
 

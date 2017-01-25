@@ -1,7 +1,4 @@
 import unittest
-
-from pbxproj import PBXGenericObject
-from pbxproj.PBXObjects import objects
 from pbxproj.PBXKey import PBXKey
 
 
