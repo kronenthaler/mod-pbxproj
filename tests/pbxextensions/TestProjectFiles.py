@@ -201,7 +201,7 @@ class ProjectFilesTest(unittest.TestCase):
     def testRemoveFilesByPath(self):
         project = XcodeProject(self.obj)
         original = project.__str__()
-        build_files = project.add_file("file.m")
+        project.add_file("file.m")
 
         result = project.remove_files_by_path('file.m')
 
