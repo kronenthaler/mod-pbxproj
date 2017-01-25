@@ -91,7 +91,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileFrameworkWithAbsolutePath(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file(os.path.abspath("samples/test.framework"))
+        project.add_file(os.path.abspath("samples/test.framework"))
 
         expected_flags = ["$(SRCROOT)/tests/samples", "$(inherited)"]
         self.assertListEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
@@ -101,7 +101,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFileLibraryWithAbsolutePath(self):
         project = XcodeProject(self.obj)
-        build_file = project.add_file(os.path.abspath("samples/testLibrary.a"))
+        project.add_file(os.path.abspath("samples/testLibrary.a"))
 
         expected_flags = "$(SRCROOT)/tests/samples"
         self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
@@ -173,7 +173,7 @@ class ProjectFilesTest(unittest.TestCase):
     def testRemoveFileById(self):
         project = XcodeProject(self.obj)
         original = project.__str__()
-        build_files = project.add_file("file.m")
+        project.add_file("file.m")
 
         file = project.get_files_by_name('file.m')[0]
         result = project.remove_file_by_id(file.get_id())
@@ -217,7 +217,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFolderNonRecursive(self):
         project = XcodeProject(self.obj)
-        result = project.add_folder('samples/', recursive=False)
+        project.add_folder('samples/', recursive=False)
 
         # should add test.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')
@@ -232,7 +232,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFolderRecursive(self):
         project = XcodeProject(self.obj)
-        result = project.add_folder('samples')
+        project.add_folder('samples')
 
         # should add test.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')
@@ -248,7 +248,7 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testAddFolderWithExclusions(self):
         project = XcodeProject(self.obj)
-        result = project.add_folder('samples', excludes=['file.\\.m', 'test.*'])
+        project.add_folder('samples', excludes=['file.\\.m', 'test.*'])
 
         # should add test.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')

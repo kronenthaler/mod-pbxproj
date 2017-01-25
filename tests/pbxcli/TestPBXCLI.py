@@ -22,7 +22,7 @@ class PBXCLITest(unittest.TestCase):
 
     def testOpenProjectInvalidPath(self):
         with self.assertRaisesRegexp(Exception, '^Project file not found'):
-            project = open_project({'<project>': 'whatever'})
+            open_project({'<project>': 'whatever'})
 
     def testBackupNoFlag(self):
         project = XcodeProject({}, path='samplescli/project.pbxproj')
