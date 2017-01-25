@@ -1,15 +1,15 @@
 from pbxproj.PBXGenericObject import *
-from pbxproj.pbxsections import *
+from pbxproj.pbxsections.PBXBuildFile import *
 
 
 class PBXGenericBuildPhase(PBXGenericObject):
     @classmethod
-    def create(cls, name=None, files=None):
+    def create(cls, **kwargs):
         return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
-            u'name': name,
-            u'files': files if files else [],
+            u'name': kwargs.get(u'name'),
+            u'files': kwargs.get(u'files', []),
             u'buildActionMask': 0x7FFFFFFF,
             u'runOnlyForDeploymentPostprocessing': 0
         })
