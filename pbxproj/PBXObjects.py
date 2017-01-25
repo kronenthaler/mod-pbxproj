@@ -1,4 +1,3 @@
-import uuid
 from pbxproj import PBXGenericObject
 
 

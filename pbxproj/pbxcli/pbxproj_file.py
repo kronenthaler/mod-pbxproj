@@ -29,7 +29,7 @@ add options:
     -C, --no-create-build-files    Do not create build file phases when adding a file.
 """
 from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import TreeType, FileOptions
+from pbxproj.pbxextensions.ProjectFiles import FileOptions
 from docopt import docopt
 
 

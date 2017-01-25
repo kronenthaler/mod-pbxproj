@@ -1,4 +1,3 @@
-import os
 from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 

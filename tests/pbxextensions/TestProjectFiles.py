@@ -1,6 +1,5 @@
 import unittest
 from pbxproj.XcodeProject import *
-import sys
 
 
 class ProjectFilesTest(unittest.TestCase):
