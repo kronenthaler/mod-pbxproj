@@ -182,13 +182,13 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testRemoveFileByIdFromTarget(self):
         project = XcodeProject(self.obj)
-        build_files = project.add_file("file.m")
+        project.add_file("file.m")
 
-        file = project.get_files_by_name('file.m')[0]
-        result = project.remove_file_by_id(file.get_id(), target_name='report')
+        file_ref = project.get_files_by_name('file.m')[0]
+        result = project.remove_file_by_id(file_ref.get_id(), target_name='report')
 
         self.assertTrue(result)
-        self.assertIsNotNone(project.objects[file.get_id()])
+        self.assertIsNotNone(project.objects[file_ref.get_id()])
         self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 3)
         self.assertEqual(project.objects.get_objects_in_section('PBXSourcesBuildPhase').__len__(), 1)
 

@@ -89,7 +89,7 @@ class PBXProjFolderTest(unittest.TestCase):
 
         self.assertListEqual(project.get_files_by_path(args['<path>']), [])
         with self.assertRaisesRegexp(Exception, '^No files were added to the project.'):
-            result = pbxproj_folder.execute(project, args)
+            pbxproj_folder.execute(project, args)
 
         self.assertEqual(project.get_files_by_path(args['<path>']).__len__(), 0)
 
