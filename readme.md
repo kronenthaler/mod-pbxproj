@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master&x=1)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/70c14211ba704d2893f7b0f54bb04da7)](https://www.codacy.com/app/kronenthaler/mod-pbxproj?utm_source=github.com&utm_medium=referral&utm_content=kronenthaler/mod-pbxproj&utm_campaign=badger)
 [![PyPI](https://img.shields.io/pypi/v/pbxproj.svg)](https://pypi.python.org/pypi/pbxproj)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](license.txt)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?x=1)](license.txt)
  
 # pbxproj 
 
