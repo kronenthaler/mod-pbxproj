@@ -23,6 +23,10 @@ class PBXFileReference(PBXGenericObject):
             del self[u'explicitFileType']
         self[u'lastKnownFileType'] = file_type
 
+        # for localization strings the name has to be the name of the language file
+        if file_type == u'text.plist.strings':
+            self.name = os.path.splitext(os.path.split(self.path)[0])[0]
+
     def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
                       indentation_increment=u'\t'):
         return super(PBXFileReference, self)._print_object(u'', entry_separator=u' ', object_start=u'',
