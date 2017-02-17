@@ -196,7 +196,7 @@ class ProjectFiles:
 
         files = []
         for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
-            if file_ref.name == name and (parent is None or parent.has_child(file_ref.get_id())):
+            if hasattr(file_ref, 'name') and file_ref.name == name and (parent is None or parent.has_child(file_ref.get_id())):
                 files.append(file_ref)
 
         return files
