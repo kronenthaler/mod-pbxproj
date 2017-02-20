@@ -329,7 +329,7 @@ class ProjectFiles:
             # don't create another one
             if any(str(self.objects[str(build_file)].fileRef) == file_ref.get_id() for build_file in target_build_phase.files):
                 continue
-            
+
             build_file = PBXBuildFile.create(file_ref, attributes)
             self.objects[build_file.get_id()] = build_file
             target_build_phase.add_build_file(build_file)
