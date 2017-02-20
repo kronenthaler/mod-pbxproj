@@ -125,7 +125,7 @@ class ProjectFiles:
 
         # determine the parent and add it to it
         self._get_parent_group(parent).add_child(file_ref)
-        
+
         # no need to create the build_files, done
         if not file_options.create_build_files:
             return results
