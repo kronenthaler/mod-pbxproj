@@ -125,7 +125,7 @@ class ProjectFiles:
 
         # determine the parent and add it to it
         self._get_parent_group(parent).add_child(file_ref)
-
+        
         # no need to create the build_files, done
         if not file_options.create_build_files:
             return results
@@ -325,6 +325,11 @@ class ProjectFiles:
         results = []
         # create the build file and add it to the phase
         for target_build_phase in build_phases:
+            # check to see if we already have a PBXBuildFile for this file_ref in this phase, if so
+            # don't create another one
+            if any(str(self.objects[str(build_file)].fileRef) == file_ref.get_id() for build_file in target_build_phase.files):
+                continue
+            
             build_file = PBXBuildFile.create(file_ref, attributes)
             self.objects[build_file.get_id()] = build_file
             target_build_phase.add_build_file(build_file)
