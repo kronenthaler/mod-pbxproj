@@ -19,7 +19,7 @@ class XCBuildConfiguration(PBXGenericObject):
 
         current_flags = self.buildSettings[flag_name]
         if current_flags is None:
-            self.buildSettings[flag_name] = flags
+            self.set_flags(flag_name, flags)
             return
 
         if not isinstance(current_flags, list):
@@ -28,7 +28,13 @@ class XCBuildConfiguration(PBXGenericObject):
         if not isinstance(flags, list):
             flags = [flags]
 
-        self.buildSettings[flag_name] = current_flags + flags
+        self.set_flags(flag_name, current_flags + flags)
+
+    def set_flags(self, flag_name, flags):
+        if u'buildSettings' not in self:
+            self[u'buildSettings'] = PBXGenericObject()
+
+        self.buildSettings[flag_name] = flags
 
     def remove_flags(self, flag_name, flags):
         if u'buildSettings' not in self or self.buildSettings[flag_name] is None:

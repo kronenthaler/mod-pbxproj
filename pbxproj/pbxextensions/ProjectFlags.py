@@ -22,6 +22,18 @@ class ProjectFlags:
         for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
             configuration.add_flags(flag_name, flags)
 
+    def set_flags(self, flag_name, flags, target_name=None, configuration_name=None):
+        """
+        Sets the given flags to the flag_name section of the target on the configurations, full override.
+        :param flag_name: name of the flag to be added the values to
+        :param flags: A string or array of strings
+        :param target_name: Target name to add the flag to or None for every target
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return: void
+        """
+        for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
+            configuration.set_flags(flag_name, flags)
+
     def remove_flags(self, flag_name, flags, target_name=None, configuration_name=None):
         """
         Removes the given flags from the flag_name section of the target on the configurations
@@ -219,10 +231,10 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return:
         """
-        self.add_flags(u'CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
-        self.add_flags(u'DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
-        self.add_flags(u'PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
-        self.add_flags(u'PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
+        self.set_flags(u'CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
+        self.set_flags(u'DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
+        self.set_flags(u'PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
+        self.set_flags(u'PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
 
         for target in self.objects.get_targets(target_name):
             self.objects[self.rootObject].set_provisioning_style(PBXProvioningTypes.MANUAL, target)
