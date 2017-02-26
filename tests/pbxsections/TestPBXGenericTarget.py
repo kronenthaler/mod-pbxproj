@@ -1,6 +1,5 @@
 import unittest
 from pbxproj.XcodeProject import *
-from pbxproj.pbxsections.PBXGenericTarget import *
 
 
 class PBXGenericTargetTest(unittest.TestCase):
