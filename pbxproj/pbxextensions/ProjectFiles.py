@@ -196,7 +196,7 @@ class ProjectFiles:
 
         files = []
         for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
-            if file_ref.name == name and (parent is None or parent.has_child(file_ref.get_id())):
+            if file_ref.get_name() == name and (parent is None or parent.has_child(file_ref.get_id())):
                 files.append(file_ref)
 
         return files
@@ -334,7 +334,7 @@ class ProjectFiles:
     # miscellaneous functions, candidates to be extracted and decouple implementation
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
-        ext = os.path.splitext(file_ref.name)[1]
+        ext = os.path.splitext(file_ref.get_name())[1]
         if os.path.isdir(os.path.abspath(file_ref.path)) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
             build_phase = u'PBXResourcesBuildPhase'
@@ -344,7 +344,7 @@ class ProjectFiles:
         if not unknown_type_allowed and file_type is None:
             raise ValueError(
                 u'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES' \
-                    .format(os.path.splitext(file_ref.name)[1]))
+                    .format(os.path.splitext(file_ref.get_name())[1]))
 
         return file_type, build_phase
 
