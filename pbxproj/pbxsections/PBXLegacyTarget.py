@@ -1,5 +1,5 @@
 from pbxproj.pbxsections.PBXGenericTarget import PBXGenericTarget
 
 
-class PBXNativeTarget(PBXGenericTarget):
+class PBXLegacyTarget(PBXGenericTarget):
     pass
