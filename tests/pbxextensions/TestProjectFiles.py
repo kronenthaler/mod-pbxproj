@@ -26,6 +26,7 @@ class ProjectFilesTest(unittest.TestCase):
                 'file2': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SOURCE_ROOT'},
                 'file3': {'isa': 'PBXFileReference', 'name': 'file', 'path':'file', 'sourceTree': 'SDKROOT'},
                 'file4': {'isa': 'PBXFileReference', 'name': 'file1', 'path': 'file1', 'sourceTree': 'SOURCE_ROOT'},
+                'file5': {'isa': 'PBXFileReference', 'path': 'file1', 'sourceTree': 'SOURCE_ROOT'},
                 'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
