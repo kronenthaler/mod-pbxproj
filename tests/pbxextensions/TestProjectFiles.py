@@ -143,6 +143,20 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.m", force=False)
         self.assertEqual(build_file, [])
 
+    def testAddFileOfAllTypes(self):
+        for ext in ProjectFiles._FILE_TYPES:
+            project = XcodeProject(self.obj)
+            options = FileOptions(embed_framework=False)
+            build_file = project.add_file("file{0}".format(ext), file_options=options)
+
+            _, phase = ProjectFiles._FILE_TYPES[ext]
+            amount = 0
+            if phase is not None:
+                amount = 2
+
+            self.assertEqual(project.objects.get_objects_in_section(phase).__len__(), amount)
+            self.assertEqual(build_file.__len__(), amount)
+
     def testGetFilesByNameWithNoParent(self):
         project = XcodeProject(self.obj)
         files = project.get_files_by_name('file')

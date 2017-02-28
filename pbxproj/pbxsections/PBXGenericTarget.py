@@ -6,6 +6,10 @@ class PBXGenericTarget(PBXGenericObject):
     def get_or_create_build_phase(self, build_phase_type, create_parameters=()):
         result = []
         parent = self.get_parent()
+
+        if build_phase_type is None:
+            return result
+
         for build_phase_id in self.buildPhases:
             target_build_phase = parent[build_phase_id]
             current_build_phase = type(target_build_phase).__name__
