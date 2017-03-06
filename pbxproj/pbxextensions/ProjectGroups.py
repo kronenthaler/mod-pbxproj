@@ -129,6 +129,14 @@ class ProjectGroups:
 
     def _get_parent_group(self, parent):
         if parent is None:
+            # search for the mainGroup of the project
+            project = self.objects[self[u'rootObject']]
+            if project:
+                parent = self.objects[project[u'mainGroup']]
+                if parent is not None:
+                    return parent
+
+            # search for the group without name
             parent = self.get_groups_by_name(None)
 
             # if there is no parent, create and empty parent group, add it to the objects

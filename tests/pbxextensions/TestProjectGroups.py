@@ -24,7 +24,7 @@ class ProjectGroupsTest(unittest.TestCase):
                 'a': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': ['b']},
                 'b': {'isa': 'PBXGroup', 'name': 'app', 'path': '..', 'children': ['c']},
                 'c': {'isa': 'PBXFileReference', 'name': 'app'},
-            }
+            },
         }
 
     def testInit(self):
@@ -190,6 +190,20 @@ class ProjectGroupsTest(unittest.TestCase):
 
         self.assertIsNotNone(group)
         self.assertEqual(project.objects[group.get_id()], group)
+
+    def testGetParentGroupFromMainGroup(self):
+        project = XcodeProject(
+            {
+                'objects': {
+                    'project': {'isa': 'PBXProject', 'mainGroup': 'group'},
+                    'group': {'isa': 'PBXGroup', 'name': 'group1'}
+                },
+                'rootObject': 'project'
+            })
+        group = project._get_parent_group(None)
+
+        self.assertIsNotNone(group)
+        self.assertEqual(project.objects[project.objects['project'].mainGroup], group)
 
     def testGetParentGroupWithID(self):
         project = XcodeProject(self.obj)
