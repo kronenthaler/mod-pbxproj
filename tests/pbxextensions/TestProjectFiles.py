@@ -84,10 +84,24 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 4)
-        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak', u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
-        self.assertListEqual(build_file[1].settings.ATTRIBUTES, [u'Weak', u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
-        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak', u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
-        self.assertListEqual(build_file[3].settings.ATTRIBUTES, [u'Weak', u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
+        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
+        self.assertListEqual(build_file[1].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
+        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak'])
+        self.assertListEqual(build_file[3].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
+
+    def testAddFileFrameworkFromSDKRootIgnoresEmbedAndCodeSign(self):
+        project = XcodeProject(self.obj)
+        options = FileOptions(create_build_files=True, weak=True, embed_framework=True, code_sign_on_copy=True)
+        build_file = project.add_file("file.framework", tree=TreeType.SDKROOT, file_options=options)
+
+        # 2 source files are created 1 x target
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 2)
+        self.assertEqual(build_file.__len__(), 4)
+        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
+        self.assertIsNone(build_file[1]['settings'])
+        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak'])
+        self.assertIsNone(build_file[3]['settings'])
 
     def testAddFileFrameworkWithAbsolutePath(self):
         project = XcodeProject(self.obj)
