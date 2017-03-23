@@ -36,9 +36,12 @@ class FileOptions:
         self.embed_framework = embed_framework
         self.code_sign_on_copy = code_sign_on_copy
 
-    def get_attributes(self):
-        attributes = [u'Weak'] if self.weak else None
-        if self.code_sign_on_copy:
+    def get_attributes(self, file_ref, build_phase):
+        if file_ref.lastKnownFileType != u'wrapper.framework':
+            return None
+
+        attributes = [u'Weak'] if self.weak and build_phase.isa == u'PBXFrameworksBuildPhase' else None
+        if file_ref.sourceTree != TreeType.SDKROOT and self.code_sign_on_copy and build_phase.isa == u'PBXCopyFilesBuildPhase':
             if attributes is None:
                 attributes = []
             attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
@@ -133,9 +136,6 @@ class ProjectFiles:
         if not file_options.create_build_files:
             return results
 
-        # additional attributes in for libraries/embed frameworks
-        attributes = file_options.get_attributes()
-
         # get target to match the given name or all
         for target in self.objects.get_targets(target_name):
             # determine if there is a suitable build phase created
@@ -153,7 +153,7 @@ class ProjectFiles:
 
             # create the build file and add it to the phase
             for target_build_phase in build_phases:
-                build_file = PBXBuildFile.create(file_ref, attributes)
+                build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase))
                 self.objects[build_file.get_id()] = build_file
                 target_build_phase.add_build_file(build_file)
 
