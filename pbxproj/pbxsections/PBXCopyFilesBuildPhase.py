@@ -7,7 +7,7 @@ class PBXCopyFilesBuildPhaseNames:
 
 class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
     @classmethod
-    def create(cls, name=None, files=None, dest_path=u'', dest_subfolder_spec=10):
+    def create(cls, name=None, files=None, dest_path=u'', dest_subfolder_spec='10'):
         return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,

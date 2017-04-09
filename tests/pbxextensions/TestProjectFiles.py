@@ -30,7 +30,7 @@ class ProjectFilesTest(unittest.TestCase):
                 'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
-                'compile1': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file2']}
+                'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']}
             }
         }
 
@@ -82,7 +82,7 @@ class ProjectFilesTest(unittest.TestCase):
 
         # 2 source files are created 1 x target
         self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
         self.assertEqual(build_file.__len__(), 4)
         self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
         self.assertListEqual(build_file[1].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
@@ -96,7 +96,7 @@ class ProjectFilesTest(unittest.TestCase):
 
         # 2 source files are created 1 x target
         self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
         self.assertEqual(build_file.__len__(), 4)
         self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
         self.assertIsNone(build_file[1]['settings'])
@@ -297,9 +297,17 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(dirB[0].children.__len__(), 0)  # -fileB.m
 
     def testAddFolderAsReference(self):
-        project = XcodeProject(self.obj,path="tests/project.pbxproj")
+        project = XcodeProject(self.obj, path="tests/project.pbxproj")
         build_file = project.add_folder('samples', create_groups=False)
 
         self.assertListEqual(project.get_groups_by_name('samples'), [])
         self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 2)
+
+    def testEmbedFrameworkInRightCopySection(self):
+        project = XcodeProject(self.obj)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 1)
+
+        build_file = project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
+
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
