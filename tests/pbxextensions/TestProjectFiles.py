@@ -308,6 +308,6 @@ class ProjectFilesTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 1)
 
-        build_file = project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
+        project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
 
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)

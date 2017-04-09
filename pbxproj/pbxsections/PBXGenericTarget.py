@@ -3,9 +3,10 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXGenericTarget(PBXGenericObject):
-    def get_or_create_build_phase(self, build_phase_type, search_parameters={}, create_parameters=()):
+    def get_or_create_build_phase(self, build_phase_type, search_parameters=None, create_parameters=()):
         result = []
         parent = self.get_parent()
+        search_parameters = search_parameters if search_parameters is not None else {}
 
         if build_phase_type is None:
             return result
