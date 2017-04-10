@@ -3,17 +3,20 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXGenericTarget(PBXGenericObject):
-    def get_or_create_build_phase(self, build_phase_type, create_parameters=()):
+    def get_or_create_build_phase(self, build_phase_type, search_parameters=None, create_parameters=()):
         result = []
         parent = self.get_parent()
+        search_parameters = search_parameters if search_parameters is not None else {}
 
         if build_phase_type is None:
             return result
 
         for build_phase_id in self.buildPhases:
             target_build_phase = parent[build_phase_id]
-            current_build_phase = type(target_build_phase).__name__
-            if current_build_phase == build_phase_type:
+            current_build_phase = target_build_phase.isa
+
+            if current_build_phase == build_phase_type and \
+                    all(key in target_build_phase and target_build_phase[key] == search_parameters[key] for key in search_parameters):
                 result.append(target_build_phase)
 
         if result.__len__() == 0:

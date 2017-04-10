@@ -45,7 +45,7 @@ setup(name='pbxproj',
         ]
       },
       url="http://github.com/kronenthaler/mod-pbxproj",
-      version='2.0.6',
+      version='2.0.7',
       license='MIT License',
       install_requires=['openstep_parser', 'docopt'],
       packages=find_packages(exclude=['tests']),

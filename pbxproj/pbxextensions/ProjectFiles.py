@@ -145,7 +145,8 @@ class ProjectFiles:
             if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
                     file_ref.lastKnownFileType == u'wrapper.framework':
                 embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
-                                                               (PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
+                                                               search_parameters={'dstSubfolderSpec': '10'},
+                                                               create_parameters=(PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
                 # add runpath search flag
                 self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
                                u'$(inherited) @executable_path/Frameworks', target_name)
