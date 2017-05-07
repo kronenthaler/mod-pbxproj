@@ -1,5 +1,6 @@
 import re
 import uuid
+import copy
 
 from pbxproj.PBXKey import PBXKey
 
@@ -43,7 +44,7 @@ class PBXGenericObject(object):
     def _parse_list(self, obj):
         ret = []
         for item in obj:
-            ret.append(self.parse(item))
+            ret.append(copy.copy(self).parse(item))
 
         return ret
 
