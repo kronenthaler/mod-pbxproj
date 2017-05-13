@@ -58,6 +58,7 @@ class ProjectFiles:
         u'.framework': (u'wrapper.framework', u'PBXFrameworksBuildPhase'),
         u'.h': (u'sourcecode.c.h', None),
         u'.hpp': (u'sourcecode.c.h', None),
+        u'.pch': (u'sourcecode.c.h', None),
         u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
         u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
         u'.icns': (u'image.icns', u'PBXResourcesBuildPhase'),
