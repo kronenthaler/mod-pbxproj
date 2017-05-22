@@ -50,6 +50,7 @@ class FileOptions:
 
 class ProjectFiles:
     _FILE_TYPES = {
+        u'': (u'text', u'PBXResourcesBuildPhase'),
         u'.a': (u'archive.ar', u'PBXFrameworksBuildPhase'),
         u'.app': (u'wrapper.application', None),
         u'.s': (u'sourcecode.asm', u'PBXSourcesBuildPhase'),
@@ -60,6 +61,7 @@ class ProjectFiles:
         u'.hpp': (u'sourcecode.c.h', None),
         u'.pch': (u'sourcecode.c.h', None),
         u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
+        u'.def': (u'text', u'PBXResourcesBuildPhase'),
         u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
         u'.icns': (u'image.icns', u'PBXResourcesBuildPhase'),
         u'.m': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
@@ -79,6 +81,7 @@ class ProjectFiles:
         u'.dylib': (u'compiled.mach-o.dylib', u'PBXFrameworksBuildPhase'),
         u'.xcdatamodeld': (u'wrapper.xcdatamodel', u'PBXSourcesBuildPhase'),
         u'.xcassets': (u'folder.assetcatalog', u'PBXResourcesBuildPhase'),
+        u'.xcconfig': (u'sourcecode.xcconfig', u'PBXSourcesBuildPhase'),
         u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
     }
     _SPECIAL_FOLDERS = [
