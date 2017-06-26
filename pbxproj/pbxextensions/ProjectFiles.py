@@ -166,8 +166,8 @@ class ProjectFiles:
                     if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
                         return []
 
-        file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
-                                                                                        file_options)
+        file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
+                                                                                 file_options)
         if path is None or tree is None:
             return None
 
@@ -197,7 +197,7 @@ class ProjectFiles:
             results.append(reference_proxy)
 
             if file_options.create_build_files:
-                file_type, expected_build_phase = self._determine_file_type(reference_proxy, file_options.ignore_unknown_type)
+                _, expected_build_phase = self._determine_file_type(reference_proxy, file_options.ignore_unknown_type)
                 self._create_build_files(reference_proxy, target_name, expected_build_phase, file_options)
 
         # add new PBXFileReference and PBXGroup to the PBXProject object
