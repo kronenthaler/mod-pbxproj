@@ -30,7 +30,8 @@ class ProjectFilesTest(unittest.TestCase):
                 'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
-                'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']}
+                'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']},
+                'project': {'isa': 'PBXProject'}
             }
         }
 
@@ -311,3 +312,57 @@ class ProjectFilesTest(unittest.TestCase):
         project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
 
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
+
+    def testAddProjectWithBuildPhases(self):
+        project = XcodeProject(self.obj)
+
+        frameworks = project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__()
+        resources = project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__()
+        build_files = project.objects.get_objects_in_section('PBXBuildFile').__len__()
+
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj')
+
+        self.assertEqual(reference_proxies.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+
+        # check that the buildFiles where added
+        self.assertGreater(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
+        self.assertGreater(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
+        self.assertGreater(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+
+    def testAddProjectWithoutBuildPhases(self):
+        project = XcodeProject(self.obj)
+
+        frameworks = project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__()
+        resources = project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__()
+        build_files = project.objects.get_objects_in_section('PBXBuildFile').__len__()
+
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj', file_options=FileOptions(create_build_files=False))
+
+        self.assertEqual(reference_proxies.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+
+        # check that the buildFiles where added
+        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
+        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
+        self.assertEqual(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+
+    def testAddProjectNotForced(self):
+        project = XcodeProject(self.obj)
+
+        _ = project.add_project('samplescli/dependency.xcodeproj', file_options=FileOptions(create_build_files=False))
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj', force=False,
+                                                file_options=FileOptions(create_build_files=False))
+
+        self.assertListEqual(reference_proxies, [])
+
+    def testAddProjectDoesntExists(self):
+        project = XcodeProject(self.obj)
+        reference_proxies = project.add_project(os.path.abspath("samples/unexistingFile.m"))
+
+        # nothing to do if the file is absolute but doesn't exist
+        self.assertIsNone(reference_proxies)
