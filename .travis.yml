@@ -20,6 +20,7 @@ after_success:
 deploy:
   provider: pypi
   user: kronenthaler
+  server: https://upload.pypi.org/legacy/
   password:
     secure: wJTcHIa1sbXxE4FnLux/fUI+OqZl8tM3EuvPckC7FaYKFzVbFG63xHhpThZxOVF5295nxHBFIBPSm/wA+6wOjvDazaPd3Kvw+BlQqPOaUPuJEfeK9R0IfRB0ojkn7nXmhhiUJiO3UzNrCFsMdt9zMCzu7jih/r7DCv8pYb66CuQ=
   on:
