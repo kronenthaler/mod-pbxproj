@@ -31,6 +31,7 @@ class ProjectFilesTest(unittest.TestCase):
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
                 'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']},
+                'compile2': {'isa': 'PBXShellScriptBuildPhase', 'files': []},
                 'project': {'isa': 'PBXProject'}
             }
         }
@@ -207,6 +208,19 @@ class ProjectFilesTest(unittest.TestCase):
 
     def testRemoveFileById(self):
         project = XcodeProject(self.obj)
+        original = project.__str__()
+        project.add_file("file.m")
+
+        file = project.get_files_by_name('file.m')[0]
+        result = project.remove_file_by_id(file.get_id())
+
+        self.assertTrue(result)
+        self.assertEqual(project.__str__(), original)
+
+    def testRemoveFileByIdKeepShellScriptBuildPhases(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script('ls -la')
+
         original = project.__str__()
         project.add_file("file.m")
 

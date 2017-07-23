@@ -281,8 +281,8 @@ class ProjectFiles:
                         # remove the build file from the phase
                         build_phase.remove_build_file(build_file)
 
-                # if the build_phase is empty remove it too
-                if build_phase.files.__len__() == 0:
+                # if the build_phase is empty remove it too, unless it's a shell script.
+                if build_phase.files.__len__() == 0 and build_phase.isa != u'PBXShellScriptBuildPhase':
                     # remove the build phase from the target
                     target.remove_build_phase(build_phase)
 
