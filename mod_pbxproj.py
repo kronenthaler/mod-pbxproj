@@ -38,7 +38,7 @@ try:
     from pbxproj import XcodeProject
 except:
     # install it if not present
-    print 'Installing package...'
+    print('Installing package...')
     setup(name=__package_name__,
           license='MIT License',
           install_requires=['pbxproj'],

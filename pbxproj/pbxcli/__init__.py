@@ -30,9 +30,9 @@ def command_parser(command):
         try:
             project = open_project(args)
             backup_file = backup_project(project, args)
-            print command(project, args)
+            print(command(project, args))
             resolve_backup(project, backup_file, args)
         except Exception as ex:
-            print ex.message
+            print(ex.message)
             exit(1)
     return parser

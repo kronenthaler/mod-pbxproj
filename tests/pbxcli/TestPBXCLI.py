@@ -1,8 +1,7 @@
 import unittest
-import os
 import sys
 import tempfile
-import StringIO
+from io import StringIO
 from pbxproj.pbxcli import *
 
 
