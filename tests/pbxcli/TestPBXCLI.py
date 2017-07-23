@@ -52,16 +52,16 @@ class PBXCLITest(unittest.TestCase):
         self.assertFalse(os.path.exists(tmpfile.name))
 
     def testCommandWithSuccess(self):
-        function = lambda p, a: 'test'
+        function = lambda p, a: u'test'
         parser = command_parser(function)
-        sys.stdout = StringIO.StringIO()
-        parser({'<project>': 'samplescli/project.pbxproj', '--backup': False})
-        self.assertEqual(sys.stdout.getvalue().strip(), 'test')
+        sys.stdout = StringIO()
+        parser({u'<project>': u'samplescli/project.pbxproj', u'--backup': False})
+        self.assertEqual(sys.stdout.getvalue().strip(), u'test')
 
     def testCommandWithFailure(self):
-        function = lambda p, a: 'test'
+        function = lambda p, a: u'test'
         parser = command_parser(function)
-        sys.stdout = StringIO.StringIO()
+        sys.stdout = StringIO()
         with self.assertRaisesRegexp(SystemExit, '^1'):
-            parser({'<project>': 'whatever/project.pbxproj', '--backup': False})
-        self.assertEqual(sys.stdout.getvalue().strip(), 'Project file not found')
+            parser({u'<project>': u'whatever/project.pbxproj', u'--backup': False})
+        self.assertEqual(sys.stdout.getvalue().strip(), u'Project file not found')
