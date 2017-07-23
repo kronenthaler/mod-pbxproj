@@ -1,6 +1,6 @@
-class PBXKey(unicode):
+class PBXKey(str):
     def __new__(cls, value, parent):
-        obj = unicode.__new__(cls, value)
+        obj = str.__new__(cls, value)
         obj._parent = parent
         return obj
 
