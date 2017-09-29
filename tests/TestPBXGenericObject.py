@@ -50,7 +50,16 @@ class PBXGenericObjectTest(unittest.TestCase):
         self.assertIsInstance(dobj["c"]["c1"], PBXKey)
         self.assertIsNone(dobj['X'])
 
-    def testSetItem(self):
+    def testSetItemNone(self):
+        obj = {}
+        dobj = PBXGenericObject().parse(obj)
+
+        self.assertIsNone(dobj['something'])
+
+        dobj['something'] = None
+        self.assertIsNone(dobj['something'])
+
+    def testSetItemString(self):
         obj = {}
         dobj = PBXGenericObject().parse(obj)
 
@@ -58,6 +67,33 @@ class PBXGenericObjectTest(unittest.TestCase):
 
         dobj['something'] = 'yes'
         self.assertEqual(dobj['something'], 'yes')
+
+    def testSetItemListOfZero(self):
+        obj = {}
+        dobj = PBXGenericObject().parse(obj)
+
+        self.assertIsNone(dobj['something'])
+
+        dobj['something'] = []
+        self.assertIsNone(dobj['something'])
+
+    def testSetItemListOfOne(self):
+        obj = {}
+        dobj = PBXGenericObject().parse(obj)
+
+        self.assertIsNone(dobj['something'])
+
+        dobj['something'] = ['yes']
+        self.assertEqual(dobj['something'], 'yes')
+
+    def testSetItemListOfTwo(self):
+        obj = {}
+        dobj = PBXGenericObject().parse(obj)
+
+        self.assertIsNone(dobj['something'])
+
+        dobj['something'] = ['yes', 'yes']
+        self.assertEqual(dobj['something'], ['yes', 'yes'])
 
     def testResolveComment(self):
         obj = {"a": {"name": "A"}, "b": {"path": "B"}, "c": {"c1": "FDDF6A571C68E5B100D7A645"}}
