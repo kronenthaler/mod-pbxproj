@@ -134,7 +134,8 @@ class PBXGenericObject(object):
             if value.__len__() == 1:
                 value = value[0]
             if value.__len__() == 0:
-                delattr(self, key)
+                if hasattr(self, key):
+                    delattr(self, key)
                 return
 
         setattr(self, key, value)
