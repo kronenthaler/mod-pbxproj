@@ -1,3 +1,13 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+from past.builtins import basestring
+
 import re
 import uuid
 import copy
@@ -32,7 +42,7 @@ class PBXGenericObject(object):
 
     def _parse_dict(self, obj):
         # all top level objects are added as variables to this object
-        for key, value in obj.iteritems():
+        for key, value in list(obj.items()):
             if value is None:
                 continue
 

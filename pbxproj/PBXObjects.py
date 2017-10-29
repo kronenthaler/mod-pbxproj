@@ -12,7 +12,7 @@ class objects(PBXGenericObject):
     def parse(self, object_data):
         # iterate over the keys and fill the sections
         if isinstance(object_data, dict):
-            for key, value in object_data.iteritems():
+            for key, value in list(object_data.items()):
                 key = self._parse_string(key)
                 obj_type = key
                 if 'isa' in value:
@@ -56,7 +56,7 @@ class objects(PBXGenericObject):
         return keys
 
     def get_sections(self):
-        sections = self._sections.keys()
+        sections = list(self._sections.keys())
         sections.sort()
         return sections
 
