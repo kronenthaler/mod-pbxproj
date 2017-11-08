@@ -61,5 +61,5 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
-        tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
+        tree = osp.OpenStepDecoder.ParseFromString(open(path, 'r').read().decode('UTF-8'))
         return XcodeProject(tree, path)
