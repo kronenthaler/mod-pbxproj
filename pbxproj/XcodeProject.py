@@ -1,5 +1,6 @@
 import shutil
 import datetime
+import sys
 from pbxproj.pbxextensions import *
 
 
@@ -61,5 +62,8 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
-        tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
+        if sys.version_info > (3, 0):
+            tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
+        else:
+            tree = osp.OpenStepDecoder.ParseFromString(open(path, 'r').read().decode('UTF-8'))
         return XcodeProject(tree, path)
