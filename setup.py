@@ -45,9 +45,9 @@ setup(name='pbxproj',
         ]
       },
       url="http://github.com/kronenthaler/mod-pbxproj",
-      version='2.2.0',
+      version='2.2.1',
       license='MIT License',
-      install_requires=['openstep_parser', 'docopt', 'future'],
+      install_requires=['openstep_parser>=1.3.1', 'docopt', 'future'],
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
       cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage})
