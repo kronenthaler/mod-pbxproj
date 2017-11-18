@@ -346,7 +346,7 @@ class ProjectFiles:
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
             return self.add_file(path, parent, target_name=target_name, force=False, file_options=file_options)
 
-        parent = self.get_or_create_group(os.path.split(path)[1], os.path.split(path)[1], parent)
+        parent = self.get_or_create_group(os.path.split(path)[1], path, parent)
 
         # iterate over the objects in the directory
         for child in os.listdir(path):
