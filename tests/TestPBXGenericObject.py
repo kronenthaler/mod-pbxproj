@@ -34,6 +34,8 @@ class PBXGenericObjectTest(unittest.TestCase):
         self.assertEqual(PBXGenericObject._escape("a-invalid-id"), '"a-invalid-id"')
         self.assertEqual(PBXGenericObject._escape("<group>"), '"<group>"')
         self.assertEqual(PBXGenericObject._escape("script \\ continuation"), '"script \\\\ continuation"')
+        self.assertEqual(PBXGenericObject._escape("/bin/sh find .. -name '*.framework'", exclude=["\'"]),
+                         "\"/bin/sh find .. -name '*.framework'\"")
 
     def testPrintObject(self):
         obj = {"a": "varA", "b": [1, 2, 3], "c": {"c1": "FDDF6A571C68E5B100D7A645"}}
