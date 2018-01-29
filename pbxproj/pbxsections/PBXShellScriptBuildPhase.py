@@ -18,4 +18,8 @@ class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
         })
 
     def _get_comment(self):
-        return u'ShellScript'
+        key = "name";
+        if key in self:
+            return self[key];
+        else:
+            return u'ShellScript'
