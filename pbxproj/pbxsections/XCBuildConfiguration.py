@@ -34,7 +34,7 @@ class XCBuildConfiguration(PBXGenericObject):
         if u'buildSettings' not in self:
             self[u'buildSettings'] = PBXGenericObject()
 
-        self.buildSettings[flag_name] = flags
+        self.buildSettings[flag_name] = list(sorted(set(flags)))
 
     def remove_flags(self, flag_name, flags):
         if u'buildSettings' not in self or self.buildSettings[flag_name] is None:
