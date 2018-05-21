@@ -380,3 +380,61 @@ class ProjectFilesTest(unittest.TestCase):
 
         # nothing to do if the file is absolute but doesn't exist
         self.assertIsNone(reference_proxies)
+
+    def testAddHeaderFilePublic(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PUBLIC))
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Public'])
+
+
+    def testAddHeaderFilePrivate(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PRIVATE))
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Private'])
+
+    def testAddHeaderFileProjectScope(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions())
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertIsNone(references[0]['settings'], None)

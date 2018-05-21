@@ -16,36 +16,54 @@ class TreeType:
                 TreeType.DEVELOPER_DIR, TreeType.BUILT_PRODUCTS_DIR]
 
 
+class HeaderScope:
+    PUBLIC = u'Public'
+    PRIVATE = u'Private'
+    PROJECT = u''
+
+
 class FileOptions:
     """
     Wrapper class for all file parameters required at the moment of adding a file to the project.
     """
     def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
-                 code_sign_on_copy=True):
+                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT):
         """
-        Creates an object specifying options to be consided during the file creation into the project.
+        Creates an object specifying options to be considered during the file creation into the project.
 
         :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
         :param weak: When adding a framework set it as a weak reference
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param embed_framework: When adding a framework sets the embed section
         :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :param header_scope: When adding a header file, adds the header as HeaderScope.PROJECT (default),
+            HeaderScope.PRIVATE or HeaderScope.PUBLIC.
         """
         self.create_build_files = create_build_files
         self.weak = weak
         self.ignore_unknown_type = ignore_unknown_type
         self.embed_framework = embed_framework
         self.code_sign_on_copy = code_sign_on_copy
+        self.header_scope = header_scope
 
     def get_attributes(self, file_ref, build_phase):
-        if file_ref.get_file_type() != u'wrapper.framework':
+        if file_ref.get_file_type() != u'wrapper.framework' and file_ref.get_file_type() != u'sourcecode.c.h':
             return None
 
-        attributes = [u'Weak'] if self.weak and build_phase.isa == u'PBXFrameworksBuildPhase' else None
-        if file_ref.sourceTree != TreeType.SDKROOT and self.code_sign_on_copy and build_phase.isa == u'PBXCopyFilesBuildPhase':
+        attributes = None
+        if build_phase.isa == u'PBXFrameworksBuildPhase':
+            attributes = [u'Weak'] if self.weak else None
+
+        if build_phase.isa == u'PBXCopyFilesBuildPhase' and \
+                file_ref.sourceTree != TreeType.SDKROOT and \
+                self.code_sign_on_copy:
             if attributes is None:
                 attributes = []
             attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+
+        if build_phase.isa == u'PBXHeadersBuildPhase':
+            attributes = [self.header_scope] if self.header_scope != HeaderScope.PROJECT else None
+
         return attributes
 
 
@@ -58,9 +76,9 @@ class ProjectFiles:
         u'.c': (u'sourcecode.c.c', u'PBXSourcesBuildPhase'),
         u'.cpp': (u'sourcecode.cpp.cpp', u'PBXSourcesBuildPhase'),
         u'.framework': (u'wrapper.framework', u'PBXFrameworksBuildPhase'),
-        u'.h': (u'sourcecode.c.h', None),
-        u'.hpp': (u'sourcecode.c.h', None),
-        u'.pch': (u'sourcecode.c.h', None),
+        u'.h': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
+        u'.hpp': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
+        u'.pch': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
         u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
         u'.def': (u'text', u'PBXResourcesBuildPhase'),
         u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
