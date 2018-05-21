@@ -9,7 +9,7 @@ class ProjectFilesTest(unittest.TestCase):
                 '0': {'isa': 'PBXGroup', 'children': ['group1'], 'sourceTree': "<group>"},
                 '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
                       'buildPhases': ['compile1']},
-                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
                       'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
