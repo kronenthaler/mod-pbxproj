@@ -55,7 +55,7 @@ class PBXObjectTest(unittest.TestCase):
     def testGetTargets(self):
         obj = {
             '1': {'isa': 'PBXNativeTarget', 'name': 'app'},
-            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report'}
+            '2': {'isa': 'PBXAggregateTarget', 'name': 'report'}
         }
         dobj = objects().parse(obj)
 
@@ -67,7 +67,7 @@ class PBXObjectTest(unittest.TestCase):
     def testGetConfigurationTargets(self):
         obj = {
             '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3'},
-            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4'},
+            '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4'},
             '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
             '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
             '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '5'},

@@ -11,7 +11,7 @@ from pbxproj.pbxsections.PBXShellScriptBuildPhase import *
 from pbxproj.pbxsections.PBXTargetDependency import *
 from pbxproj.pbxsections.PBXHeadersBuildPhase import *
 from pbxproj.pbxsections.XCBuildConfiguration import *
-from pbxproj.pbxsections.PBXAggregatedTarget import *
+from pbxproj.pbxsections.PBXAggregateTarget import *
 from pbxproj.pbxsections.PBXNativeTarget import *
 from pbxproj.pbxsections.PBXLegacyTarget import *
 from pbxproj.pbxsections.PBXReferenceProxy import *
