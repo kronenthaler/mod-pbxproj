@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from pbxproj import PBXGenericObject
 
 
@@ -34,7 +35,10 @@ class XCBuildConfiguration(PBXGenericObject):
         if u'buildSettings' not in self:
             self[u'buildSettings'] = PBXGenericObject()
 
-        self.buildSettings[flag_name] = flags
+        if not isinstance(flags, list):
+            flags = [flags]
+
+        self.buildSettings[flag_name] = list(OrderedDict.fromkeys(flags))
 
     def remove_flags(self, flag_name, flags):
         if u'buildSettings' not in self or self.buildSettings[flag_name] is None:
