@@ -1,6 +1,7 @@
 """
 usage:
-    pbxproj folder [options] <project> <path> [--exclude <regex>...]
+    pbxproj folder [options] <project> <path> [--target <target>...]
+                                              [--exclude <regex>...]
                                               [(--recursive | -r)]
                                               [(--no-create-groups | -G)]
                                               [(--weak | -w)]

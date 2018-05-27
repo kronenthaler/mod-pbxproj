@@ -55,14 +55,16 @@ class PBXObjectTest(unittest.TestCase):
     def testGetTargets(self):
         obj = {
             '1': {'isa': 'PBXNativeTarget', 'name': 'app'},
-            '2': {'isa': 'PBXAggregateTarget', 'name': 'report'}
+            '2': {'isa': 'PBXAggregateTarget', 'name': 'report'},
+            '3': {'isa': 'PBXNativeTarget', 'name': 'something'}
         }
         dobj = objects().parse(obj)
 
-        self.assertEqual(dobj.get_targets().__len__(), 2)
+        self.assertEqual(dobj.get_targets().__len__(), 3)
         self.assertEqual(dobj.get_targets('app').__len__(), 1)
         self.assertEqual(dobj.get_targets('report').__len__(), 1)
         self.assertEqual(dobj.get_targets('whatever').__len__(), 0)
+        self.assertEqual(dobj.get_targets(['app', 'something']).__len__(), 2)
 
     def testGetConfigurationTargets(self):
         obj = {

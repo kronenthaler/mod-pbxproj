@@ -112,15 +112,19 @@ class objects(PBXGenericObject):
         if name is None:
             return targets
 
+        if not isinstance(name, list):
+            name = [name]
+
+        result = []
         for target in targets:
-            if target.name == name:
-                return [target]
-        return []
+            if target.name in name:
+                result += [target]
+        return result
 
     def get_configurations_on_targets(self, target_name=None, configuration_name=None):
         """
         Retrieves all configuration given a name on the specified target
-        :param target_name: Searches for a specific target name, if None all targets are used
+        :param target_name: Searches for a specific target name or a list of target names. If None all targets are used
         :param configuration_name: Searches for a specific configuration, if None all configuration of the target
             are used
         :return: A generator of configurations objects matching the target and configuration given (or all if nothing is
