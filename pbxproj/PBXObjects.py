@@ -115,11 +115,7 @@ class objects(PBXGenericObject):
         if not isinstance(name, list):
             name = [name]
 
-        result = []
-        for target in targets:
-            if target.name in name:
-                result += [target]
-        return result
+        return [target for target in targets if target.name in name]
 
     def get_configurations_on_targets(self, target_name=None, configuration_name=None):
         """
