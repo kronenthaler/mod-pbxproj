@@ -1,6 +1,7 @@
 """
 usage:
-    pbxproj file [options] <project> <path> [(--weak | -w)]
+    pbxproj file [options] <project> <path> [--target <target>...]
+                                            [(--weak | -w)]
                                             [(--no-embed | -E)]
                                             [(--sign-on-copy | -s)]
                                             [(--ignore-unknown-types | -i)]

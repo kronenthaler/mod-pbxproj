@@ -124,7 +124,7 @@ class ProjectFiles:
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
         :param force: Add the file without checking if the file already exists
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
@@ -171,7 +171,7 @@ class ProjectFiles:
         :param path: Path to the .xcodeproj file
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
         :param force: Add the file without checking if the file already exists
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: list of PBXReferenceProxy objects that can be used to create the PBXBuildFile phases.
@@ -280,7 +280,8 @@ class ProjectFiles:
         Removes the file id from given target name. If no target name is given, the file is removed
         from all targets
         :param file_id: identifier of the file to be removed
-        :param target_name: The target name to remove the file from, if None, it's removed from all targets.
+        :param target_name: Target name or list of target names where the file should be removed from (none for every
+            target)
         :return: True if the file id was removed. False if the file was not removed.
         """
 
@@ -323,7 +324,8 @@ class ProjectFiles:
         Removes all files for the given path under the same tree
         :param path: Path to the file relative to the tree root
         :param tree: Tree type to look for the path. By default the SOURCE_ROOT
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be removed from (none for every
+            target)
         :return: True if all the files were removed without problems. False if at least one file failed.
         """
         files = self.get_files_by_path(path, tree)
@@ -347,7 +349,7 @@ class ProjectFiles:
         :param excludes: list of regexs to ignore
         :param recursive: add folders recursively or stop in the first level
         :param create_groups: add folders recursively as groups or references
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """

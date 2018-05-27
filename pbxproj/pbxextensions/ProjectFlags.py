@@ -15,7 +15,7 @@ class ProjectFlags:
         Adds the given flags to the flag_name section of the target on the configurations
         :param flag_name: name of the flag to be added the values to
         :param flags: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -27,7 +27,7 @@ class ProjectFlags:
         Sets the given flags to the flag_name section of the target on the configurations, full override.
         :param flag_name: name of the flag to be added the values to
         :param flags: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to set the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -39,7 +39,7 @@ class ProjectFlags:
         Removes the given flags from the flag_name section of the target on the configurations
         :param flag_name: name of the flag to be removed the values from
         :param flags: A string or array of strings. If none, removes all values from the flag.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -50,7 +50,7 @@ class ProjectFlags:
         """
         Adds flag values to the OTHER_CFLAGS flag.
         :param flags: A string or array of strings. If none, removes all values from the flag.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -60,7 +60,7 @@ class ProjectFlags:
         """
         Removes the given flags from the OTHER_CFLAGS section of the target on the configurations
         :param flags: A string or array of strings. If none, removes all values from the flag.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -70,7 +70,7 @@ class ProjectFlags:
         """
         Adds flag values to the OTHER_LDFLAGS flag.
         :param flags: A string or array of strings. If none, removes all values from the flag.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -80,7 +80,7 @@ class ProjectFlags:
         """
         Removes the given flags from the OTHER_LDFLAGS section of the target on the configurations
         :param flags: A string or array of strings. If none, removes all values from the flag.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -94,7 +94,7 @@ class ProjectFlags:
         :param paths: A string or array of strings
         :param recursive: Add the paths as recursive ones
         :param escape: Escape the path in case it contains spaces
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -106,7 +106,7 @@ class ProjectFlags:
         Removes the given search paths from the path_type section of the target on the configurations
         :param path_type: name of the path type to be removed the values from
         :param paths: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -119,7 +119,7 @@ class ProjectFlags:
         :param paths: A string or array of strings
         :param recursive: Add the paths as recursive ones
         :param escape: Escape the path in case it contains spaces
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -130,7 +130,7 @@ class ProjectFlags:
         """
         Removes the given search paths from the HEADER_SEARCH_PATHS section of the target on the configurations
         :param paths: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -142,7 +142,7 @@ class ProjectFlags:
         :param paths: A string or array of strings
         :param recursive: Add the paths as recursive ones
         :param escape: Escape the path in case it contains spaces
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -153,7 +153,7 @@ class ProjectFlags:
         """
         Removes the given search paths from the LIBRARY_SEARCH_PATHS section of the target on the configurations
         :param paths: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -166,7 +166,7 @@ class ProjectFlags:
         :param paths: A string or array of strings
         :param recursive: Add the paths as recursive ones
         :param escape: Escape the path in case it contains spaces
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -177,7 +177,7 @@ class ProjectFlags:
         """
         Removes the given search paths from the FRAMEWORK_SEARCH_PATHS section of the target on the configurations
         :param paths: A string or array of strings
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the flag from or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
@@ -187,7 +187,7 @@ class ProjectFlags:
         """
         Adds a run script phase into the given target, optionally before compilation phase
         :param script: Script to be inserted on the run script
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the run script to or None for every target
         :param insert_before_compile: Insert the run script phase before the compilation of the source files. By default,
         it's added at the end.
         :return:
@@ -202,7 +202,7 @@ class ProjectFlags:
         """
         Removes the given script string from the given target
         :param script: The script string to be removed from the target
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to remove the run script from or None for every target
         :return:
         """
         for target in self.objects.get_targets(target_name):
@@ -227,7 +227,7 @@ class ProjectFlags:
         :param development_team: Development team identifier string. Usually formatted as: 'MAAYFEXXXX'
         :param provisioning_profile_uuid: Provisioning profile UUID string. Usually formatted as: '6f1ffc4d-xxxx-xxxx-xxxx-6dc186280e1e'
         :param provisioning_profile_specifier: Provisioning profile specifier (a.k.a. name) string.
-        :param target_name: Target name to add the flag to or None for every target
+        :param target_name: Target name or list of target names to add the flag to or None for every target
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return:
         """
