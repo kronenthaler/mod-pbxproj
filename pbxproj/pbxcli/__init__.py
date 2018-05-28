@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
 
+
 import os
 from pbxproj.XcodeProject import XcodeProject
 
@@ -41,5 +42,7 @@ def command_parser(command):
             resolve_backup(project, backup_file, args)
         except Exception as ex:
             print(u"{0}".format(ex))
+            import traceback
+            traceback.print_exc(ex)
             exit(1)
     return parser

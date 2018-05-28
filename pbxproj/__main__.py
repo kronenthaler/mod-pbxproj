@@ -30,6 +30,9 @@ def main():
     elif args['<command>'] == 'folder':
         import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
         command_parser(pbxproj_folder.execute)(docopt(pbxproj_folder.__doc__, argv=argv))
+    elif args['<command>'] == 'show':
+        import pbxproj.pbxcli.pbxproj_show as pbxproj_show
+        command_parser(pbxproj_show.execute)(docopt(pbxproj_show.__doc__, argv=argv))
 
 
 if __name__ == "__main__":
