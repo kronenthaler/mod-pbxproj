@@ -17,7 +17,7 @@ generic options:
     -h, --help                     This message.
     --tree <tree>                  Tree to add the file relative to. Available options: <absolute>, <group>,
                                        SOURCE_ROOT, SDKROOT, DEVELOPER_DIR, BUILT_PRODUCTS_DIR. [default: SOURCE_ROOT]
-    -t, --target <target>          Target name to be modified. If there is no target specified, all targets are
+    -t, --target <target>          Target name(s) to be modified. If there is no target specified, all targets are
                                        modified.
     -b, --backup                   Creates a backup before start processing the command.
 
@@ -30,7 +30,8 @@ add options:
     -s, --sign-on-copy             Sign frameworks when copied/embedded.
     -i, --ignore-unknown-types     Ignore unknown file types when added.
     -C, --no-create-build-files    Do not create build file phases when adding a file.
-    -H, --header-scope <scope>     Add header file using the given scope. Available options: public or private, project. [default: project]
+    -H, --header-scope <scope>     Add header file using the given scope. Available options: public or private, project.
+                                       [default: project]
 """
 from pbxproj.pbxcli import *
 from pbxproj.pbxextensions.ProjectFiles import FileOptions

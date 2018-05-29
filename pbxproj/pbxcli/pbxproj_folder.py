@@ -9,6 +9,7 @@ usage:
                                               [(--sign-on-copy | -s)]
                                               [(--ignore-unknown-types | -i)]
                                               [(--no-create-build-files | -C)]
+                                              [(--header-scope <scope> | -H <scope>)]
     pbxproj folder [options] (--delete | -D) <project> <path> [--tree <tree>]
 
 positional arguments:
@@ -17,7 +18,7 @@ positional arguments:
 
 generic options:
     -h, --help                      This message.
-    -t, --target <target>           Target name to be modified. If there is no target specified, all targets are
+    -t, --target <target>           Target name(s) to be modified. If there is no target specified, all targets are
                                         modified.
     -b, --backup                    Creates a backup before start processing the command.
 
@@ -36,11 +37,9 @@ add options:
     -s, --sign-on-copy              Sign frameworks when copied/embedded.
     -i, --ignore-unknown-types      Ignore unknown file types when added.
     -C, --no-create-build-files     Do not create build file phases when adding a file.
+    -H, --header-scope <scope>      Add header file using the given scope. Available options: public or private, project.
+                                       [default: project]
 """
-
-# Future addition to the command line:
-# pbxproj folder (--delete | -D) (--group | -G) <project> <path>
-
 from pbxproj.pbxcli import *
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
 from docopt import docopt
@@ -55,11 +54,17 @@ def execute(project, args):
 
 
 def _add(project, args):
+    if u'--header-scope' not in args or args[u'--header-scope'] not in ['public', 'private', 'project']:
+        header_scope = u'project'
+    else:
+        header_scope = args[u'--header-scope']
+
     options = FileOptions(create_build_files=not args[u'--no-create-build-files'],
                           weak=args[u'--weak'],
                           ignore_unknown_type=args[u'--ignore-unknown-types'],
                           embed_framework=not args[u'--no-embed'],
-                          code_sign_on_copy=args[u'--sign-on-copy'])
+                          code_sign_on_copy=args[u'--sign-on-copy'],
+                          header_scope=header_scope)
 
     build_files = project.add_folder(args[u'<path>'], excludes=args[u'--exclude'], recursive=args[u'--recursive'],
                                      create_groups=not args[u'--no-create-groups'], target_name=args[u'--target'],

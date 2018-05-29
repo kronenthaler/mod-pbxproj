@@ -20,9 +20,6 @@ target options:
 """
 
 from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import FileOptions
-from docopt import docopt
-
 
 def execute(project, args):
     # make a decision of what function to call based on the -D flag
