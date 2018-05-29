@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
 
+
 import os
 from pbxproj.XcodeProject import XcodeProject
 
@@ -26,18 +27,19 @@ def backup_project(project, args):
 
 
 def resolve_backup(project, backup_file, args):
-    project.save()
     # remove backup if everything was ok.
     if args[u'--backup'] and backup_file:
         os.remove(backup_file)
 
 
-def command_parser(command):
+def command_parser(command, auto_save=True):
     def parser(args):
         try:
             project = open_project(args)
             backup_file = backup_project(project, args)
             print(command(project, args))
+            if auto_save:
+                project.save()
             resolve_backup(project, backup_file, args)
         except Exception as ex:
             print(u"{0}".format(ex))

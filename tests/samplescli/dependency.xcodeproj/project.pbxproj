@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C97E400420BDEBC600E5A8B9 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C97E400320BDEBC600E5A8B9 /* AppKit.framework */; };
 		C9AA3B401E83225700487F6A /* helloworld.h in Headers */ = {isa = PBXBuildFile; fileRef = C9AA3B3E1E83225700487F6A /* helloworld.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C9AA3B481E83227300487F6A /* doit.h in Headers */ = {isa = PBXBuildFile; fileRef = C9AA3B461E83227300487F6A /* doit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C9AA3B491E83227300487F6A /* doit.m in Sources */ = {isa = PBXBuildFile; fileRef = C9AA3B471E83227300487F6A /* doit.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C97E400320BDEBC600E5A8B9 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		C9AA3B3B1E83225700487F6A /* helloworld.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = helloworld.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9AA3B3E1E83225700487F6A /* helloworld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = helloworld.h; sourceTree = "<group>"; };
 		C9AA3B3F1E83225700487F6A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -27,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C97E400420BDEBC600E5A8B9 /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,12 +43,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C97E400220BDEBC600E5A8B9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C97E400320BDEBC600E5A8B9 /* AppKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C9AA3B311E83225700487F6A = {
 			isa = PBXGroup;
 			children = (
 				C9AA3B3D1E83225700487F6A /* helloworld */,
 				C9DCC7BF1F00FAAA00CACDC8 /* assets */,
 				C9AA3B3C1E83225700487F6A /* Products */,
+				C97E400220BDEBC600E5A8B9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -146,7 +158,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C9AA3B351E83225700487F6A /* Build configuration list for PBXProject "helloworld" */;
+			buildConfigurationList = C9AA3B351E83225700487F6A /* Build configuration list for PBXProject "dependency" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -362,7 +374,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C9AA3B351E83225700487F6A /* Build configuration list for PBXProject "helloworld" */ = {
+		C9AA3B351E83225700487F6A /* Build configuration list for PBXProject "dependency" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C9AA3B411E83225700487F6A /* Debug */,
@@ -387,6 +399,7 @@
 				C9DCC7C21F00FAAA00CACDC8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

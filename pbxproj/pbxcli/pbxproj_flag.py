@@ -13,8 +13,8 @@ generic options:
                                                 might be interpreted as an option and detected as such. Use when a
                                                 flag_value starts with -, like -ObjC
     -h, --help                              This message.
-    -t, --target <target>                   Target name to be modified. If there is no target specified, all targets are
-                                                modified.
+    -t, --target <target>                   Target name(s) to be modified. If there is no target specified, all targets
+                                                are modified.
     -b, --backup                            Creates a backup before start processing the command.
     -c, --configuration <configuration>     Configuration name to modify the flags. If no configuration name is
                                                 provided, all configurations are affected.
