@@ -7,6 +7,7 @@ options:
     -h, --help          This message
 
 commands:
+    show                Displays information about the project targets
     file                Manipulates files on a project
     flag                Manipulates compilation flags on the project
     folder              Manipulates folders or groups on a project
@@ -32,7 +33,7 @@ def main():
         command_parser(pbxproj_folder.execute)(docopt(pbxproj_folder.__doc__, argv=argv))
     elif args['<command>'] == 'show':
         import pbxproj.pbxcli.pbxproj_show as pbxproj_show
-        command_parser(pbxproj_show.execute)(docopt(pbxproj_show.__doc__, argv=argv))
+        command_parser(pbxproj_show.execute, auto_save=False)(docopt(pbxproj_show.__doc__, argv=argv))
 
 
 if __name__ == "__main__":

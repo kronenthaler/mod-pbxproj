@@ -17,7 +17,8 @@ generic options:
     -h, --help                     This message.
     --tree <tree>                  Tree to add the file relative to. Available options: <absolute>, <group>,
                                        SOURCE_ROOT, SDKROOT, DEVELOPER_DIR, BUILT_PRODUCTS_DIR. [default: SOURCE_ROOT]
-    -t, --target <target>          Target name to be modified. If there is no target specified, all targets are modified.
+    -t, --target <target>          Target name to be modified. If there is no target specified, all targets are
+                                       modified.
     -b, --backup                   Creates a backup before start processing the command.
 
 delete options:
