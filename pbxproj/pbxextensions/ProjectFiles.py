@@ -366,7 +366,7 @@ class ProjectFiles:
 
         return result != 0 and result == total
 
-    def add_folder(self, path, parent=None, excludes=None, recursive=True, create_groups=True, target_name=None,
+    def add_folder(self, path, parent=None, excludes=None, is_group_abspath=True, recursive=True, create_groups=True, target_name=None,
                    file_options=FileOptions()):
         """
         Given a directory, it will create the equivalent group structure and add all files in the process.
@@ -376,6 +376,9 @@ class ProjectFiles:
         :param path: OS path to the directory to be added.
         :param parent: Parent group to be added under
         :param excludes: list of regexs to ignore
+        :param is_group_abspath: set the path of group as abspath or same as name while add folder as groups. If
+                                 U has moved the folder as part of the project which will be moved to other PC, U
+                                 should set is_group_abspath False
         :param recursive: add folders recursively or stop in the first level
         :param create_groups: add folders recursively as groups or references
         :param target_name: Target name or list of target names where the file should be added (none for every target)
