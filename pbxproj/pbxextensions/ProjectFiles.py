@@ -90,6 +90,7 @@ class ProjectFiles:
         u'.plist': (u'text.plist.xml', u'PBXResourcesBuildPhase'),
         u'.json': (u'text.json', u'PBXResourcesBuildPhase'),
         u'.png': (u'image.png', u'PBXResourcesBuildPhase'),
+        u'.jpg': (u'image.jpg', u'PBXResourcesBuildPhase'),
         u'.rtf': (u'text.rtf', u'PBXResourcesBuildPhase'),
         u'.tiff': (u'image.tiff', u'PBXResourcesBuildPhase'),
         u'.txt': (u'text', u'PBXResourcesBuildPhase'),
