@@ -1,10 +1,11 @@
 from pbxproj.pbxsections import *
+from pbxproj import PBXList
 
 
 class TreeType:
     ABSOLUTE = u'<absolute>'
     GROUP = u'<group>'
-    BUILT_PRODUCT_DIR = u'BUILT_PRODUCTS_DIR'
+    BUILT_PRODUCTS_DIR = u'BUILT_PRODUCTS_DIR'
     DEVELOPER_DIR = u'DEVELOPER_DIR'
     SDKROOT = u'SDKROOT'
     SOURCE_ROOT = u'SOURCE_ROOT'
@@ -12,7 +13,13 @@ class TreeType:
     @classmethod
     def options(cls):
         return [TreeType.SOURCE_ROOT, TreeType.SDKROOT, TreeType.GROUP, TreeType.ABSOLUTE,
-                TreeType.DEVELOPER_DIR, TreeType.BUILT_PRODUCT_DIR]
+                TreeType.DEVELOPER_DIR, TreeType.BUILT_PRODUCTS_DIR]
+
+
+class HeaderScope:
+    PUBLIC = u'Public'
+    PRIVATE = u'Private'
+    PROJECT = u''
 
 
 class FileOptions:
@@ -20,31 +27,43 @@ class FileOptions:
     Wrapper class for all file parameters required at the moment of adding a file to the project.
     """
     def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
-                 code_sign_on_copy=True):
+                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT):
         """
-        Creates an object specifying options to be consided during the file creation into the project.
+        Creates an object specifying options to be considered during the file creation into the project.
 
         :param create_build_files: Creates any necessary PBXBuildFile section when adding the file
         :param weak: When adding a framework set it as a weak reference
         :param ignore_unknown_type: Stop insertion if the file type is unknown (Default is false)
         :param embed_framework: When adding a framework sets the embed section
         :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
+        :param header_scope: When adding a header file, adds the header as HeaderScope.PROJECT (default),
+            HeaderScope.PRIVATE or HeaderScope.PUBLIC.
         """
         self.create_build_files = create_build_files
         self.weak = weak
         self.ignore_unknown_type = ignore_unknown_type
         self.embed_framework = embed_framework
         self.code_sign_on_copy = code_sign_on_copy
+        self.header_scope = header_scope
 
     def get_attributes(self, file_ref, build_phase):
-        if file_ref.lastKnownFileType != u'wrapper.framework':
+        if file_ref.get_file_type() != u'wrapper.framework' and file_ref.get_file_type() != u'sourcecode.c.h':
             return None
 
-        attributes = [u'Weak'] if self.weak and build_phase.isa == u'PBXFrameworksBuildPhase' else None
-        if file_ref.sourceTree != TreeType.SDKROOT and self.code_sign_on_copy and build_phase.isa == u'PBXCopyFilesBuildPhase':
+        attributes = None
+        if build_phase.isa == u'PBXFrameworksBuildPhase':
+            attributes = [u'Weak'] if self.weak else None
+
+        if build_phase.isa == u'PBXCopyFilesBuildPhase' and \
+                file_ref.sourceTree != TreeType.SDKROOT and \
+                self.code_sign_on_copy:
             if attributes is None:
                 attributes = []
             attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+
+        if build_phase.isa == u'PBXHeadersBuildPhase':
+            attributes = [self.header_scope] if self.header_scope != HeaderScope.PROJECT else None
+
         return attributes
 
 
@@ -57,9 +76,9 @@ class ProjectFiles:
         u'.c': (u'sourcecode.c.c', u'PBXSourcesBuildPhase'),
         u'.cpp': (u'sourcecode.cpp.cpp', u'PBXSourcesBuildPhase'),
         u'.framework': (u'wrapper.framework', u'PBXFrameworksBuildPhase'),
-        u'.h': (u'sourcecode.c.h', None),
-        u'.hpp': (u'sourcecode.c.h', None),
-        u'.pch': (u'sourcecode.c.h', None),
+        u'.h': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
+        u'.hpp': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
+        u'.pch': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
         u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
         u'.def': (u'text', u'PBXResourcesBuildPhase'),
         u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
@@ -105,7 +124,7 @@ class ProjectFiles:
         :param path: Path to the file to be added
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
         :param force: Add the file without checking if the file already exists
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
@@ -116,53 +135,19 @@ class ProjectFiles:
             for section in self.objects.get_sections():
                 for obj in self.objects.get_objects_in_section(section):
                     if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
-                        return results
+                        return []
 
-        # decide the proper tree and path to add
-        abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
+        file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
+                                                                                        file_options)
         if path is None or tree is None:
             return None
-
-        # create a PBXFileReference for the new file
-        file_ref = PBXFileReference.create(path, tree)
-
-        # determine the type of the new file:
-        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, file_options.ignore_unknown_type)
-
-        # set the file type on the file ref add the files
-        file_ref.set_last_known_file_type(file_type)
-        self.objects[file_ref.get_id()] = file_ref
-
-        # determine the parent and add it to it
-        self._get_parent_group(parent).add_child(file_ref)
 
         # no need to create the build_files, done
         if not file_options.create_build_files:
             return results
 
-        # get target to match the given name or all
-        for target in self.objects.get_targets(target_name):
-            # determine if there is a suitable build phase created
-            build_phases = target.get_or_create_build_phase(expected_build_phase)
-
-            # if it's a framework and it needs to be embedded
-            if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
-                    file_ref.lastKnownFileType == u'wrapper.framework':
-                embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
-                                                               search_parameters={'dstSubfolderSpec': '10'},
-                                                               create_parameters=(PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
-                # add runpath search flag
-                self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
-                               u'$(inherited) @executable_path/Frameworks', target_name)
-                build_phases.extend(embed_phase)
-
-            # create the build file and add it to the phase
-            for target_build_phase in build_phases:
-                build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase))
-                self.objects[build_file.get_id()] = build_file
-                target_build_phase.add_build_file(build_file)
-
-                results.append(build_file)
+        # create build_files for the targets
+        results.extend(self._create_build_files(file_ref, target_name, expected_build_phase, file_options))
 
         # special case for the frameworks and libraries to update the search paths
         if tree != TreeType.SOURCE_ROOT or abs_path is None:
@@ -174,6 +159,76 @@ class ProjectFiles:
             self.add_library_search_paths([library_path], recursive=False)
         else:
             self.add_framework_search_paths([library_path, u'$(inherited)'], recursive=False)
+
+        return results
+
+    def add_project(self, path, parent=None, tree=TreeType.GROUP, target_name=None, force=True, file_options=FileOptions()):
+        """
+        Adds another Xcode project into this project. Allows to use the products generated from the given project into
+        this project during compilation time. Optional: it can add the products into the different sections: frameworks
+        and bundles.
+
+        :param path: Path to the .xcodeproj file
+        :param parent: Parent group to be added under
+        :param tree: Tree where the path is relative to
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
+        :param force: Add the file without checking if the file already exists
+        :param file_options: FileOptions object to be used during the addition of the file to the project.
+        :return: list of PBXReferenceProxy objects that can be used to create the PBXBuildFile phases.
+        """
+        results = []
+        # if it's not forced to add the file stop if the file already exists.
+        if not force:
+            for section in self.objects.get_sections():
+                for obj in self.objects.get_objects_in_section(section):
+                    if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                        return []
+
+        file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
+                                                                                 file_options)
+        if path is None or tree is None:
+            return None
+
+        # load project and add the things
+        child_project = self.__class__.load(os.path.join(path, u'project.pbxproj'))
+        child_products = child_project.get_build_phases_by_name(u'PBXNativeTarget')
+
+        # create an special group without parent (ref proxies)
+        products_group = PBXGroup.create(name=u'Products', children=[])
+        self.objects[products_group.get_id()] = products_group
+
+        for child_product in child_products:
+            product_file_ref = child_project.objects[child_product.productReference]
+
+            # create the container proxies
+            container_proxy = PBXContainerItemProxy.create(file_ref, child_product)
+            self.objects[container_proxy.get_id()] = container_proxy
+
+            # create the reference proxies
+            reference_proxy = PBXReferenceProxy.create(product_file_ref, container_proxy)
+            self.objects[reference_proxy.get_id()] = reference_proxy
+
+            # add reference proxy to the product group
+            products_group.add_child(reference_proxy)
+
+            # append the result
+            results.append(reference_proxy)
+
+            if file_options.create_build_files:
+                _, expected_build_phase = self._determine_file_type(reference_proxy, file_options.ignore_unknown_type)
+                self._create_build_files(reference_proxy, target_name, expected_build_phase, file_options)
+
+        # add new PBXFileReference and PBXGroup to the PBXProject object
+        project_object = self.objects.get_objects_in_section(u'PBXProject')[0]
+        project_ref = PBXGenericObject(project_object).parse({
+            u'ProductGroup': products_group.get_id(),
+            u'ProjectRef': file_ref.get_id()
+        })
+
+        if u'projectReferences' not in project_object:
+            project_object[u'projectReferences'] = PBXList()
+
+        project_object.projectReferences.append(project_ref)
 
         return results
 
@@ -225,7 +280,8 @@ class ProjectFiles:
         Removes the file id from given target name. If no target name is given, the file is removed
         from all targets
         :param file_id: identifier of the file to be removed
-        :param target_name: The target name to remove the file from, if None, it's removed from all targets.
+        :param target_name: Target name or list of target names where the file should be removed from (none for every
+            target)
         :return: True if the file id was removed. False if the file was not removed.
         """
 
@@ -244,8 +300,8 @@ class ProjectFiles:
                         # remove the build file from the phase
                         build_phase.remove_build_file(build_file)
 
-                # if the build_phase is empty remove it too
-                if build_phase.files.__len__() == 0:
+                # if the build_phase is empty remove it too, unless it's a shell script.
+                if build_phase.files.__len__() == 0 and build_phase.isa != u'PBXShellScriptBuildPhase':
                     # remove the build phase from the target
                     target.remove_build_phase(build_phase)
 
@@ -268,7 +324,8 @@ class ProjectFiles:
         Removes all files for the given path under the same tree
         :param path: Path to the file relative to the tree root
         :param tree: Tree type to look for the path. By default the SOURCE_ROOT
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be removed from (none for every
+            target)
         :return: True if all the files were removed without problems. False if at least one file failed.
         """
         files = self.get_files_by_path(path, tree)
@@ -292,7 +349,7 @@ class ProjectFiles:
         :param excludes: list of regexs to ignore
         :param recursive: add folders recursively or stop in the first level
         :param create_groups: add folders recursively as groups or references
-        :param target_name: Target name where the file should be added (none for every target)
+        :param target_name: Target name or list of target names where the file should be added (none for every target)
         :param file_options: FileOptions object to be used during the addition of the file to the project.
         :return: a list of elements that were added to the project successfully as PBXBuildFile objects
         """
@@ -309,7 +366,7 @@ class ProjectFiles:
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
             return self.add_file(path, parent, target_name=target_name, force=False, file_options=file_options)
 
-        parent = self.get_or_create_group(os.path.split(path)[1], os.path.split(path)[1], parent)
+        parent = self.get_or_create_group(os.path.split(path)[1], path, parent)
 
         # iterate over the objects in the directory
         for child in os.listdir(path):
@@ -337,6 +394,55 @@ class ProjectFiles:
         return results
 
     # miscellaneous functions, candidates to be extracted and decouple implementation
+
+    def _add_file_reference(self, path, parent, tree, force, file_options):
+        # decide the proper tree and path to add
+        abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
+        if path is None or tree is None:
+            return None, abs_path, path, tree, None
+
+        # create a PBXFileReference for the new file
+        file_ref = PBXFileReference.create(path, tree)
+
+        # determine the type of the new file:
+        file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, file_options.ignore_unknown_type)
+
+        # set the file type on the file ref add the files
+        file_ref.set_last_known_file_type(file_type)
+        self.objects[file_ref.get_id()] = file_ref
+
+        # determine the parent and add it to it
+        self._get_parent_group(parent).add_child(file_ref)
+
+        return file_ref, abs_path, path, tree, expected_build_phase
+
+    def _create_build_files(self, file_ref, target_name, expected_build_phase, file_options):
+        results = []
+        for target in self.objects.get_targets(target_name):
+            # determine if there is a suitable build phase created
+            build_phases = target.get_or_create_build_phase(expected_build_phase)
+
+            # if it's a framework and it needs to be embedded
+            if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
+                    file_ref.get_file_type() == u'wrapper.framework':
+                embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
+                                                               search_parameters={'dstSubfolderSpec': '10'},
+                                                               create_parameters=(PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
+                # add runpath search flag
+                self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
+                               u'$(inherited) @executable_path/Frameworks', target_name)
+                build_phases.extend(embed_phase)
+
+            # create the build file and add it to the phase
+            for target_build_phase in build_phases:
+                build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase))
+                self.objects[build_file.get_id()] = build_file
+                target_build_phase.add_build_file(build_file)
+
+                results.append(build_file)
+
+        return results
+
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
         ext = os.path.splitext(file_ref.get_name())[1]

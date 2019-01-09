@@ -33,6 +33,23 @@ class NoseTestCoverage(TestCommand):
                             '-w', 'tests'])
 
 
+def find_version(*file_paths):
+    def read(*parts):
+        import codecs
+        import os
+        here = os.path.abspath(os.path.dirname(__file__))
+        with codecs.open(os.path.join(here, *parts), 'r') as fp:
+            return fp.read()
+
+    import re
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+
 setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
@@ -45,9 +62,9 @@ setup(name='pbxproj',
         ]
       },
       url="http://github.com/kronenthaler/mod-pbxproj",
-      version='2.0.10',
+      version=find_version("pbxproj", "__init__.py"),
       license='MIT License',
-      install_requires=['openstep_parser', 'docopt'],
+      install_requires=['openstep_parser>=1.3.1', 'docopt', 'future'],
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
       cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage})

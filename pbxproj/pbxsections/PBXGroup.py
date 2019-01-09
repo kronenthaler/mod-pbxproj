@@ -1,3 +1,11 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from past.builtins import basestring
+
 from pbxproj.PBXGenericObject import *
 from pbxproj.pbxsections import *
 
@@ -44,7 +52,9 @@ class PBXGroup(PBXGenericObject):
 
     def add_child(self, child):
         # if it's not the right type of children for the group
-        if not isinstance(child, PBXGroup) and not isinstance(child, PBXFileReference):
+        if not isinstance(child, PBXGroup) \
+                and not isinstance(child, PBXFileReference) \
+                and not isinstance(child, PBXReferenceProxy):
             return False
 
         self.children.append(child.get_id())

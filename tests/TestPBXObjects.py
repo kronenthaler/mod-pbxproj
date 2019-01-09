@@ -55,19 +55,21 @@ class PBXObjectTest(unittest.TestCase):
     def testGetTargets(self):
         obj = {
             '1': {'isa': 'PBXNativeTarget', 'name': 'app'},
-            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report'}
+            '2': {'isa': 'PBXAggregateTarget', 'name': 'report'},
+            '3': {'isa': 'PBXNativeTarget', 'name': 'something'}
         }
         dobj = objects().parse(obj)
 
-        self.assertEqual(dobj.get_targets().__len__(), 2)
+        self.assertEqual(dobj.get_targets().__len__(), 3)
         self.assertEqual(dobj.get_targets('app').__len__(), 1)
         self.assertEqual(dobj.get_targets('report').__len__(), 1)
         self.assertEqual(dobj.get_targets('whatever').__len__(), 0)
+        self.assertEqual(dobj.get_targets(['app', 'something']).__len__(), 2)
 
     def testGetConfigurationTargets(self):
         obj = {
             '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3'},
-            '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4'},
+            '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4'},
             '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
             '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
             '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '5'},

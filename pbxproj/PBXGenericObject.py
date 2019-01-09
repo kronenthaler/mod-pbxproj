@@ -1,3 +1,13 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+from past.builtins import basestring
+
 import re
 import uuid
 import copy
@@ -32,7 +42,7 @@ class PBXGenericObject(object):
 
     def _parse_dict(self, obj):
         # all top level objects are added as variables to this object
-        for key, value in obj.iteritems():
+        for key, value in list(obj.items()):
             if value is None:
                 continue
 
@@ -108,7 +118,7 @@ class PBXGenericObject(object):
         elif isinstance(value, PBXKey):
             value = value.__repr__()
         else:
-            value = PBXGenericObject._escape(value.__str__())
+            value = PBXGenericObject._escape(value.__str__(), exclude=[u"\'"])
 
         return value
 
@@ -134,7 +144,8 @@ class PBXGenericObject(object):
             if value.__len__() == 1:
                 value = value[0]
             if value.__len__() == 0:
-                delattr(self, key)
+                if hasattr(self, key):
+                    delattr(self, key)
                 return
 
         setattr(self, key, value)
@@ -171,13 +182,20 @@ class PBXGenericObject(object):
         return ''.join(str(uuid.uuid4()).upper().split('-')[1:])
 
     @classmethod
-    def _escape(cls, item):
+    def _escape(cls, item, exclude=None):
+        replacements = [(u'\\', u'\\\\'),
+                        (u'\n', u'\\n'),
+                        (u'\"', u'\\"'),
+                        (u'\0', u'\\0'),
+                        (u'\t', u'\\\t'),
+                        (u'\'', u'\\\'')]
+        if exclude is not None:
+            replacements = [x for x in replacements for y in exclude if x[0] != y]
+
         if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
-            escaped = item.replace(u'\\', u'\\\\')\
-                .replace(u'\n', u'\\n')\
-                .replace(u'\"', u'\\"')\
-                .replace(u'\0', u'\\0')\
-                .replace(u'\'', u'\\\'')\
-                .replace(u'\t', u'\\\t')
+            escaped = item
+            for replacement in replacements:
+                escaped = escaped.replace(replacement[0], replacement[1])
+
             return u'"{0}"'.format(escaped)
         return item

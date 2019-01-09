@@ -9,7 +9,7 @@ class ProjectFilesTest(unittest.TestCase):
                 '0': {'isa': 'PBXGroup', 'children': ['group1'], 'sourceTree': "<group>"},
                 '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
                       'buildPhases': ['compile1']},
-                '2': {'isa': 'PBXAggregatedTarget', 'name': 'report', 'buildConfigurationList': '4',
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
                       'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
@@ -30,7 +30,9 @@ class ProjectFilesTest(unittest.TestCase):
                 'build_file1': {'isa': 'PBXBuildFile', 'fileRef': 'file1'},
                 'build_file2': {'isa': 'PBXBuildFile', 'fileRef': 'file2'},
                 'compile': {'isa': 'PBXGenericBuildPhase', 'files': ['build_file1']},
-                'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']}
+                'compile1': {'isa': 'PBXCopyFilesBuildPhase', 'files': ['build_file2']},
+                'compile2': {'isa': 'PBXShellScriptBuildPhase', 'files': []},
+                'project': {'isa': 'PBXProject'}
             }
         }
 
@@ -215,6 +217,19 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(project.__str__(), original)
 
+    def testRemoveFileByIdKeepShellScriptBuildPhases(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script('ls -la')
+
+        original = project.__str__()
+        project.add_file("file.m")
+
+        file = project.get_files_by_name('file.m')[0]
+        result = project.remove_file_by_id(file.get_id())
+
+        self.assertTrue(result)
+        self.assertEqual(project.__str__(), original)
+
     def testRemoveFileByIdFromTarget(self):
         project = XcodeProject(self.obj)
         project.add_file("file.m")
@@ -311,3 +326,115 @@ class ProjectFilesTest(unittest.TestCase):
         project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
 
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
+
+    def testAddProjectWithBuildPhases(self):
+        project = XcodeProject(self.obj)
+
+        frameworks = project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__()
+        resources = project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__()
+        build_files = project.objects.get_objects_in_section('PBXBuildFile').__len__()
+
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj')
+
+        self.assertEqual(reference_proxies.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+
+        # check that the buildFiles where added
+        self.assertGreater(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
+        self.assertGreater(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
+        self.assertGreater(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+
+    def testAddProjectWithoutBuildPhases(self):
+        project = XcodeProject(self.obj)
+
+        frameworks = project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__()
+        resources = project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__()
+        build_files = project.objects.get_objects_in_section('PBXBuildFile').__len__()
+
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj', file_options=FileOptions(create_build_files=False))
+
+        self.assertEqual(reference_proxies.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+
+        # check that the buildFiles where added
+        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
+        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
+        self.assertEqual(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+
+    def testAddProjectNotForced(self):
+        project = XcodeProject(self.obj)
+
+        _ = project.add_project('samplescli/dependency.xcodeproj', file_options=FileOptions(create_build_files=False))
+        reference_proxies = project.add_project('samplescli/dependency.xcodeproj', force=False,
+                                                file_options=FileOptions(create_build_files=False))
+
+        self.assertListEqual(reference_proxies, [])
+
+    def testAddProjectDoesntExists(self):
+        project = XcodeProject(self.obj)
+        reference_proxies = project.add_project(os.path.abspath("samples/unexistingFile.m"))
+
+        # nothing to do if the file is absolute but doesn't exist
+        self.assertIsNone(reference_proxies)
+
+    def testAddHeaderFilePublic(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PUBLIC))
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Public'])
+
+
+    def testAddHeaderFilePrivate(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PRIVATE))
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Private'])
+
+    def testAddHeaderFileProjectScope(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+
+        references = project.add_file("header.h", file_options=FileOptions())
+
+        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        self.assertIsNone(references[0]['settings'], None)
