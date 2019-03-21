@@ -48,7 +48,7 @@ class PBXBuildFile(PBXGenericObject):
 
     def get_attributes(self):
         if u'settings' not in self:
-            return
+            return None
 
         if u'ATTRIBUTES' not in self.settings:
             return
