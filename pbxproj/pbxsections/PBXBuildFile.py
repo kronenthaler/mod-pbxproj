@@ -51,7 +51,7 @@ class PBXBuildFile(PBXGenericObject):
             return None
 
         if u'ATTRIBUTES' not in self.settings:
-            return
+            return None
 
         return self.settings[u'ATTRIBUTES']
 
