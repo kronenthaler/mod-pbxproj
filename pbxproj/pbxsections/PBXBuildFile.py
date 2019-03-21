@@ -57,7 +57,7 @@ class PBXBuildFile(PBXGenericObject):
 
     def get_compiler_flags(self):
         if u'settings' not in self:
-            return
+            return None
 
         if u'COMPILER_FLAGS' not in self.settings:
             return
