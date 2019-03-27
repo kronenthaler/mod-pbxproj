@@ -27,7 +27,7 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
             path = self._pbxproj_path
 
         f = open(path, 'w')
-        f.write(self.__repr__())
+        f.write(self.__repr__() + "\n")
         f.close()
 
     def backup(self):
