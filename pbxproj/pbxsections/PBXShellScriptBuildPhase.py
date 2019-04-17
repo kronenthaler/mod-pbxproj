@@ -2,9 +2,10 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
+
     @classmethod
-    def create(cls, script, shell_path=u"/bin/sh", files=None, input_paths=None, output_paths=None, show_in_log='0'):
-        return cls().parse({
+    def create(cls, script, name=None, shell_path=u"/bin/sh", files=None, input_paths=None, output_paths=None, show_in_log='0'):
+        kwargs = {
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
             u'files': files if files else [],
@@ -15,7 +16,10 @@ class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
             u'shellPath': shell_path,
             u'shellScript': script,
             u'showEnvVarsInLog': show_in_log
-        })
+        }
+        if name is not None:
+            kwargs[u'name'] = name
+        return cls().parse(kwargs)
 
     def _get_comment(self):
-        return u'ShellScript'
+        return getattr(self, 'name', u'ShellScript')
