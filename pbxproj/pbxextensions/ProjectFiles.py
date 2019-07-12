@@ -104,6 +104,8 @@ class ProjectFiles:
         u'.xcconfig': (u'sourcecode.xcconfig', u'PBXSourcesBuildPhase'),
         u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
         u'.bin': (u'archive.macbinary', u'PBXResourcesBuildPhase'),
+        u'.mlmodel': (u'file.mlmodel', u'PBXSourcesBuildPhase'),
+        u'.html': (u'text.html', u'PBXResourcesBuildPhase'),
     }
     _SPECIAL_FOLDERS = [
         u'.bundle',
