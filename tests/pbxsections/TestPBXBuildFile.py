@@ -24,6 +24,17 @@ class PBXBuildFileTest(unittest.TestCase):
 
         self.assertEqual(dobj.objects['1']._get_comment(), "real name in X")
 
+    def testGetCommentForNonExistentRef(self):
+        obj = {
+            'objects': {
+                'FDDF6A571C68E5B100D7A645': {'isa': 'PBXBuildFile'},
+                "X": {'isa': 'phase', 'name': 'X', 'files': ['FDDF6A571C68E5B100D7A645']}
+            }
+        }
+        dobj = XcodeProject().parse(obj)
+
+        self.assertEqual(dobj.objects['FDDF6A571C68E5B100D7A645']._get_comment(), "(null) in X")
+
     def testAddAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
