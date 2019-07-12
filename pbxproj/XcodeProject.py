@@ -57,6 +57,21 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
 
     def get_object(self, object_id):
         return self.objects[object_id]
+    
+    def get_build_configurations_by_target(self,target_name):
+        result=[]
+        temp_result= self.get_target_by_name(target_name)
+        targets= self.objects.get_targets()
+        configSets=[]
+        for target_temp in targets:
+            if target_temp.name==target_name:
+                configuration_list = self.objects[target_temp.buildConfigurationList]  
+                configSets=configuration_list['buildConfigurations']
+                break
+        for configSet_temp in configSets:
+            temp_Obj=self.objects[configSet_temp]
+            result.append(temp_Obj.name)     
+        return result
 
     @classmethod
     def load(cls, path):
