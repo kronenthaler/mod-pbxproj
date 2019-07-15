@@ -49,6 +49,27 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         return [build_file for build_file in self.objects.get_objects_in_section(u'PBXBuildFile')
                 if build_file.fileRef == file_id]
 
+    def get_build_configurations_by_target(self, target_name):
+        result = []
+        specified_target = self.get_target_by_name(target_name)
+        if specified_target is None:
+            return None
+        all_targets = self.objects.get_targets()
+        if all_targets is None or len(all_targets) == 0:
+            return None
+        target_build_configurations = []
+        for target in all_targets:
+            if target.name == target_name:
+                buildConfigurationList = self.objects[target.buildConfigurationList]
+                target_build_configurations = buildConfigurationList['buildConfigurations']
+                break
+        if len(target_build_configurations) == 0:
+            return None
+        for build_configuration in target_build_configurations:
+            build_configuration_Obj = self.objects[build_configuration]
+            result.append(build_configuration_Obj.name)
+        return result
+
     def get_target_by_name(self, name):
         targets = self.objects.get_targets(name)
         if targets.__len__() > 0:
@@ -57,21 +78,6 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
 
     def get_object(self, object_id):
         return self.objects[object_id]
-    
-    def get_build_configurations_by_target(self,target_name):
-        result=[]
-        temp_result= self.get_target_by_name(target_name)
-        targets= self.objects.get_targets()
-        configSets=[]
-        for target_temp in targets:
-            if target_temp.name==target_name:
-                configuration_list = self.objects[target_temp.buildConfigurationList]  
-                configSets=configuration_list['buildConfigurations']
-                break
-        for configSet_temp in configSets:
-            temp_Obj=self.objects[configSet_temp]
-            result.append(temp_Obj.name)     
-        return result
 
     @classmethod
     def load(cls, path):
