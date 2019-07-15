@@ -67,7 +67,11 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
             return None
         for build_configuration in target_build_configurations:
             build_configuration_Obj = self.objects[build_configuration]
+            if build_configuration_Obj is None:
+                continue
             result.append(build_configuration_Obj.name)
+        if len(result) == 0:
+            result = None
         return result
 
     def get_target_by_name(self, name):
