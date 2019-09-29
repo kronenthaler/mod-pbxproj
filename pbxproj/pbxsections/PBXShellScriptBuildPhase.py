@@ -5,9 +5,10 @@ class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
 
     @classmethod
     def create(cls, script, name=None, shell_path=u"/bin/sh", files=None, input_paths=None, output_paths=None, show_in_log='0'):
-        kwargs = {
+        return cls().parse({
             u'_id': cls._generate_id(),
             u'isa': cls.__name__,
+            u'name': name,
             u'files': files if files else [],
             u'buildActionMask': 0x7FFFFFFF,
             u'inputPaths': input_paths if input_paths else [],
@@ -16,10 +17,7 @@ class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
             u'shellPath': shell_path,
             u'shellScript': script,
             u'showEnvVarsInLog': show_in_log
-        }
-        if name is not None:
-            kwargs[u'name'] = name
-        return cls().parse(kwargs)
+        })
 
     def _get_comment(self):
         return getattr(self, 'name', u'ShellScript')
