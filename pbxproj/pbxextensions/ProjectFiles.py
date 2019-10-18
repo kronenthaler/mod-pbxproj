@@ -106,6 +106,7 @@ class ProjectFiles:
         u'.bin': (u'archive.macbinary', u'PBXResourcesBuildPhase'),
         u'.mlmodel':(u'file.mlmodel', u'PBXSourcesBuildPhase'),
         u'.html':(u'text.html', u'PBXResourcesBuildPhase'),
+        u'.entitlements': (u'text.plist.entitlements', u'PBXResourcesBuildPhase')
     }
     _SPECIAL_FOLDERS = [
         u'.bundle',
