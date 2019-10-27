@@ -134,10 +134,7 @@ class PBXGenericObject(object):
         return fields
 
     def __getitem__(self, key):
-        if hasattr(self, key):
-            return getattr(self, key)
-
-        return None
+        return getattr(self, key, None)
 
     def __setitem__(self, key, value):
         if type(value) == list:

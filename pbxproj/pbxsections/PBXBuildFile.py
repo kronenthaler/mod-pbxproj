@@ -1,4 +1,5 @@
 from pbxproj import *
+from pbxproj import save_accelerators
 
 
 class PBXBuildFile(PBXGenericObject):
@@ -44,6 +45,23 @@ class PBXBuildFile(PBXGenericObject):
         objects = self.get_parent()
         target = self.get_id()
 
+        def fill_cache_during_save(cache):
+            for section in objects.get_sections():
+                for obj in objects.get_objects_in_section(section):
+                    file_ids = obj[u'files']
+                    if file_ids is not None:
+                        comment = obj._get_comment()
+                        for file_id in file_ids:
+                            cache[file_id] = comment
+
+        # Do a special behavior here while saving to avoid the linear lookup below and therefore
+        # be significantly faster.
+        if save_accelerators.is_in_save(self):
+            return save_accelerators.get_from_cache_during_save(self, 'FILE_HOLDERS', objects, fill_cache_during_save, target)
+
+        # It's not safe to do the above optimization "normally" (outside of saving) since the objects
+        # may have been modified by the user, and the cache may therefore be invalid. So we fall back
+        # to a linear search.
         for section in objects.get_sections():
             for obj in objects.get_objects_in_section(section):
                 if u'files' in obj and target in obj.files:
