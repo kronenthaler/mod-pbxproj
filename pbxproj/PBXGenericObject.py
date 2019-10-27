@@ -20,7 +20,15 @@ class PBXGenericObject(object):
     Generic class that creates internal attributes to match the structure of the tree used to create the element.
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
     """
-    _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/]*'
+    _VALID_KEY_REGEX = re.compile(r'^[a-zA-Z0-9\\._/]*$')
+    _ESCAPE_REPLACEMENTS = [
+        (u'\\', u'\\\\'),
+        (u'\n', u'\\n'),
+        (u'\"', u'\\"'),
+        (u'\0', u'\\0'),
+        (u'\t', u'\\\t'),
+        (u'\'', u'\\\''),
+    ]
 
     def __init__(self, parent=None):
         self._parent = parent
@@ -71,10 +79,7 @@ class PBXGenericObject(object):
     @classmethod
     def _get_class_reference(cls, class_type):
         module = __import__(u'pbxproj')
-        if hasattr(module, class_type):
-            class_ = getattr(module, class_type)
-            return class_
-        return PBXGenericObject
+        return getattr(module, class_type, PBXGenericObject)
 
     def __repr__(self):
         return self._print_object()
@@ -123,7 +128,7 @@ class PBXGenericObject(object):
         return value
 
     def get_keys(self):
-        fields = list([x for x in dir(self) if not x.startswith(u'_') and not hasattr(getattr(self, x), '__call__')])
+        fields = [field for field in self.__dict__.keys() if field[0] != u'_']
         if u'isa' in fields:
             fields.remove(u'isa')
             fields = sorted(fields)
@@ -180,19 +185,13 @@ class PBXGenericObject(object):
 
     @classmethod
     def _escape(cls, item, exclude=None):
-        replacements = [(u'\\', u'\\\\'),
-                        (u'\n', u'\\n'),
-                        (u'\"', u'\\"'),
-                        (u'\0', u'\\0'),
-                        (u'\t', u'\\\t'),
-                        (u'\'', u'\\\'')]
-        if exclude is not None:
-            replacements = [x for x in replacements for y in exclude if x[0] != y]
-
-        if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
+        exclude = set() if exclude is None else set(exclude)
+        if len(item) == 0 or cls._VALID_KEY_REGEX.match(item) is None:
             escaped = item
-            for replacement in replacements:
-                escaped = escaped.replace(replacement[0], replacement[1])
+            for unescaped_value, escaped_value in cls._ESCAPE_REPLACEMENTS:
+                if unescaped_value in exclude:
+                    continue
+                escaped = escaped.replace(unescaped_value, escaped_value)
 
             return u'"{0}"'.format(escaped)
         return item

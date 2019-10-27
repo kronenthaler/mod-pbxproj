@@ -15,12 +15,8 @@ def get_from_cache_during_save(current_obj, caches_key_type, caches_key_obj, fil
 
 
 def _get_save_caches(current_obj):
-    # Lazy import to break circular dependency
-    from pbxproj.XcodeProject import XcodeProject
-
-    root_project = current_obj
-    while root_project is not None and not isinstance(root_project, XcodeProject):
-        root_project = root_project.get_parent()
-    if root_project is None:
-        return None
-    return root_project._save_caches
+    parent = current_obj._parent
+    while parent is not None:
+        current_obj = parent
+        parent = current_obj._parent
+    return getattr(current_obj, '_save_caches', None)
