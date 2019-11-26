@@ -19,6 +19,9 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         self._pbxproj_path = os.path.abspath(path)
         self._source_root = os.path.abspath(os.path.join(os.path.split(path)[0], '..'))
 
+        # Used to speed up saving the project.
+        self._save_caches = None
+
         # initialize the structure using the given tree
         self.parse(tree)
 
@@ -27,7 +30,11 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
             path = self._pbxproj_path
 
         f = open(path, 'w')
+        # Initialize the save cache to indicate that we're in a save
+        self._save_caches = {}
         f.write(self.__repr__() + "\n")
+        # Clear the cache since future modifications may make it invalid (and we're no longer in a save).
+        self._save_caches = None
         f.close()
 
     def backup(self):
