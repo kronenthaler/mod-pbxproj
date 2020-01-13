@@ -15,14 +15,14 @@ class PBXBuildFileTest(unittest.TestCase):
     def testGetComment(self):
         obj = {
             'objects': {
-                '1': {"isa": "PBXBuildFile", "name": "something", 'fileRef': 'FDDF6A571C68E5B100D7A645'},
-                'FDDF6A571C68E5B100D7A645': {'isa': 'PBXFileReference', "name": "real name"},
-                "X": {'isa': 'phase', 'name': 'X', 'files': ['1']}
+                '1': {'isa': 'PBXBuildFile', 'name': 'something', 'fileRef': 'FDDF6A571C68E5B100D7A645'},
+                'FDDF6A571C68E5B100D7A645': {'isa': 'PBXFileReference', 'name': 'real name'},
+                'X': {'isa': 'phase', 'name': 'X', 'files': ['1']}
             }
         }
         dobj = XcodeProject().parse(obj)
 
-        self.assertEqual(dobj.objects['1']._get_comment(), "real name in X")
+        self.assertEqual(dobj.objects['1']._get_comment(), 'real name in X')
 
     def testGetAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
@@ -32,19 +32,19 @@ class PBXBuildFileTest(unittest.TestCase):
         self.assertIsNone(attributes)
 
     def testGetAttributesWithoutAttributes(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags="x")
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='x')
 
         attributes = dobj.get_attributes()
 
         self.assertIsNone(attributes)
 
     def testGetAttributesWithAttributes(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), attributes="x")
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes='x')
 
         attributes = dobj.get_attributes()
 
         self.assertIsNotNone(attributes)
-        self.assertEquals(attributes, [u'x'])
+        self.assertEquals(attributes, ['x'])
 
     def testGetCompilerFlagsWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
@@ -52,90 +52,90 @@ class PBXBuildFileTest(unittest.TestCase):
         self.assertIsNone(dobj.get_compiler_flags())
 
     def testGetCompilerFlagsWithoutFlags(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), attributes="x")
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes='x')
 
         self.assertIsNone(dobj.get_compiler_flags())
 
     def testGetCompilerFlagsWithFlags(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=[u'Weak', '-fno-arc'])
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=['Weak', '-fno-arc'])
 
         self.assertIsNotNone(dobj.get_compiler_flags())
-        self.assertEquals(dobj.get_compiler_flags(), u'Weak -fno-arc')
+        self.assertEquals(dobj.get_compiler_flags(), 'Weak -fno-arc')
 
     def testGetCommentForNonExistentRef(self):
         obj = {
             'objects': {
                 'FDDF6A571C68E5B100D7A645': {'isa': 'PBXBuildFile'},
-                "X": {'isa': 'phase', 'name': 'X', 'files': ['FDDF6A571C68E5B100D7A645']}
+                'X': {'isa': 'phase', 'name': 'X', 'files': ['FDDF6A571C68E5B100D7A645']}
             }
         }
         dobj = XcodeProject().parse(obj)
 
-        self.assertEqual(dobj.objects['FDDF6A571C68E5B100D7A645']._get_comment(), "(null) in X")
+        self.assertEqual(dobj.objects['FDDF6A571C68E5B100D7A645']._get_comment(), '(null) in X')
 
     def testAddAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
-        dobj.add_attributes(u'Weak')
+        dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, [u'Weak'])
+        self.assertEquals(dobj.settings.ATTRIBUTES, ['Weak'])
 
     def testAddAttributesWithoutAttributes(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags="x")
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='x')
 
-        dobj.add_attributes(u'Weak')
+        dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, [u'Weak'])
+        self.assertEquals(dobj.settings.ATTRIBUTES, ['Weak'])
 
     def testAddAttributesWithAttributes(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), attributes="x")
-        dobj.add_attributes(u'Weak')
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes='x')
+        dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, [u'x', u'Weak'])
+        self.assertEquals(dobj.settings.ATTRIBUTES, ['x', 'Weak'])
 
     def testRemoveAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
         dobj.remove_attributes('Weak')
 
-        self.assertIsNone(dobj[u'settings'])
+        self.assertIsNone(dobj['settings'])
 
     def testRemoveAttributesWithSettings(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), attributes=["Weak"])
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes=['Weak'])
 
         dobj.remove_attributes('Weak')
 
-        self.assertIsNone(dobj[u'settings'])
+        self.assertIsNone(dobj['settings'])
 
     def testAddCompilerFlagWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
-        dobj.add_compiler_flags([u'Weak', '-fno-arc'])
+        dobj.add_compiler_flags(['Weak', '-fno-arc'])
 
         self.assertIsNotNone(dobj.settings.COMPILER_FLAGS)
-        self.assertEquals(dobj.settings.COMPILER_FLAGS, u'Weak -fno-arc')
+        self.assertEquals(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc')
 
     def testAddCompilerFlagWithFlags(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=[u'Weak', '-fno-arc'])
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=['Weak', '-fno-arc'])
 
         dobj.add_compiler_flags('x')
 
         self.assertIsNotNone(dobj.settings.COMPILER_FLAGS)
-        self.assertEquals(dobj.settings.COMPILER_FLAGS, u'Weak -fno-arc x')
+        self.assertEquals(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc x')
 
     def testRemoveCompilerFlagsWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
         dobj.remove_compiler_flags('Weak')
 
-        self.assertIsNone(dobj[u'settings'])
+        self.assertIsNone(dobj['settings'])
 
     def testRemoveCompilerFlagsWithSettings(self):
-        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=u'Weak')
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='Weak')
 
         dobj.remove_compiler_flags('Weak')
 
-        self.assertIsNone(dobj[u'settings'])
+        self.assertIsNone(dobj['settings'])

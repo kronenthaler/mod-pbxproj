@@ -68,22 +68,19 @@ class PBXBuildFile(PBXGenericObject):
                     return obj._get_comment()
 
     def get_attributes(self):
-        if u'settings' not in self:
+        if 'settings' not in self:
             return None
 
-        if u'ATTRIBUTES' not in self.settings:
+        if 'ATTRIBUTES' not in self.settings:
             return None
 
-        return self.settings[u'ATTRIBUTES']
+        return self.settings['ATTRIBUTES']
 
     def get_compiler_flags(self):
-        if u'settings' not in self:
+        if 'settings' not in self or 'COMPILER_FLAGS' not in self.settings:
             return None
 
-        if u'COMPILER_FLAGS' not in self.settings:
-            return
-
-        return self.settings[u'COMPILER_FLAGS']
+        return self.settings['COMPILER_FLAGS']
 
     def add_attributes(self, attributes):
         if not isinstance(attributes, list):
