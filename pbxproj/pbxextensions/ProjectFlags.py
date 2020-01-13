@@ -231,10 +231,10 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return:
         """
-        self.set_flags(u'CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
-        self.set_flags(u'DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
-        self.set_flags(u'PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
-        self.set_flags(u'PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
+        self.set_flags('CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
+        self.set_flags('DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
+        self.set_flags('PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
+        self.set_flags('PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
 
         for target in self.objects.get_targets(target_name):
             self.objects[self.rootObject].set_provisioning_style(PBXProvioningTypes.MANUAL, target)

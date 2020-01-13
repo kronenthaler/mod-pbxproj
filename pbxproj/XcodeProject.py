@@ -44,7 +44,7 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         return backup_name
 
     def __repr__(self):
-        return u'// !$*UTF8*$!\n' + super(XcodeProject, self).__repr__()
+        return '// !$*UTF8*$!\n' + super(XcodeProject, self).__repr__()
 
     def get_ids(self):
         return self.objects.get_keys()
@@ -53,7 +53,7 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         return self.objects.get_objects_in_section(phase_name)
 
     def get_build_files_for_file(self, file_id):
-        return [build_file for build_file in self.objects.get_objects_in_section(u'PBXBuildFile')
+        return [build_file for build_file in self.objects.get_objects_in_section('PBXBuildFile')
                 if build_file.fileRef == file_id]
 
     def get_target_by_name(self, name):

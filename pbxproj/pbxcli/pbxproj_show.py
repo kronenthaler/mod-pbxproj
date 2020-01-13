@@ -29,8 +29,8 @@ from pbxproj.pbxcli import *
 
 def execute(project, args):
     # make a decision of what function to call based on the -D flag
-    if args[u'--target']:
-        return _target_info(project, args[u'--target'], args)
+    if args['--target']:
+        return _target_info(project, args['--target'], args)
     else:
         return _summary(project, args)
 
@@ -59,16 +59,16 @@ def _summary(project, args):
 
 def _target_info(project, target_name, args):
     build_phases = []
-    if args[u'--source-files']:
-        build_phases += [u'PBXSourcesBuildPhase']
-    elif args[u'--header-files']:
-        build_phases += [u'PBXHeadersBuildPhase']
-    elif args[u'--resource-files']:
-        build_phases += [u'PBXResourcesBuildPhase']
-    elif args[u'--framework-files']:
-        build_phases += [u'PBXFrameworksBuildPhase']
-    elif args[u'--build-phase-files']:
-        build_phases += [args[u'--build-phase-files']]
+    if args['--source-files']:
+        build_phases += ['PBXSourcesBuildPhase']
+    elif args['--header-files']:
+        build_phases += ['PBXHeadersBuildPhase']
+    elif args['--resource-files']:
+        build_phases += ['PBXResourcesBuildPhase']
+    elif args['--framework-files']:
+        build_phases += ['PBXFrameworksBuildPhase']
+    elif args['--build-phase-files']:
+        build_phases += [args['--build-phase-files']]
 
     info = ''
     for target in project.objects.get_targets(target_name):
@@ -79,7 +79,7 @@ def _target_info(project, target_name, args):
                     configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]),
                     )
 
-        if args[u'--configurations']:
+        if args['--configurations']:
             info += "\tConfigurations: {configs}\n" \
                 .format(configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]))
 

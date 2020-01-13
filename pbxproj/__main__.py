@@ -20,7 +20,7 @@ from docopt import docopt
 
 
 def main():
-    args = docopt(__doc__, options_first=True, version=u'pbxproj version {0}'.format(pbxproj.__version__))
+    args = docopt(__doc__, options_first=True, version='pbxproj version {0}'.format(pbxproj.__version__))
     argv = [args['<command>']] + args['<args>']
     if args['<command>'] == 'file':
         import pbxproj.pbxcli.pbxproj_file as pbxproj_file
