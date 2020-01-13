@@ -5,12 +5,12 @@ class PBXGenericBuildPhase(PBXGenericObject):
     @classmethod
     def create(cls, name=None, files=None):
         return cls().parse({
-            u'_id': cls._generate_id(),
-            u'isa': cls.__name__,
-            u'name': name,
-            u'files': files if files else [],
-            u'buildActionMask': 0x7FFFFFFF,
-            u'runOnlyForDeploymentPostprocessing': 0
+            '_id': cls._generate_id(),
+            'isa': cls.__name__,
+            'name': name,
+            'files': files if files else [],
+            'buildActionMask': 0x7FFFFFFF,
+            'runOnlyForDeploymentPostprocessing': 0
         })
 
     def add_build_file(self, build_file):

@@ -32,24 +32,24 @@ from docopt import docopt
 
 def execute(project, args):
     # make a decision of what function to call based on the -D flag
-    if args[u'--delete']:
+    if args['--delete']:
         return _remove(project, args)
     else:
         return _add(project, args)
 
 
 def _add(project, args):
-    for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
-        project.add_flags(flag_name, flag_value, target_name=args[u'--target'],
-                          configuration_name=args[u'--configuration'])
-    return u'Flags added successfully.'
+    for (flag_name, flag_value) in zip(args['<flag_name>'], args['<flag_value>']):
+        project.add_flags(flag_name, flag_value, target_name=args['--target'],
+                          configuration_name=args['--configuration'])
+    return 'Flags added successfully.'
 
 
 def _remove(project, args):
-    for (flag_name, flag_value) in zip(args[u'<flag_name>'], args[u'<flag_value>']):
-        project.remove_flags(flag_name, flag_value, target_name=args[u'--target'],
-                             configuration_name=args[u'--configuration'])
-    return u'Flags removed successfully.'
+    for (flag_name, flag_value) in zip(args['<flag_name>'], args['<flag_value>']):
+        project.remove_flags(flag_name, flag_value, target_name=args['--target'],
+                             configuration_name=args['--configuration'])
+    return 'Flags removed successfully.'
 
 
 def main():

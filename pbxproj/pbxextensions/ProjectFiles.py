@@ -3,12 +3,12 @@ from pbxproj import PBXList
 
 
 class TreeType:
-    ABSOLUTE = u'<absolute>'
-    GROUP = u'<group>'
-    BUILT_PRODUCTS_DIR = u'BUILT_PRODUCTS_DIR'
-    DEVELOPER_DIR = u'DEVELOPER_DIR'
-    SDKROOT = u'SDKROOT'
-    SOURCE_ROOT = u'SOURCE_ROOT'
+    ABSOLUTE = '<absolute>'
+    GROUP = '<group>'
+    BUILT_PRODUCTS_DIR = 'BUILT_PRODUCTS_DIR'
+    DEVELOPER_DIR = 'DEVELOPER_DIR'
+    SDKROOT = 'SDKROOT'
+    SOURCE_ROOT = 'SOURCE_ROOT'
 
     @classmethod
     def options(cls):
@@ -17,9 +17,9 @@ class TreeType:
 
 
 class HeaderScope:
-    PUBLIC = u'Public'
-    PRIVATE = u'Private'
-    PROJECT = u''
+    PUBLIC = 'Public'
+    PRIVATE = 'Private'
+    PROJECT = ''
 
 
 class FileOptions:
@@ -47,21 +47,21 @@ class FileOptions:
         self.header_scope = header_scope
 
     def get_attributes(self, file_ref, build_phase):
-        if file_ref.get_file_type() != u'wrapper.framework' and file_ref.get_file_type() != u'sourcecode.c.h':
+        if file_ref.get_file_type() != 'wrapper.framework' and file_ref.get_file_type() != 'sourcecode.c.h':
             return None
 
         attributes = None
-        if build_phase.isa == u'PBXFrameworksBuildPhase':
-            attributes = [u'Weak'] if self.weak else None
+        if build_phase.isa == 'PBXFrameworksBuildPhase':
+            attributes = ['Weak'] if self.weak else None
 
-        if build_phase.isa == u'PBXCopyFilesBuildPhase' and \
+        if build_phase.isa == 'PBXCopyFilesBuildPhase' and \
                 file_ref.sourceTree != TreeType.SDKROOT and \
                 self.code_sign_on_copy:
             if attributes is None:
                 attributes = []
-            attributes += [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+            attributes += ['CodeSignOnCopy', 'RemoveHeadersOnCopy']
 
-        if build_phase.isa == u'PBXHeadersBuildPhase':
+        if build_phase.isa == 'PBXHeadersBuildPhase':
             attributes = [self.header_scope] if self.header_scope != HeaderScope.PROJECT else None
 
         return attributes
@@ -69,52 +69,52 @@ class FileOptions:
 
 class ProjectFiles:
     _FILE_TYPES = {
-        u'': (u'text', u'PBXResourcesBuildPhase'),
-        u'.a': (u'archive.ar', u'PBXFrameworksBuildPhase'),
-        u'.app': (u'wrapper.application', None),
-        u'.s': (u'sourcecode.asm', u'PBXSourcesBuildPhase'),
-        u'.c': (u'sourcecode.c.c', u'PBXSourcesBuildPhase'),
-        u'.cpp': (u'sourcecode.cpp.cpp', u'PBXSourcesBuildPhase'),
-        u'.framework': (u'wrapper.framework', u'PBXFrameworksBuildPhase'),
-        u'.h': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
-        u'.hpp': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
-        u'.pch': (u'sourcecode.c.h', u'PBXHeadersBuildPhase'),
-        u'.d': (u'sourcecode.dtrace', u'PBXSourcesBuildPhase'),
-        u'.def': (u'text', u'PBXResourcesBuildPhase'),
-        u'.swift': (u'sourcecode.swift', u'PBXSourcesBuildPhase'),
-        u'.icns': (u'image.icns', u'PBXResourcesBuildPhase'),
-        u'.m': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
-        u'.j': (u'sourcecode.c.objc', u'PBXSourcesBuildPhase'),
-        u'.mm': (u'sourcecode.cpp.objcpp', u'PBXSourcesBuildPhase'),
-        u'.nib': (u'wrapper.nib', u'PBXResourcesBuildPhase'),
-        u'.plist': (u'text.plist.xml', u'PBXResourcesBuildPhase'),
-        u'.json': (u'text.json', u'PBXResourcesBuildPhase'),
-        u'.png': (u'image.png', u'PBXResourcesBuildPhase'),
-        u'.jpg': (u'image.jpg', u'PBXResourcesBuildPhase'),
-        u'.rtf': (u'text.rtf', u'PBXResourcesBuildPhase'),
-        u'.tiff': (u'image.tiff', u'PBXResourcesBuildPhase'),
-        u'.txt': (u'text', u'PBXResourcesBuildPhase'),
-        u'.xcodeproj': (u'wrapper.pb-project', None),
-        u'.xib': (u'file.xib', u'PBXResourcesBuildPhase'),
-        u'.strings': (u'text.plist.strings', u'PBXResourcesBuildPhase'),
-        u'.bundle': (u'wrapper.plug-in', u'PBXResourcesBuildPhase'),
-        u'.dylib': (u'compiled.mach-o.dylib', u'PBXFrameworksBuildPhase'),
-        u'.xcdatamodeld': (u'wrapper.xcdatamodel', u'PBXSourcesBuildPhase'),
-        u'.xcassets': (u'folder.assetcatalog', u'PBXResourcesBuildPhase'),
-        u'.xcconfig': (u'sourcecode.xcconfig', u'PBXSourcesBuildPhase'),
-        u'.tbd': (u'sourcecode.text-based-dylib-definition', u'PBXFrameworksBuildPhase'),
-        u'.bin': (u'archive.macbinary', u'PBXResourcesBuildPhase'),
-        u'.mlmodel':(u'file.mlmodel', u'PBXSourcesBuildPhase'),
-        u'.html':(u'text.html', u'PBXResourcesBuildPhase'),
-        u'.entitlements': (u'text.plist.entitlements', u'PBXResourcesBuildPhase')
+        '': ('text', 'PBXResourcesBuildPhase'),
+        '.a': ('archive.ar', 'PBXFrameworksBuildPhase'),
+        '.app': ('wrapper.application', None),
+        '.s': ('sourcecode.asm', 'PBXSourcesBuildPhase'),
+        '.c': ('sourcecode.c.c', 'PBXSourcesBuildPhase'),
+        '.cpp': ('sourcecode.cpp.cpp', 'PBXSourcesBuildPhase'),
+        '.framework': ('wrapper.framework', 'PBXFrameworksBuildPhase'),
+        '.h': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
+        '.hpp': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
+        '.pch': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
+        '.d': ('sourcecode.dtrace', 'PBXSourcesBuildPhase'),
+        '.def': ('text', 'PBXResourcesBuildPhase'),
+        '.swift': ('sourcecode.swift', 'PBXSourcesBuildPhase'),
+        '.icns': ('image.icns', 'PBXResourcesBuildPhase'),
+        '.m': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
+        '.j': ('sourcecode.c.objc', 'PBXSourcesBuildPhase'),
+        '.mm': ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase'),
+        '.nib': ('wrapper.nib', 'PBXResourcesBuildPhase'),
+        '.plist': ('text.plist.xml', 'PBXResourcesBuildPhase'),
+        '.json': ('text.json', 'PBXResourcesBuildPhase'),
+        '.png': ('image.png', 'PBXResourcesBuildPhase'),
+        '.jpg': ('image.jpg', 'PBXResourcesBuildPhase'),
+        '.rtf': ('text.rtf', 'PBXResourcesBuildPhase'),
+        '.tiff': ('image.tiff', 'PBXResourcesBuildPhase'),
+        '.txt': ('text', 'PBXResourcesBuildPhase'),
+        '.xcodeproj': ('wrapper.pb-project', None),
+        '.xib': ('file.xib', 'PBXResourcesBuildPhase'),
+        '.strings': ('text.plist.strings', 'PBXResourcesBuildPhase'),
+        '.bundle': ('wrapper.plug-in', 'PBXResourcesBuildPhase'),
+        '.dylib': ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase'),
+        '.xcdatamodeld': ('wrapper.xcdatamodel', 'PBXSourcesBuildPhase'),
+        '.xcassets': ('folder.assetcatalog', 'PBXResourcesBuildPhase'),
+        '.xcconfig': ('sourcecode.xcconfig', 'PBXSourcesBuildPhase'),
+        '.tbd': ('sourcecode.text-based-dylib-definition', 'PBXFrameworksBuildPhase'),
+        '.bin': ('archive.macbinary', 'PBXResourcesBuildPhase'),
+        '.mlmodel':('file.mlmodel', 'PBXSourcesBuildPhase'),
+        '.html':('text.html', 'PBXResourcesBuildPhase'),
+        '.entitlements': ('text.plist.entitlements', 'PBXResourcesBuildPhase')
     }
     _SPECIAL_FOLDERS = [
-        u'.bundle',
-        u'.framework',
-        u'.xcodeproj',
-        u'.xcassets',
-        u'.xcdatamodeld',
-        u'.storyboardc'
+        '.bundle',
+        '.framework',
+        '.xcodeproj',
+        '.xcassets',
+        '.xcdatamodeld',
+        '.storyboardc'
     ]
 
     def __init__(self):
@@ -139,7 +139,7 @@ class ProjectFiles:
         if not force:
             for section in self.objects.get_sections():
                 for obj in self.objects.get_objects_in_section(section):
-                    if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                    if 'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
                         return []
 
         file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
@@ -159,11 +159,11 @@ class ProjectFiles:
             return results
 
         # the path is absolute and it's outside the scope of the project for linking purposes
-        library_path = os.path.join(u'$(SRCROOT)', os.path.split(file_ref.path)[0])
+        library_path = os.path.join('$(SRCROOT)', os.path.split(file_ref.path)[0])
         if os.path.isfile(abs_path):
             self.add_library_search_paths([library_path], recursive=False)
         else:
-            self.add_framework_search_paths([library_path, u'$(inherited)'], recursive=False)
+            self.add_framework_search_paths([library_path, '$(inherited)'], recursive=False)
 
         return results
 
@@ -186,7 +186,7 @@ class ProjectFiles:
         if not force:
             for section in self.objects.get_sections():
                 for obj in self.objects.get_objects_in_section(section):
-                    if u'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                    if 'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
                         return []
 
         file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
@@ -195,11 +195,11 @@ class ProjectFiles:
             return None
 
         # load project and add the things
-        child_project = self.__class__.load(os.path.join(path, u'project.pbxproj'))
-        child_products = child_project.get_build_phases_by_name(u'PBXNativeTarget')
+        child_project = self.__class__.load(os.path.join(path, 'project.pbxproj'))
+        child_products = child_project.get_build_phases_by_name('PBXNativeTarget')
 
         # create an special group without parent (ref proxies)
-        products_group = PBXGroup.create(name=u'Products', children=[])
+        products_group = PBXGroup.create(name='Products', children=[])
         self.objects[products_group.get_id()] = products_group
 
         for child_product in child_products:
@@ -224,14 +224,14 @@ class ProjectFiles:
                 self._create_build_files(reference_proxy, target_name, expected_build_phase, file_options)
 
         # add new PBXFileReference and PBXGroup to the PBXProject object
-        project_object = self.objects.get_objects_in_section(u'PBXProject')[0]
+        project_object = self.objects.get_objects_in_section('PBXProject')[0]
         project_ref = PBXGenericObject(project_object).parse({
-            u'ProductGroup': products_group.get_id(),
-            u'ProjectRef': file_ref.get_id()
+            'ProductGroup': products_group.get_id(),
+            'ProjectRef': file_ref.get_id()
         })
 
-        if u'projectReferences' not in project_object:
-            project_object[u'projectReferences'] = PBXList()
+        if 'projectReferences' not in project_object:
+            project_object['projectReferences'] = PBXList()
 
         project_object.projectReferences.append(project_ref)
 
@@ -260,7 +260,7 @@ class ProjectFiles:
             parent = self._get_parent_group(parent)
 
         files = []
-        for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
+        for file_ref in self.objects.get_objects_in_section('PBXFileReference'):
             if file_ref.get_name() == name and (parent is None or parent.has_child(file_ref.get_id())):
                 files.append(file_ref)
 
@@ -274,7 +274,7 @@ class ProjectFiles:
         :return: List of all PBXFileReference that match the path and tree criteria.
         """
         files = []
-        for file_ref in self.objects.get_objects_in_section(u'PBXFileReference'):
+        for file_ref in self.objects.get_objects_in_section('PBXFileReference'):
             if file_ref.path == path and file_ref.sourceTree == tree:
                 files.append(file_ref)
 
@@ -306,17 +306,17 @@ class ProjectFiles:
                         build_phase.remove_build_file(build_file)
 
                 # if the build_phase is empty remove it too, unless it's a shell script.
-                if build_phase.files.__len__() == 0 and build_phase.isa != u'PBXShellScriptBuildPhase':
+                if build_phase.files.__len__() == 0 and build_phase.isa != 'PBXShellScriptBuildPhase':
                     # remove the build phase from the target
                     target.remove_build_phase(build_phase)
 
         # remove it iff it's removed from all targets or no build file reference it
-        for build_file in self.objects.get_objects_in_section(u'PBXBuildFile'):
+        for build_file in self.objects.get_objects_in_section('PBXBuildFile'):
             if build_file.fileRef == file_ref.get_id():
                 return True
 
         # remove the file from any groups if there is no reference from any target
-        for group in self.objects.get_objects_in_section(u'PBXGroup'):
+        for group in self.objects.get_objects_in_section('PBXGroup'):
             if file_ref.get_id() in group.children:
                 group.remove_child(file_ref)
 
@@ -428,14 +428,14 @@ class ProjectFiles:
             build_phases = target.get_or_create_build_phase(expected_build_phase)
 
             # if it's a framework and it needs to be embedded
-            if file_options.embed_framework and expected_build_phase == u'PBXFrameworksBuildPhase' and \
-                    file_ref.get_file_type() == u'wrapper.framework':
-                embed_phase = target.get_or_create_build_phase(u'PBXCopyFilesBuildPhase',
+            if file_options.embed_framework and expected_build_phase == 'PBXFrameworksBuildPhase' and \
+                    file_ref.get_file_type() == 'wrapper.framework':
+                embed_phase = target.get_or_create_build_phase('PBXCopyFilesBuildPhase',
                                                                search_parameters={'dstSubfolderSpec': '10'},
                                                                create_parameters=(PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
                 # add runpath search flag
                 self.add_flags(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS,
-                               u'$(inherited) @executable_path/Frameworks', target_name)
+                               '$(inherited) @executable_path/Frameworks', target_name)
                 build_phases.extend(embed_phase)
 
             # create the build file and add it to the phase
@@ -453,13 +453,13 @@ class ProjectFiles:
         ext = os.path.splitext(file_ref.get_name())[1]
         if os.path.isdir(os.path.abspath(file_ref.path)) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
-            build_phase = u'PBXResourcesBuildPhase'
+            build_phase = 'PBXResourcesBuildPhase'
         else:
-            file_type, build_phase = ProjectFiles._FILE_TYPES.get(ext, (None, u'PBXResourcesBuildPhase'))
+            file_type, build_phase = ProjectFiles._FILE_TYPES.get(ext, (None, 'PBXResourcesBuildPhase'))
 
         if not unknown_type_allowed and file_type is None:
             raise ValueError(
-                u'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES' \
+                'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES' \
                     .format(os.path.splitext(file_ref.get_name())[1]))
 
         return file_type, build_phase

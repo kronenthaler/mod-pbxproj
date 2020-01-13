@@ -10,7 +10,7 @@ class ProjectGroups:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_group(self, name, path=None, parent=None, source_tree=u'<group>'):
+    def add_group(self, name, path=None, parent=None, source_tree='<group>'):
         """
         Add a new group with the given name and optionally path to the parent group. If parent is None, the group will
         be added to the 'root' group.
@@ -61,7 +61,7 @@ class ProjectGroups:
         del self.objects[group.get_id()]
 
         # remove the reference from any other group object that could be containing it.
-        for other_group in self.objects.get_objects_in_section(u'PBXGroup'):
+        for other_group in self.objects.get_objects_in_section('PBXGroup'):
             other_group.remove_child(group)
 
         return True
@@ -93,7 +93,7 @@ class ProjectGroups:
         :param parent: A PBXGroup object where the object has to be retrieved from. If None all matching groups are returned
         :return: An list of all matching groups
         """
-        groups = self.objects.get_objects_in_section(u'PBXGroup')
+        groups = self.objects.get_objects_in_section('PBXGroup')
         groups = [group for group in groups if group.get_name() == name]
 
         if parent:
@@ -109,7 +109,7 @@ class ProjectGroups:
         :param parent: A PBXGroup object where the object has to be retrieved from. If None all matching groups are returned
         :return: An list of all matching groups
         """
-        groups = self.objects.get_objects_in_section(u'PBXGroup')
+        groups = self.objects.get_objects_in_section('PBXGroup')
         groups = [group for group in groups if group.get_path() == path]
 
         if parent:
@@ -130,9 +130,9 @@ class ProjectGroups:
     def _get_parent_group(self, parent):
         if parent is None:
             # search for the mainGroup of the project
-            project = self.objects[self[u'rootObject']]
+            project = self.objects[self['rootObject']]
             if project:
-                parent = self.objects[project[u'mainGroup']]
+                parent = self.objects[project['mainGroup']]
                 if parent is not None:
                     return parent
 

@@ -6,19 +6,19 @@ from pbxproj.PBXObjects import *
 class XCConfigurationListTest(unittest.TestCase):
     def testGetComment(self):
         config = XCConfigurationList()
-        config._get_section = lambda: ("TargetType", "name")
+        config._get_section = lambda: ('TargetType', 'name')
 
         self.assertEqual(config._get_comment(), 'Build configuration list for TargetType "name"')
 
     def testGetSectionOnTarget(self):
         objs = objects(None).parse(
             {
-                "1": {
-                    "isa": "PBXNativeTarget",
-                    "buildConfigurationList": ['2'],
-                    "name": "the-target-name"
+                '1': {
+                    'isa': 'PBXNativeTarget',
+                    'buildConfigurationList': ['2'],
+                    'name': 'the-target-name'
                 },
-                "2": {
+                '2': {
                     'isa': 'XCConfigurationList'
                 }
             })

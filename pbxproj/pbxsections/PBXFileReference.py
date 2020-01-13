@@ -4,39 +4,39 @@ from pbxproj import PBXGenericObject
 
 class PBXFileReference(PBXGenericObject):
     @classmethod
-    def create(cls, path, tree=u'SOURCE_ROOT'):
+    def create(cls, path, tree='SOURCE_ROOT'):
         return cls().parse({
-            u'_id': cls._generate_id(),
-            u'isa': cls.__name__,
-            u'path': path,
-            u'name': os.path.split(path)[1],
-            u'sourceTree': tree
+            '_id': cls._generate_id(),
+            'isa': cls.__name__,
+            'path': path,
+            'name': os.path.split(path)[1],
+            'sourceTree': tree
         })
 
     def set_explicit_file_type(self, file_type):
-        if u'lastKnownFileType' in self:
-            del self[u'lastKnownFileType']
-        self[u'explicitFileType'] = file_type
+        if 'lastKnownFileType' in self:
+            del self['lastKnownFileType']
+        self['explicitFileType'] = file_type
 
     def set_last_known_file_type(self, file_type):
-        if u'explicitFileType' in self:
-            del self[u'explicitFileType']
-        self[u'lastKnownFileType'] = file_type
+        if 'explicitFileType' in self:
+            del self['explicitFileType']
+        self['lastKnownFileType'] = file_type
 
     def get_file_type(self):
-        if u'explicitFileType' in self:
+        if 'explicitFileType' in self:
             return self.explicitFileType
         return self.lastKnownFileType
 
-    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
-                      indentation_increment=u'\t'):
-        return super(PBXFileReference, self)._print_object(u'', entry_separator=u' ', object_start=u'',
-                                                           indentation_increment=u'')
+    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
+                      indentation_increment='\t'):
+        return super(PBXFileReference, self)._print_object('', entry_separator=' ', object_start='',
+                                                           indentation_increment='')
 
     def get_name(self):
-        if hasattr(self, u'name'):
+        if hasattr(self, 'name'):
             return self.name
-        if hasattr(self, u'path'):
+        if hasattr(self, 'path'):
             return self.path
         return None
 

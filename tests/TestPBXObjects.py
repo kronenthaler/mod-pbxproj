@@ -29,10 +29,10 @@ class PBXObjectTest(unittest.TestCase):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         string = dobj.__repr__()
 
-        self.assertTrue(string.__contains__("/* Begin phase1 section */"))
-        self.assertTrue(string.__contains__("/* End phase1 section */"))
-        self.assertTrue(string.__contains__("/* Begin phase2 section */"))
-        self.assertTrue(string.__contains__("/* End phase2 section */"))
+        self.assertTrue(string.__contains__('/* Begin phase1 section */'))
+        self.assertTrue(string.__contains__('/* End phase1 section */'))
+        self.assertTrue(string.__contains__('/* Begin phase2 section */'))
+        self.assertTrue(string.__contains__('/* End phase2 section */'))
 
     def testGetItem(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
