@@ -1,4 +1,5 @@
-from pbxproj import PBXGenericObject, save_accelerators
+import pbxproj
+from pbxproj import PBXGenericObject
 
 
 class objects(PBXGenericObject):
@@ -69,8 +70,8 @@ class objects(PBXGenericObject):
 
         # Do a special behavior here while saving to avoid the linear lookup below and therefore
         # be significantly faster.
-        if save_accelerators.is_in_save(self):
-            return save_accelerators.get_from_cache_during_save(self, 'OBJECTS', self, fill_cache_during_save, key)
+        if pbxproj.is_in_save(self):
+            return pbxproj.get_from_cache_during_save(self, 'OBJECTS', self, fill_cache_during_save, key)
 
         # It's not safe to do the above optimization "normally" (outside of saving) since the objects
         # may have been modified by the user, and the cache may therefore be invalid. So we fall back
