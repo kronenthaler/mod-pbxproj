@@ -4,7 +4,7 @@ from pbxproj.XcodeProject import XcodeProject
 
 def open_project(args):
     if os.path.isdir(args['<project>']):
-        args['<project>'] += "/project.pbxproj"
+        args['<project>'] += '/project.pbxproj'
 
     if not os.path.isfile(args['<project>']):
         raise Exception('Project file not found')
@@ -34,6 +34,6 @@ def command_parser(command, auto_save=True):
                 project.save()
             resolve_backup(project, backup_file, args)
         except Exception as ex:
-            print(("{0}".format(ex)))
+            print(('{0}'.format(ex)))
             exit(1)
     return parser

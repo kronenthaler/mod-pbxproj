@@ -113,7 +113,7 @@ class PBXGenericObject(object):
         elif isinstance(value, PBXKey):
             value = value.__repr__()
         else:
-            value = PBXGenericObject._escape(value.__str__(), exclude=["\'"])
+            value = PBXGenericObject._escape(value.__str__(), exclude=['\''])
 
         return value
 

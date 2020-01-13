@@ -36,5 +36,5 @@ def main():
         command_parser(pbxproj_show.execute, auto_save=False)(docopt(pbxproj_show.__doc__, argv=argv))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
