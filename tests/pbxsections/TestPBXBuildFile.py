@@ -24,6 +24,44 @@ class PBXBuildFileTest(unittest.TestCase):
 
         self.assertEqual(dobj.objects['1']._get_comment(), "real name in X")
 
+    def testGetAttributesWithoutSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        attributes = dobj.get_attributes()
+
+        self.assertIsNone(attributes)
+
+    def testGetAttributesWithoutAttributes(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags="x")
+
+        attributes = dobj.get_attributes()
+
+        self.assertIsNone(attributes)
+
+    def testGetAttributesWithAttributes(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes="x")
+
+        attributes = dobj.get_attributes()
+
+        self.assertIsNotNone(attributes)
+        self.assertEquals(attributes, [u'x'])
+
+    def testGetCompilerFlagsWithoutSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        self.assertIsNone(dobj.get_compiler_flags())
+
+    def testGetCompilerFlagsWithoutFlags(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes="x")
+
+        self.assertIsNone(dobj.get_compiler_flags())
+
+    def testGetCompilerFlagsWithFlags(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=[u'Weak', '-fno-arc'])
+
+        self.assertIsNotNone(dobj.get_compiler_flags())
+        self.assertEquals(dobj.get_compiler_flags(), u'Weak -fno-arc')
+
     def testGetCommentForNonExistentRef(self):
         obj = {
             'objects': {
