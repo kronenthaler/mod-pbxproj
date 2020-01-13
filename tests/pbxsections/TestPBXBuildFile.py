@@ -62,6 +62,17 @@ class PBXBuildFileTest(unittest.TestCase):
         self.assertIsNotNone(dobj.get_compiler_flags())
         self.assertEquals(dobj.get_compiler_flags(), u'Weak -fno-arc')
 
+    def testGetCommentForNonExistentRef(self):
+        obj = {
+            'objects': {
+                'FDDF6A571C68E5B100D7A645': {'isa': 'PBXBuildFile'},
+                "X": {'isa': 'phase', 'name': 'X', 'files': ['FDDF6A571C68E5B100D7A645']}
+            }
+        }
+        dobj = XcodeProject().parse(obj)
+
+        self.assertEqual(dobj.objects['FDDF6A571C68E5B100D7A645']._get_comment(), "(null) in X")
+
     def testAddAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
 

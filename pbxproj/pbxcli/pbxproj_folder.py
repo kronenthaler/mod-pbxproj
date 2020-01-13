@@ -47,34 +47,34 @@ from docopt import docopt
 
 def execute(project, args):
     # make a decision of what function to call based on the -D flag
-    if args[u'--delete']:
+    if args['--delete']:
         return _remove(project, args)
     else:
         return _add(project, args)
 
 
 def _add(project, args):
-    if u'--header-scope' not in args or args[u'--header-scope'] not in ['public', 'private', 'project']:
-        header_scope = u'project'
+    if '--header-scope' not in args or args['--header-scope'] not in ['public', 'private', 'project']:
+        header_scope = 'project'
     else:
-        header_scope = args[u'--header-scope']
+        header_scope = args['--header-scope']
 
-    options = FileOptions(create_build_files=not args[u'--no-create-build-files'],
-                          weak=args[u'--weak'],
-                          ignore_unknown_type=args[u'--ignore-unknown-types'],
-                          embed_framework=not args[u'--no-embed'],
-                          code_sign_on_copy=args[u'--sign-on-copy'],
+    options = FileOptions(create_build_files=not args['--no-create-build-files'],
+                          weak=args['--weak'],
+                          ignore_unknown_type=args['--ignore-unknown-types'],
+                          embed_framework=not args['--no-embed'],
+                          code_sign_on_copy=args['--sign-on-copy'],
                           header_scope=header_scope)
 
-    build_files = project.add_folder(args[u'<path>'], excludes=args[u'--exclude'], recursive=args[u'--recursive'],
-                                     create_groups=not args[u'--no-create-groups'], target_name=args[u'--target'],
+    build_files = project.add_folder(args['<path>'], excludes=args['--exclude'], recursive=args['--recursive'],
+                                     create_groups=not args['--no-create-groups'], target_name=args['--target'],
                                      file_options=options)
     # print some information about the build files created.
     if build_files is None:
-        raise Exception(u'No files were added to the project.')
+        raise Exception('No files were added to the project.')
 
     if not build_files:
-        return u'Folder added to the project, no build file sections created.'
+        return 'Folder added to the project, no build file sections created.'
 
     info = {}
     for build_file in build_files:
@@ -82,16 +82,16 @@ def _add(project, args):
             info[build_file.isa] = 0
         info[build_file.isa] += 1
 
-    summary = u'Folder added to the project.'
+    summary = 'Folder added to the project.'
     for k in info:
-        summary += u'\n{0} {1} sections created.'.format(info[k], k)
+        summary += '\n{0} {1} sections created.'.format(info[k], k)
     return summary
 
 
 def _remove(project, args):
-    if project.remove_files_by_path(args[u'<path>'], tree=args[u'--tree'], target_name=args[u'--target']):
-        return u'Folder removed from the project.'
-    raise Exception(u'An error occurred removing one of the files.')
+    if project.remove_files_by_path(args['<path>'], tree=args['--tree'], target_name=args['--target']):
+        return 'Folder removed from the project.'
+    raise Exception('An error occurred removing one of the files.')
 
 
 def main():

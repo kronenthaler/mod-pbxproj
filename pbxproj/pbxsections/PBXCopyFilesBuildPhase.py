@@ -2,25 +2,25 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import *
 
 
 class PBXCopyFilesBuildPhaseNames:
-    EMBEDDED_FRAMEWORKS = u'Embed Frameworks'
+    EMBEDDED_FRAMEWORKS = 'Embed Frameworks'
 
 
 class PBXCopyFilesBuildPhase(PBXGenericBuildPhase):
     @classmethod
-    def create(cls, name=None, files=None, dest_path=u'', dest_subfolder_spec='10'):
+    def create(cls, name=None, files=None, dest_path='', dest_subfolder_spec='10'):
         return cls().parse({
-            u'_id': cls._generate_id(),
-            u'isa': cls.__name__,
-            u'name': name,
-            u'files': files if files else [],
-            u'buildActionMask': 0x7FFFFFFF,
-            u'dstSubfolderSpec': dest_subfolder_spec,
-            u'dstPath': dest_path,
-            u'runOnlyForDeploymentPostprocessing': 0
+            '_id': cls._generate_id(),
+            'isa': cls.__name__,
+            'name': name,
+            'files': files if files else [],
+            'buildActionMask': 0x7FFFFFFF,
+            'dstSubfolderSpec': dest_subfolder_spec,
+            'dstPath': dest_path,
+            'runOnlyForDeploymentPostprocessing': 0
         })
 
     def _get_comment(self):
         comment = super(PBXCopyFilesBuildPhase, self)._get_comment()
         if comment is None:
-            return u'CopyFiles'
+            return 'CopyFiles'
         return comment

@@ -24,12 +24,12 @@ class PBXProjShowTest(unittest.TestCase):
         self.assertIn('testUITests:', result)
         self.assertIn('Product name: testUITests', result)
         self.assertIn('Configurations: Debug, Release', result)
-        self.assertIn('Sources count: 1', result)
+        self.assertIn('Sources (PBXSourcesBuildPhase) file count: 1', result)
 
         self.assertIn('test:', result)
         self.assertIn('Product name: test\n', result)
         self.assertIn('Configurations: Debug, Release', result)
-        self.assertIn('Sources count: 2', result)
+        self.assertIn('Sources (PBXSourcesBuildPhase) file count: 2', result)
 
     def testShowTargetBasicInfo(self):
         args = {
@@ -39,7 +39,8 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': None,
             u'--resource-files': None,
             u'--framework-files': None,
-            u'--configurations': None
+            u'--configurations': None,
+            u'--build-phase-files': None
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
@@ -58,7 +59,8 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': None,
             u'--resource-files': None,
             u'--framework-files': None,
-            u'--configurations': True
+            u'--configurations': True,
+            u'--build-phase-files': None
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
@@ -75,7 +77,8 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': None,
             u'--resource-files': None,
             u'--framework-files': None,
-            u'--configurations': None
+            u'--configurations': None,
+            u'--build-phase-files': None
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
@@ -94,7 +97,8 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': None,
             u'--resource-files': True,
             u'--framework-files': None,
-            u'--configurations': None
+            u'--configurations': None,
+            u'--build-phase-files': None
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
@@ -114,7 +118,8 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': True,
             u'--resource-files': None,
             u'--framework-files': None,
-            u'--configurations': None
+            u'--configurations': None,
+            u'--build-phase-files': None
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
@@ -133,7 +138,27 @@ class PBXProjShowTest(unittest.TestCase):
             u'--header-files': None,
             u'--resource-files': None,
             u'--framework-files': True,
-            u'--configurations': None
+            u'--configurations': None,
+            u'--build-phase-files': None
+        }
+        project = open_project(args)
+        result = pbxproj_show.execute(project, args)
+
+        self.assertIn('helloworld:', result)
+        self.assertIn('Product name: helloworld\n', result)
+        self.assertIn('Frameworks:', result)
+        self.assertIn('AppKit.framework', result)
+
+    def testShowTargetExplicitBuildPhase(self):
+        args = {
+            u'<project>': u'samplescli/dependency.xcodeproj/project.pbxproj',
+            u'--target': u'helloworld',
+            u'--source-files': None,
+            u'--header-files': None,
+            u'--resource-files': None,
+            u'--framework-files': None,
+            u'--configurations': None,
+            u'--build-phase-files': u'PBXFrameworksBuildPhase'
         }
         project = open_project(args)
         result = pbxproj_show.execute(project, args)

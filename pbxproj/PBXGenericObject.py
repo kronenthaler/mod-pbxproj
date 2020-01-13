@@ -1,13 +1,3 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
-from past.builtins import basestring
-
 import re
 import uuid
 import copy
@@ -20,7 +10,15 @@ class PBXGenericObject(object):
     Generic class that creates internal attributes to match the structure of the tree used to create the element.
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
     """
-    _VALID_KEY_REGEX = '[a-zA-Z0-9\\._/]*'
+    _VALID_KEY_REGEX = re.compile(r'^[a-zA-Z0-9\\._/]*$')
+    _ESCAPE_REPLACEMENTS = [
+        ('\\', '\\\\'),
+        ('\n', '\\n'),
+        ('\"', '\\"'),
+        ('\0', '\\0'),
+        ('\t', '\\\t'),
+        ('\'', '\\\''),
+    ]
 
     def __init__(self, parent=None):
         self._parent = parent
@@ -32,7 +30,7 @@ class PBXGenericObject(object):
         if isinstance(value, dict):
             return self._parse_dict(value)
 
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return self._parse_string(value)
 
         if isinstance(value, list):
@@ -70,42 +68,39 @@ class PBXGenericObject(object):
 
     @classmethod
     def _get_class_reference(cls, class_type):
-        module = __import__(u'pbxproj')
-        if hasattr(module, class_type):
-            class_ = getattr(module, class_type)
-            return class_
-        return PBXGenericObject
+        module = __import__('pbxproj')
+        return getattr(module, class_type, PBXGenericObject)
 
     def __repr__(self):
         return self._print_object()
 
-    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
-                      indentation_increment=u'\t'):
-        ret = u'{' + object_start
+    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
+                      indentation_increment='\t'):
+        ret = '{' + object_start
 
         for key in self.get_keys():
             value = self._format(getattr(self, key), indentation_depth, entry_separator, object_start,
                                  indentation_increment)
 
             # use key decorators, could simplify the generation of the comments.
-            ret += indentation_depth + u'{3}{0} = {1};{2}'.format(PBXGenericObject._escape(key), value, entry_separator,
+            ret += indentation_depth + '{3}{0} = {1};{2}'.format(PBXGenericObject._escape(key), value, entry_separator,
                                                                   indentation_increment)
-        ret += indentation_depth + u'}'
+        ret += indentation_depth + '}'
         return ret
 
-    def _print_list(self, obj, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
-                    indentation_increment=u'\t'):
-        ret = u'(' + object_start
+    def _print_list(self, obj, indentation_depth='', entry_separator='\n', object_start='\n',
+                    indentation_increment='\t'):
+        ret = '(' + object_start
         for item in obj:
             value = self._format(item, indentation_depth, entry_separator, object_start, indentation_increment)
 
-            ret += indentation_depth + u'{1}{0},{2}'.format(value, indentation_increment, entry_separator)
-        ret += indentation_depth + u')'
+            ret += indentation_depth + '{1}{0},{2}'.format(value, indentation_increment, entry_separator)
+        ret += indentation_depth + ')'
         return ret
 
-    def _format(self, value, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
-                indentation_increment=u'\t'):
-        if hasattr(value, u'_print_object'):
+    def _format(self, value, indentation_depth='', entry_separator='\n', object_start='\n',
+                indentation_increment='\t'):
+        if hasattr(value, '_print_object'):
             value = value._print_object(indentation_depth + indentation_increment,
                                         entry_separator,
                                         object_start,
@@ -118,26 +113,23 @@ class PBXGenericObject(object):
         elif isinstance(value, PBXKey):
             value = value.__repr__()
         else:
-            value = PBXGenericObject._escape(value.__str__(), exclude=[u"\'"])
+            value = PBXGenericObject._escape(value.__str__(), exclude=['\''])
 
         return value
 
     def get_keys(self):
-        fields = list([x for x in dir(self) if not x.startswith(u'_') and not hasattr(getattr(self, x), '__call__')])
-        if u'isa' in fields:
-            fields.remove(u'isa')
+        fields = [field for field in list(self.__dict__.keys()) if field[0] != '_']
+        if 'isa' in fields:
+            fields.remove('isa')
             fields = sorted(fields)
-            fields.insert(0, u'isa')
+            fields.insert(0, 'isa')
         else:
             fields = sorted(fields)
 
         return fields
 
     def __getitem__(self, key):
-        if hasattr(self, key):
-            return getattr(self, key)
-
-        return None
+        return getattr(self, key, None)
 
     def __setitem__(self, key, value):
         if type(value) == list:
@@ -170,9 +162,9 @@ class PBXGenericObject(object):
         return self['_id']
 
     def _get_comment(self):
-        if hasattr(self, u'name'):
+        if hasattr(self, 'name'):
             return self.name
-        if hasattr(self, u'path'):
+        if hasattr(self, 'path'):
             return self.path
 
         return None
@@ -183,19 +175,13 @@ class PBXGenericObject(object):
 
     @classmethod
     def _escape(cls, item, exclude=None):
-        replacements = [(u'\\', u'\\\\'),
-                        (u'\n', u'\\n'),
-                        (u'\"', u'\\"'),
-                        (u'\0', u'\\0'),
-                        (u'\t', u'\\\t'),
-                        (u'\'', u'\\\'')]
-        if exclude is not None:
-            replacements = [x for x in replacements for y in exclude if x[0] != y]
-
-        if item.__len__() == 0 or re.match(cls._VALID_KEY_REGEX, item).group(0) != item:
+        exclude = set() if exclude is None else set(exclude)
+        if len(item) == 0 or cls._VALID_KEY_REGEX.match(item) is None:
             escaped = item
-            for replacement in replacements:
-                escaped = escaped.replace(replacement[0], replacement[1])
+            for unescaped_value, escaped_value in cls._ESCAPE_REPLACEMENTS:
+                if unescaped_value in exclude:
+                    continue
+                escaped = escaped.replace(unescaped_value, escaped_value)
 
-            return u'"{0}"'.format(escaped)
+            return '"{0}"'.format(escaped)
         return item

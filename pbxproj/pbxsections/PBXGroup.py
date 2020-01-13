@@ -1,38 +1,30 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from past.builtins import basestring
-
 from pbxproj.PBXGenericObject import *
 from pbxproj.pbxsections import *
 
 
 class PBXGroup(PBXGenericObject):
     @classmethod
-    def create(cls, path=None, name=None, tree=u'<group>', children=None):
+    def create(cls, path=None, name=None, tree='<group>', children=None):
         return cls().parse({
-            u'_id': cls._generate_id(),
-            u'isa': cls.__name__,
-            u'children': children if children else [],
-            u'name': name,
-            u'path': path,
-            u'sourceTree': tree
+            '_id': cls._generate_id(),
+            'isa': cls.__name__,
+            'children': children if children else [],
+            'name': name,
+            'path': path,
+            'sourceTree': tree
         })
 
     def get_name(self):
-        if u'name' in self:
+        if 'name' in self:
             return self.name
-        if u'path' in self:
+        if 'path' in self:
             return self.path
         return None
 
     def get_path(self):
-        if u'path' in self:
+        if 'path' in self:
             return self.path
-        if u'name' in self:
+        if 'name' in self:
             return self.name
         return None
 
@@ -42,10 +34,10 @@ class PBXGroup(PBXGenericObject):
         :param child: The id to check if it's a child of the group
         :return: True if the given id it's a child of this group, False otherwise
         """
-        if u'children' not in self:
+        if 'children' not in self:
             return False
 
-        if not isinstance(child, basestring):
+        if not isinstance(child, str):
             child = child.get_id()
 
         return child in self.children

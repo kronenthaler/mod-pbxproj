@@ -1,3 +1,4 @@
+import pbxproj
 from pbxproj import PBXGenericObject
 
 
@@ -19,7 +20,7 @@ class objects(PBXGenericObject):
                     obj_type = value['isa']
 
                 child = self._get_instance(obj_type, value)
-                child[u'_id'] = key
+                child['_id'] = key
                 self[key] = child
 
             return self
@@ -27,20 +28,20 @@ class objects(PBXGenericObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(objects, self).parse(object_data)
 
-    def _print_object(self, indentation_depth=u'', entry_separator=u'\n', object_start=u'\n',
-                      indentation_increment=u'\t'):
+    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
+                      indentation_increment='\t'):
         # override to change the way the object is printed out
-        result = u'{\n'
+        result = '{\n'
         for section in self.get_sections():
             phase = self._sections[section]
             phase.sort(key=lambda x: x.get_id())
-            result += u'\n/* Begin {0} section */\n'.format(section)
+            result += '\n/* Begin {0} section */\n'.format(section)
             for value in phase:
-                obj = value._print_object(indentation_depth + u'\t', entry_separator, object_start,
+                obj = value._print_object(indentation_depth + '\t', entry_separator, object_start,
                                           indentation_increment)
-                result += indentation_depth + u'\t{0} = {1};\n'.format(value.get_id().__repr__(), obj)
-            result += u'/* End {0} section */\n'.format(section)
-        result += indentation_depth + u'}'
+                result += indentation_depth + '\t{0} = {1};\n'.format(value.get_id().__repr__(), obj)
+            result += '/* End {0} section */\n'.format(section)
+        result += indentation_depth + '}'
         return result
 
     def get_keys(self):
@@ -61,6 +62,20 @@ class objects(PBXGenericObject):
         return sections
 
     def __getitem__(self, key):
+        def fill_cache_during_save(cache):
+            for section in self.get_sections():
+                phase = self._sections[section]
+                for obj in phase:
+                    cache[obj.get_id()] = obj
+
+        # Do a special behavior here while saving to avoid the linear lookup below and therefore
+        # be significantly faster.
+        if pbxproj.is_in_save(self):
+            return pbxproj.get_from_cache_during_save(self, 'OBJECTS', self, fill_cache_during_save, key)
+
+        # It's not safe to do the above optimization "normally" (outside of saving) since the objects
+        # may have been modified by the user, and the cache may therefore be invalid. So we fall back
+        # to a linear search.
         for section in self.get_sections():
             phase = self._sections[section]
             for obj in phase:
@@ -106,7 +121,7 @@ class objects(PBXGenericObject):
         """
         targets = []
         for section in self.get_sections():
-            if section.endswith(u'Target'):
+            if section.endswith('Target'):
                 targets += [value for value in self._sections[section]]
 
         if name is None:
