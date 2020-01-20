@@ -72,7 +72,7 @@ class XCodeProjectTest(unittest.TestCase):
 
         build_files = project.get_build_files_for_file('file1')
         self.assertListEqual(build_files, [project.objects['build_file1']])
-        
+
     def testGetTargetByNameExisting(self):
         project = XcodeProject(self.obj)
 
