@@ -28,7 +28,7 @@ class ProjectGroupsTest(unittest.TestCase):
         }
 
     def testInit(self):
-        with self.assertRaisesRegexp(EnvironmentError, '^This class cannot be instantiated directly'):
+        with self.assertRaisesRegex(EnvironmentError, '^This class cannot be instantiated directly'):
             ProjectGroups()
 
     def testGetGroupsByNameNoParent(self):

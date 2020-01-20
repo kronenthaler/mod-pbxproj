@@ -1,4 +1,4 @@
-from pbxproj.pbxsections.PBXGenericBuildPhase import *
+from pbxproj.pbxsections.PBXGenericBuildPhase import PBXGenericBuildPhase
 
 
 class PBXCopyFilesBuildPhaseNames:

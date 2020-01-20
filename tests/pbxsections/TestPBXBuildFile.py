@@ -44,7 +44,7 @@ class PBXBuildFileTest(unittest.TestCase):
         attributes = dobj.get_attributes()
 
         self.assertIsNotNone(attributes)
-        self.assertEquals(attributes, ['x'])
+        self.assertEqual(attributes, ['x'])
 
     def testGetCompilerFlagsWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
@@ -60,7 +60,7 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=['Weak', '-fno-arc'])
 
         self.assertIsNotNone(dobj.get_compiler_flags())
-        self.assertEquals(dobj.get_compiler_flags(), 'Weak -fno-arc')
+        self.assertEqual(dobj.get_compiler_flags(), 'Weak -fno-arc')
 
     def testGetCommentForNonExistentRef(self):
         obj = {
@@ -79,7 +79,7 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, ['Weak'])
+        self.assertEqual(dobj.settings.ATTRIBUTES, ['Weak'])
 
     def testAddAttributesWithoutAttributes(self):
         dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='x')
@@ -87,14 +87,14 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, ['Weak'])
+        self.assertEqual(dobj.settings.ATTRIBUTES, ['Weak'])
 
     def testAddAttributesWithAttributes(self):
         dobj = PBXBuildFile.create(PBXGenericObject(), attributes='x')
         dobj.add_attributes('Weak')
 
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
-        self.assertEquals(dobj.settings.ATTRIBUTES, ['x', 'Weak'])
+        self.assertEqual(dobj.settings.ATTRIBUTES, ['x', 'Weak'])
 
     def testRemoveAttributesWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())
@@ -116,7 +116,7 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.add_compiler_flags(['Weak', '-fno-arc'])
 
         self.assertIsNotNone(dobj.settings.COMPILER_FLAGS)
-        self.assertEquals(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc')
+        self.assertEqual(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc')
 
     def testAddCompilerFlagWithFlags(self):
         dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=['Weak', '-fno-arc'])
@@ -124,7 +124,7 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.add_compiler_flags('x')
 
         self.assertIsNotNone(dobj.settings.COMPILER_FLAGS)
-        self.assertEquals(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc x')
+        self.assertEqual(dobj.settings.COMPILER_FLAGS, 'Weak -fno-arc x')
 
     def testRemoveCompilerFlagsWithoutSettings(self):
         dobj = PBXBuildFile.create(PBXGenericObject())

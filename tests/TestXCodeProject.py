@@ -1,7 +1,5 @@
 import shutil
 import unittest
-import os
-
 from pbxproj import *
 from pbxproj import XcodeProject
 
@@ -60,7 +58,7 @@ class XCodeProjectTest(unittest.TestCase):
         project.save('results/default')
         backup_name = project.backup()
 
-        self.assertRegexpMatches(backup_name, '_[0-9]{6}-[0-9]{6}\\.backup')
+        self.assertRegex(backup_name, r'_[0-9]{6}-[0-9]{6}\.backup')
 
     def testGetIds(self):
         project = XcodeProject({'objects':{'1':{'isa':'a'}, '2':{'isa':'a'}}})
@@ -90,3 +88,10 @@ class XCodeProjectTest(unittest.TestCase):
 
         build_phases = project.get_build_phases_by_name('PBXGenericBuildPhase')
         self.assertEqual(build_phases.__len__(), 2)
+
+    def testGetBuildConfigurationsByTarget(self):
+        project = XcodeProject(self.obj)
+
+        build_Configurations = project.get_build_configurations_by_target(
+            'app')
+        self.assertListEqual(build_Configurations, ['Release', 'Debug'])

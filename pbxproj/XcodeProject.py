@@ -56,6 +56,25 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         return [build_file for build_file in self.objects.get_objects_in_section('PBXBuildFile')
                 if build_file.fileRef == file_id]
 
+    def get_build_configurations_by_target(self, target_name):
+        result = []
+        target = self.get_target_by_name(target_name)
+        if target is None:
+            return None
+
+        build_configuration_list = self.objects[target.buildConfigurationList]
+        target_build_configurations = build_configuration_list['buildConfigurations']
+
+        for build_configuration in target_build_configurations:
+            build_configuration_obj = self.objects[build_configuration]
+            if build_configuration_obj is not None:
+                result.append(build_configuration_obj.name)
+
+        if len(result) == 0:
+            return None
+
+        return result
+
     def get_target_by_name(self, name):
         targets = self.objects.get_targets(name)
         if targets.__len__() > 0:

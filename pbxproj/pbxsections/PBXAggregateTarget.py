@@ -1,4 +1,4 @@
-from pbxproj.pbxsections.PBXGenericTarget import *
+from pbxproj.pbxsections.PBXGenericTarget import PBXGenericTarget
 
 
 class PBXAggregateTarget(PBXGenericTarget):

@@ -81,15 +81,15 @@ class PBXObjectTest(unittest.TestCase):
 
         result = [x for x in dobj.get_configurations_on_targets()]
         self.assertEqual(result.__len__(), 4)
-        self.assertSetEqual(set([x.id for x in result]), set(['5', '6', '7', '8']))
+        self.assertSetEqual({x.id for x in result}, {'5', '6', '7', '8'})
 
         result = [x for x in dobj.get_configurations_on_targets(target_name='app')]
         self.assertEqual(result.__len__(), 2)
-        self.assertSetEqual(set([x.id for x in result]), set(['5', '6']))
+        self.assertSetEqual({x.id for x in result}, {'5', '6'})
 
         result = [x for x in dobj.get_configurations_on_targets(configuration_name='Release')]
-        self.assertSetEqual(set([x.id for x in result]), set(['5', '7']))
+        self.assertSetEqual({x.id for x in result}, {'5', '7'})
 
         result = [x for x in dobj.get_configurations_on_targets(target_name='app', configuration_name='Release')]
         self.assertEqual(result.__len__(), 1)
-        self.assertSetEqual(set([x.id for x in result]), set(['5']))
+        self.assertSetEqual({x.id for x in result}, {'5'})
