@@ -72,7 +72,7 @@ class XCodeProjectTest(unittest.TestCase):
 
         build_files = project.get_build_files_for_file('file1')
         self.assertListEqual(build_files, [project.objects['build_file1']])
-
+        
     def testGetTargetByNameExisting(self):
         project = XcodeProject(self.obj)
 
@@ -90,3 +90,10 @@ class XCodeProjectTest(unittest.TestCase):
 
         build_phases = project.get_build_phases_by_name('PBXGenericBuildPhase')
         self.assertEqual(build_phases.__len__(), 2)
+
+    def testGetBuildConfigurationsByTarget(self):
+        project = XcodeProject(self.obj)
+
+        build_Configurations = project.get_build_configurations_by_target(
+            'app')
+        self.assertListEqual(build_Configurations, ['Release', 'Debug'])
