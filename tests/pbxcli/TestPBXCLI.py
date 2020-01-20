@@ -20,7 +20,7 @@ class PBXCLITest(unittest.TestCase):
         self.assertIsNotNone(project)
 
     def testOpenProjectInvalidPath(self):
-        with self.assertRaisesRegexp(Exception, '^Project file not found'):
+        with self.assertRaisesRegex(Exception, '^Project file not found'):
             open_project({'<project>': 'whatever'})
 
     def testBackupNoFlag(self):
@@ -45,7 +45,7 @@ class PBXCLITest(unittest.TestCase):
     def testResolveBackupWithFlag(self):
         project = XcodeProject({}, path='samplescli/project.pbxproj')
         setattr(project, 'save', lambda: 1 is 1)
-        tmpfile = tempfile.NamedTemporaryFile()
+        tmpfile = tempfile.NamedTemporaryFile(delete=False)
 
         resolve_backup(project, tmpfile.name, {'--backup': True})
 
@@ -62,6 +62,6 @@ class PBXCLITest(unittest.TestCase):
         function = lambda p, a: u'test'
         parser = command_parser(function)
         sys.stdout = StringIO()
-        with self.assertRaisesRegexp(SystemExit, '^1'):
+        with self.assertRaisesRegex(SystemExit, '^1'):
             parser({u'<project>': u'whatever/project.pbxproj', u'--backup': False})
         self.assertEqual(sys.stdout.getvalue().strip(), u'Project file not found')

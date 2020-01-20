@@ -23,7 +23,7 @@ class PBXProjFolderTest(unittest.TestCase):
         }
 
         project = open_project(args)
-        with self.assertRaisesRegexp(Exception, '^An error occurred removing one of the files.'):
+        with self.assertRaisesRegex(Exception, '^An error occurred removing one of the files.'):
             pbxproj_folder.execute(project, args)
 
     def testRemoveFolderKnown(self):
@@ -88,7 +88,7 @@ class PBXProjFolderTest(unittest.TestCase):
         project = open_project(args)
 
         self.assertListEqual(project.get_files_by_path(args['<path>']), [])
-        with self.assertRaisesRegexp(Exception, '^No files were added to the project.'):
+        with self.assertRaisesRegex(Exception, '^No files were added to the project.'):
             pbxproj_folder.execute(project, args)
 
         self.assertEqual(project.get_files_by_path(args['<path>']).__len__(), 0)

@@ -37,12 +37,12 @@ class ProjectFilesTest(unittest.TestCase):
         }
 
     def testInit(self):
-        with self.assertRaisesRegexp(EnvironmentError, '^This class cannot be instantiated directly'):
+        with self.assertRaisesRegex(EnvironmentError, '^This class cannot be instantiated directly'):
             ProjectFiles()
 
     def testAddFileUnknown(self):
         project = XcodeProject(self.obj)
-        with self.assertRaisesRegexp(ValueError, '^Unknown file extension: '):
+        with self.assertRaisesRegex(ValueError, '^Unknown file extension: '):
             project.add_file("file.unknowntype")
 
     def testAddFileUnknownAllowed(self):

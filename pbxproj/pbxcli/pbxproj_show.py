@@ -45,8 +45,7 @@ def _summary(project, args):
             .format(name=target.name,
                     productName=target.productName,
                     type=target.isa,
-                    configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]),
-                    )
+                    configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]))
 
         for build_phase_id in target.buildPhases:
             build_phase = project.objects[build_phase_id]
@@ -75,9 +74,7 @@ def _target_info(project, target_name, args):
         info += "{name}:\n" \
                 "\tProduct name: {productName}\n" \
             .format(name=target.name,
-                    productName=target.productName,
-                    configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]),
-                    )
+                    productName=target.productName)
 
         if args['--configurations']:
             info += "\tConfigurations: {configs}\n" \
