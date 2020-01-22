@@ -87,7 +87,7 @@ class PBXProjShowTest(unittest.TestCase):
         self.assertIn('Product name: test\n', result)
         self.assertIn('Sources:', result)
         self.assertIn('AppDelegate.swift', result)
-        self.assertIn('ViewController.swift', result)
+        self.assertIn('VīęwČøntröłler.swift', result)
 
     def testShowTargetResources(self):
         args = {
