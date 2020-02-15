@@ -63,7 +63,7 @@ def _add(project, args):
                           embed_framework=not args['--no-embed'],
                           code_sign_on_copy=args['--sign-on-copy'],
                           header_scope=header_scope.title())
-    build_files = None;
+    build_files = None
     if parent_group:
         build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
                                     parent=parent_group, file_options=options)
