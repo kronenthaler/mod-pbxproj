@@ -27,7 +27,7 @@ from pbxproj.PBXRootObject import rootObject
 from pbxproj.XcodeProject import XcodeProject
 from pbxproj.pbxsections import *
 
-__version__ = '2.9.0'
+__version__ = '2.10.0'
 
 
 def is_in_save(current_obj):
