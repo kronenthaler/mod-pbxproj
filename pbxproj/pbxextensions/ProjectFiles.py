@@ -120,7 +120,8 @@ class ProjectFiles:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, force=True, file_options=FileOptions()):
+    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, force=True,
+                 file_options=FileOptions()):
         """
         Adds a file to the project, taking care of the type of the file and creating additional structures depending on
         the file type. For instance, frameworks will be linked, embedded and search paths will be adjusted automatically.
@@ -137,10 +138,9 @@ class ProjectFiles:
         results = []
         # if it's not forced to add the file stop if the file already exists.
         if not force:
-            for section in self.objects.get_sections():
-                for obj in self.objects.get_objects_in_section(section):
-                    if 'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
-                        return []
+            target_name = self._filter_targets_without_path(path, target_name)
+            if target_name.__len__() == 0:
+                return []
 
         file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
                                                                                         file_options)
@@ -167,7 +167,24 @@ class ProjectFiles:
 
         return results
 
-    def add_project(self, path, parent=None, tree=TreeType.GROUP, target_name=None, force=True, file_options=FileOptions()):
+    def _filter_targets_without_path(self, path, target_name):
+        potential_targets = self.objects.get_targets(target_name)
+        for target in potential_targets.copy():
+            for build_phase_id in target.buildPhases:
+                build_phase = self.get_object(build_phase_id)
+                for build_file_id in build_phase.files:
+                    build_file = self.get_object(build_file_id)
+                    file_ref = self.get_object(build_file.fileRef)
+                    if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path):
+                        potential_targets.remove(target)
+
+        if potential_targets.__len__() == 0:
+            return []
+
+        return [target.name for target in potential_targets]
+
+    def add_project(self, path, parent=None, tree=TreeType.GROUP, target_name=None, force=True,
+                    file_options=FileOptions()):
         """
         Adds another Xcode project into this project. Allows to use the products generated from the given project into
         this project during compilation time. Optional: it can add the products into the different sections: frameworks
