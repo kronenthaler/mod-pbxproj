@@ -65,7 +65,6 @@ def _add(project, args):
                           header_scope=header_scope.title())
     build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
                                     parent=parent_group, file_options=options)
-                                    file_options=options)
 
     # print some information about the build files created.
     if build_files is None:
