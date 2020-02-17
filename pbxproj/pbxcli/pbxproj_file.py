@@ -19,6 +19,7 @@ generic options:
                                        SOURCE_ROOT, SDKROOT, DEVELOPER_DIR, BUILT_PRODUCTS_DIR. [default: SOURCE_ROOT]
     -t, --target <target>          Target name(s) to be modified. If there is no target specified, all targets are
                                        modified.
+    --parent <parent>              Parent to use when adding the file (uses project root if not given).
     -b, --backup                   Creates a backup before start processing the command.
 
 delete options:
@@ -52,6 +53,10 @@ def _add(project, args):
     else:
         header_scope = args['--header-scope']
 
+    parent_group = None
+    if args['--parent']:
+        parent_group = project.get_or_create_group(args['--parent'])
+
     options = FileOptions(create_build_files=not args['--no-create-build-files'],
                           weak=args['--weak'],
                           ignore_unknown_type=args['--ignore-unknown-types'],
@@ -59,7 +64,8 @@ def _add(project, args):
                           code_sign_on_copy=args['--sign-on-copy'],
                           header_scope=header_scope.title())
     build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
-                                   file_options=options)
+                                    parent=parent_group, file_options=options)
+
     # print some information about the build files created.
     if build_files is None:
         raise Exception('No files were added to the project.')
