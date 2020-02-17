@@ -3,6 +3,11 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 
+try:
+    long_description = open("readme.md").read()
+except IOError:
+    long_description = ""
+
 # Inspired by the example at https://pytest.org/latest/goodpractises.html
 class NoseTestCommand(TestCommand):
     def finalize_options(self):
@@ -53,6 +58,8 @@ def find_version(*file_paths):
 setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       entry_points={
         "console_scripts": [
             'pbxproj = pbxproj.__main__:main',
