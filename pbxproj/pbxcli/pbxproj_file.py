@@ -53,7 +53,7 @@ def _add(project, args):
     else:
         header_scope = args['--header-scope']
 
-    parent_group=None
+    parent_group = None
     if args['--parent']:
         parent_group = project.get_or_create_group(args['--parent'])
 
@@ -63,12 +63,8 @@ def _add(project, args):
                           embed_framework=not args['--no-embed'],
                           code_sign_on_copy=args['--sign-on-copy'],
                           header_scope=header_scope.title())
-    build_files = None
-    if parent_group:
-        build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
+    build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
                                     parent=parent_group, file_options=options)
-    else:
-        build_files = project.add_file(args['<path>'], tree=args['--tree'], force=False, target_name=args['--target'],
                                     file_options=options)
 
     # print some information about the build files created.
