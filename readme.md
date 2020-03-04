@@ -1,9 +1,10 @@
-[![Build Status](https://travis-ci.org/kronenthaler/mod-pbxproj.svg?branch=master)](https://travis-ci.org/kronenthaler/mod-pbxproj) 
-[![Coverage Status](https://coveralls.io/repos/github/kronenthaler/mod-pbxproj/badge.svg?branch=master&x=1)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master) 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/70c14211ba704d2893f7b0f54bb04da7)](https://www.codacy.com/app/kronenthaler/mod-pbxproj?utm_source=github.com&utm_medium=referral&utm_content=kronenthaler/mod-pbxproj&utm_campaign=badger)
-[![PyPI](https://img.shields.io/pypi/v/pbxproj.svg)](https://pypi.python.org/pypi/pbxproj)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?x=1)](license.txt)
- 
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/kronenthaler/mod-pbxproj/branch-check/master?logo=github&style=flat-square)](https://github.com/kronenthaler/mod-pbxproj/actions?query=workflow%3Abranch-check)
+[![Coveralls github branch](https://img.shields.io/coveralls/github/kronenthaler/mod-pbxproj/master?logo=coveralls&style=flat-square)](https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master)
+[![Codacy grade](https://img.shields.io/codacy/grade/70c14211ba704d2893f7b0f54bb04da7?logo=codacy&style=flat-square)](https://www.codacy.com/app/kronenthaler/pbxproj?utm_source=github.com&utm_medium=referral&utm_content=kronenthaler/pbxproj&utm_campaign=badger)
+[![PyPI](https://img.shields.io/pypi/v/pbxproj?color=97cb02&logo=python&logoColor=ffffff&style=flat-square)](https://pypi.python.org/pypi/pbxproj)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pbxproj?color=97cb02&logo=python&logoColor=ffffff&style=flat-square)](https://pypi.python.org/pypi/pbxproj/)
+[![PyPI - License](https://img.shields.io/pypi/l/pbxproj?color=97cb02&style=flat-square)](license.txt)
+
 # pbxproj 
 
 This module can read, modify, and write a .pbxproj file from an Xcode 4+ projects. The file is usually called project.pbxproj and can be found inside the .xcodeproj bundle. Because some task cannot be done by clicking on an UI or opening Xcode to do it for you, this python module lets you automate the modification process.
