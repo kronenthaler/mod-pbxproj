@@ -4,7 +4,7 @@ from setuptools.command.test import test as TestCommand
 
 
 try:
-    long_description = open("readme.md").read()
+    long_description = open("readme.rst").read()
 except IOError:
     long_description = ""
 
