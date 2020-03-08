@@ -3,10 +3,10 @@
    :target: https://github.com/kronenthaler/mod-pbxproj/actions?query=workflow%3Abranch-check
    :alt: GitHub Workflow Status (branch)
 
-.. image:: https://img.shields.io/coveralls/github/kronenthaler/mod-pbxproj/master?logo=coveralls&style=flat-square
-   :target: https://coveralls.io/github/kronenthaler/mod-pbxproj?branch=master
-   :alt: Coveralls github branch
-
+.. image:: https://img.shields.io/codacy/coverage/70c14211ba704d2893f7b0f54bb04da7/master?logo=codacy&style=flat-square   
+   :alt: Codacy branch coverage
+   :target: https://www.codacy.com/app/kronenthaler/pbxproj?utm_source=github.com&utm_medium=referral&utm_content=kronenthaler/pbxproj&utm_campaign=badger
+   
 .. image:: https://img.shields.io/codacy/grade/70c14211ba704d2893f7b0f54bb04da7?logo=codacy&style=flat-square
    :target: https://www.codacy.com/app/kronenthaler/pbxproj?utm_source=github.com&utm_medium=referral&utm_content=kronenthaler/pbxproj&utm_campaign=badger
    :alt: Codacy grade
