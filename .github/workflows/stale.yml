@@ -1,0 +1,18 @@
+name: "Close stale issues"
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        days-before-stale: 30
+        days-before-close: 5
+        stale-issue-message: 'This issue has become stale, the required information has not been provided and it is been marked for closure in the next ${{ days-before-close }} days'
+        stale-issue-label: 'not-enough-info, question, answered'
+        exempt-issue-label: 'enhancement, to-analyze'
