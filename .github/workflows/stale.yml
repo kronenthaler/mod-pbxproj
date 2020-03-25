@@ -6,7 +6,6 @@ on:
 
 jobs:
   stale:
-    id: state
     runs-on: ubuntu-latest
     steps:
     - uses: actions/stale
