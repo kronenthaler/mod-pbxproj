@@ -14,5 +14,5 @@ jobs:
         days-before-stale: 30
         days-before-close: 5
         stale-issue-message: 'This issue has become stale, the required information has not been provided and it is been marked for closure in the next 5 days'
-        stale-issue-label: 'not-enough-info, question, answered'
-        exempt-issue-label: 'enhancement, to-analyze'
+        stale-issue-label: 'not-enough-info'
+        exempt-issue-label: 'enhancement'
