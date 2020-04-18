@@ -3,6 +3,10 @@ from pbxproj import *
 
 
 class PBXBuildFile(PBXGenericObject):
+    def __init__(self, parent=None):
+        self._parent = parent
+        self._section = None
+
     @classmethod
     def create(cls, file_ref, attributes=None, compiler_flags=None):
         return cls().parse({
@@ -30,42 +34,29 @@ class PBXBuildFile(PBXGenericObject):
 
         return settings
 
-    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
-                      indentation_increment='\t'):
-        return super(PBXBuildFile, self)._print_object('', entry_separator=' ', object_start='',
-                                                       indentation_increment='')
+    def _print_object(self, indent_depth='', entry_separator='\n', object_start='\n', indent_increment='\t'):
+        return super(PBXBuildFile, self)._print_object('', entry_separator=' ', object_start='', indent_increment='')
 
     def _get_comment(self):
         comment = '(null)'
         if hasattr(self, 'fileRef'):
             comment = self.fileRef._get_comment()
-        return '{0} in {1}'.format(comment, self._get_section())
+        return f'{comment} in {self._get_section()}'
 
     def _get_section(self):
+        if self._section is not None:
+            return self._section
+
+        print('[WARN] falling back to slow mechanism')
         objects = self.get_parent()
         target = self.get_id()
 
-        def fill_cache_during_save(cache):
-            for section in objects.get_sections():
-                for obj in objects.get_objects_in_section(section):
-                    file_ids = obj['files']
-                    if file_ids is not None:
-                        comment = obj._get_comment()
-                        for file_id in file_ids:
-                            cache[file_id] = comment
-
-        # Do a special behavior here while saving to avoid the linear lookup below and therefore
-        # be significantly faster.
-        if pbxproj.is_in_save(self):
-            return pbxproj.get_from_cache_during_save(self, 'FILE_HOLDERS', objects, fill_cache_during_save, target)
-
-        # It's not safe to do the above optimization "normally" (outside of saving) since the objects
-        # may have been modified by the user, and the cache may therefore be invalid. So we fall back
-        # to a linear search.
         for section in objects.get_sections():
             for obj in objects.get_objects_in_section(section):
                 if 'files' in obj and target in obj.files:
-                    return obj._get_comment()
+                    self._section = obj._get_comment()
+                    break
+        return self._section
 
     def get_attributes(self):
         if 'settings' not in self:

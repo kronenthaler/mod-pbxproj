@@ -34,6 +34,6 @@ def command_parser(command, auto_save=True):
                 project.save()
             resolve_backup(project, backup_file, args)
         except Exception as ex:
-            print(('{0}'.format(ex)))
+            print((f'{ex}'))
             exit(1)
     return parser

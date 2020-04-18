@@ -19,6 +19,10 @@ class PBXGenericBuildPhase(PBXGenericObject):
             return False
 
         self.files.append(build_file.get_id())
+
+        # update the build_file section
+        build_file._section = self._get_comment()
+
         return True
 
     def remove_build_file(self, build_file):
@@ -27,5 +31,8 @@ class PBXGenericBuildPhase(PBXGenericObject):
 
         self.files.remove(build_file.get_id())
         del self.get_parent()[build_file.get_id()]
+
+        # update the build_file section
+        build_file._section = None
 
         return True

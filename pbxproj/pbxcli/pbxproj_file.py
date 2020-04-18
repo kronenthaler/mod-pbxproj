@@ -81,7 +81,7 @@ def _add(project, args):
 
     summary = 'File added to the project.'
     for k in info:
-        summary += '\n{0} {1} sections created.'.format(info[k], k)
+        summary += f'\n{info[k]} {k} sections created.'
     return summary
 
 

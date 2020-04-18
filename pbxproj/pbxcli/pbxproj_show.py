@@ -38,19 +38,15 @@ def execute(project, args):
 def _summary(project, args):
     info = ''
     for target in project.objects.get_targets():
-        info += "{name}:\n" \
-                "\tTarget type: {type}\n" \
-                "\tProduct name: {productName}\n" \
-                "\tConfigurations: {configs}\n" \
-            .format(name=target.name,
-                    productName=target.productName,
-                    type=target.isa,
-                    configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]))
+        configs = ', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)])
+        info += f"{target.name}:\n" \
+                f"\tTarget type: {target.isa}\n" \
+                f"\tProduct name: {target.productName}\n" \
+                f"\tConfigurations: {configs}\n" \
 
         for build_phase_id in target.buildPhases:
             build_phase = project.objects[build_phase_id]
-            info += "\t{name} ({type}) file count: {count}\n"\
-                .format(name=build_phase._get_comment(), type=build_phase.isa, count=build_phase.files.__len__())
+            info += f"\t{build_phase._get_comment()} ({build_phase.isa}) file count: {build_phase.files.__len__()}\n"
 
         info += "\n"
     return info
@@ -71,23 +67,22 @@ def _target_info(project, target_name, args):
 
     info = ''
     for target in project.objects.get_targets(target_name):
-        info += "{name}:\n" \
-                "\tProduct name: {productName}\n" \
-            .format(name=target.name,
-                    productName=target.productName)
+        info += f"{target.name}:\n" \
+                f"\tProduct name: {target.productName}\n"
 
         if args['--configurations']:
-            info += "\tConfigurations: {configs}\n" \
-                .format(configs=', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)]))
+            configs = ', '.join([c.name for c in project.objects.get_configurations_on_targets(target.name)])
+            info += f"\tConfigurations: {configs}\n"
 
         for build_phase_id in target.buildPhases:
             build_phase = project.objects[build_phase_id]
             if build_phase.isa in build_phases:
-                info += "\t{name}: \n\t\t".format(name=build_phase._get_comment())
+                info += f"\t{build_phase._get_comment()}: \n\t\t"
                 files = []
                 for build_file_id in build_phase.files:
                     build_file = project.objects[build_file_id]
                     files.append(project.objects[build_file.fileRef]._get_comment())
-                info += '{files}\n'.format(files="\n\t\t".join(sorted(files)))
+                formatted_files = "\n\t\t".join(sorted(files))
+                info += f'{formatted_files}\n'
         info += '\n'
     return info

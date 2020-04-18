@@ -95,3 +95,12 @@ class XCodeProjectTest(unittest.TestCase):
         build_Configurations = project.get_build_configurations_by_target(
             'app')
         self.assertListEqual(build_Configurations, ['Release', 'Debug'])
+
+    def testConsistency(self):
+        with open('samplescli/massive.pbxproj', 'r') as file:
+            original = file.read()
+            project = XcodeProject.load('samplescli/massive.pbxproj')
+            saved = project.__repr__() + '\n'
+
+            self.assertEqual(saved, original)
+
