@@ -44,5 +44,5 @@ class PBXFileReference(PBXGenericObject):
         # search on the BuildFiles if there is a build file to be removed, and remove it
         # search for each phase that has a reference to the build file and remove it from it.
         # remove the file reference from it's parent
-        pass
+        return True
 

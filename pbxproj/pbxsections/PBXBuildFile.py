@@ -139,3 +139,9 @@ class PBXBuildFile(PBXGenericObject):
             del self['settings']
 
         return True
+
+    def remove(self, recursive=True):
+        # TODO: search for each phase that has a reference to the build file and remove it from it.
+        del self._parent[self.get_id()]
+
+        return True

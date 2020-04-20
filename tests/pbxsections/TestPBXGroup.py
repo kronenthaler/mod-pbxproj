@@ -1,5 +1,6 @@
 import unittest
 from pbxproj.pbxsections.PBXGroup import *
+from pbxproj.PBXObjects import *
 
 
 class PBXGroupTests(unittest.TestCase):
@@ -37,3 +38,56 @@ class PBXGroupTests(unittest.TestCase):
         invalid_group = PBXGenericObject().parse({'_id': "not-a-group"})
         group.add_child(invalid_group)
         self.assertFalse(group.has_child(invalid_group))
+
+    def testRemoveGroupRecusively(self):
+        obj = {
+            "1": {"isa": "PBXGroup", "children": ["2", "3"], "path": "X", "sourceTree": "<group>"},
+            "2": {"isa": "PBXGroup", "children": ["4", "5"], "path": "Y", "sourceTree": "<group>"},
+            "3": {"isa": "PBXBuildFile", "fileRef": "3a"},
+            "3a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "3a.h",
+                   "path": "Source/3a.h", "sourceTree": "SOURCE_ROOT"},
+            "4": {"isa": "PBXGroup", "children": ["6"], "path": "Y", "sourceTree": "<group>"},
+            "5": {"isa": "PBXBuildFile", "fileRef": "5a"},
+            "5a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "5a.h",
+                   "path": "Source/5a.h", "sourceTree": "SOURCE_ROOT"},
+            "6": {"isa": "PBXBuildFile", "fileRef": "6a"},
+            "6a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "6a.h",
+                   "path": "Source/6a.h", "sourceTree": "SOURCE_ROOT"},
+        }
+
+        objs = objects().parse(obj)
+        objs["1"].remove()
+
+        self.assertIsNone(objs["1"])
+        self.assertIsNone(objs["2"])
+        self.assertIsNone(objs["3"])
+        self.assertIsNone(objs["4"])
+        self.assertIsNone(objs["5"])
+        self.assertIsNone(objs["6"])
+
+
+    def testRemoveGroupNonRecusively(self):
+        obj = {
+            "1": {"isa": "PBXGroup", "children": ["2", "3"], "path": "X", "sourceTree": "<group>"},
+            "2": {"isa": "PBXGroup", "children": ["4", "5"], "path": "Y", "sourceTree": "<group>"},
+            "3": {"isa": "PBXBuildFile", "fileRef": "3a"},
+            "3a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "3a.h",
+                   "path": "Source/3a.h", "sourceTree": "SOURCE_ROOT"},
+            "4": {"isa": "PBXGroup", "children": ["6"], "path": "Y", "sourceTree": "<group>"},
+            "5": {"isa": "PBXBuildFile", "fileRef": "5a"},
+            "5a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "5a.h",
+                   "path": "Source/5a.h", "sourceTree": "SOURCE_ROOT"},
+            "6": {"isa": "PBXBuildFile", "fileRef": "6a"},
+            "6a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "6a.h",
+                   "path": "Source/6a.h", "sourceTree": "SOURCE_ROOT"},
+        }
+
+        objs = objects().parse(obj)
+        objs["1"].remove(recursive=False)
+
+        self.assertIsNone(objs["1"])
+        self.assertIsNotNone(objs["2"])
+        self.assertIsNotNone(objs["3"])
+        self.assertIsNotNone(objs["4"])
+        self.assertIsNotNone(objs["5"])
+        self.assertIsNotNone(objs["6"])
