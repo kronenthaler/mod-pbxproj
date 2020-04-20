@@ -15,3 +15,8 @@ class PBXContainerItemProxy(PBXGenericObject):
 
     def _get_comment(self):
         return 'PBXContainerItemProxy'
+
+    def __getitem__(self, item):
+        if item == 'remoteGlobalIDString':
+            return getattr(self, item).__str__()
+        return super().__getitem__(item)

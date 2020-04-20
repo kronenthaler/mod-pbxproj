@@ -7,11 +7,11 @@ class PBXKey(str):
     def __repr__(self):
         comment = self._get_comment()
         if comment is not None:
-            comment = ' /* {0} */'.format(comment)
+            comment = f' /* {comment} */'
         else:
             comment = ''
 
-        return '{0}{1}'.format(self.__str__(), comment)
+        return f'{self.__str__()}{comment}'
 
     def get_parent(self):
         return self._parent

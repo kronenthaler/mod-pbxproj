@@ -19,23 +19,27 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         self._pbxproj_path = os.path.abspath(path)
         self._source_root = os.path.abspath(os.path.join(os.path.split(path)[0], '..'))
 
-        # Used to speed up saving the project.
-        self._save_caches = None
-
         # initialize the structure using the given tree
         self.parse(tree)
+
+        # sync up all the buildFile sections for speed up saving time
+        if 'objects' not in self:
+            return
+
+        for section in self.objects.get_sections():
+            for obj in self.objects.get_objects_in_section(section):
+                if 'files' in obj and obj['files'] is not None:
+                    comment = obj._get_comment()
+                    for file_id in obj['files']:
+                        # set the section into the objects
+                        self.objects[file_id]._section = comment
 
     def save(self, path=None):
         if path is None:
             path = self._pbxproj_path
 
-        f = open(path, 'w')
-        # Initialize the save cache to indicate that we're in a save
-        self._save_caches = {}
-        f.write(self.__repr__() + "\n")
-        # Clear the cache since future modifications may make it invalid (and we're no longer in a save).
-        self._save_caches = None
-        f.close()
+        with open(path, 'w') as file:
+            file.write(self.__repr__() + "\n")
 
     def backup(self):
         backup_name = "%s_%s.backup" % (self._pbxproj_path, datetime.datetime.now().strftime('%d%m%y-%H%M%S'))
@@ -87,5 +91,6 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
-        tree = osp.OpenStepDecoder.ParseFromFile(open(path, 'r'))
-        return XcodeProject(tree, path)
+        with open(path, 'r') as file:
+            tree = osp.OpenStepDecoder.ParseFromFile(file)
+            return XcodeProject(tree, path)

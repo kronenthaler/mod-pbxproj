@@ -70,7 +70,7 @@ class XCBuildConfiguration(PBXGenericObject):
                 recursive = False
 
             if escape:
-                path = '"{0}"'.format(path)
+                path = f'"{path}"'
 
             if recursive and not path.endswith('/**'):
                 path = os.path.join(path, '**')

@@ -476,8 +476,8 @@ class ProjectFiles:
 
         if not unknown_type_allowed and file_type is None:
             raise ValueError(
-                'Unknown file extension: {0}. Please add the extension and Xcode type to ProjectFiles._FILE_TYPES' \
-                    .format(os.path.splitext(file_ref.get_name())[1]))
+                f'Unknown file extension: {os.path.splitext(file_ref.get_name())[1]}. ' \
+                f'Please add the extension and Xcode type to ProjectFiles._FILE_TYPES')
 
         return file_type, build_phase
 

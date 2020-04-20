@@ -1,4 +1,5 @@
 import pbxproj
+import bisect
 from pbxproj import PBXGenericObject
 
 
@@ -10,10 +11,15 @@ class objects(PBXGenericObject):
         # sections get aggregated under the isa type. Each contains a list of tuples (id, obj) with every object defined
         self._sections = {}
 
+        # keep a dict indexed by obj.get_id() in order to do fast lookup while saving the file or in general
+        # this means that the structure needs to be kept in sync whenever an object is added or removed to the _sections
+        # dict.
+        self._objects_by_id = {}
+
     def parse(self, object_data):
         # iterate over the keys and fill the sections
         if isinstance(object_data, dict):
-            for key, value in list(object_data.items()):
+            for key, value in object_data.items():
                 key = self._parse_string(key)
                 obj_type = key
                 if 'isa' in value:
@@ -28,31 +34,26 @@ class objects(PBXGenericObject):
         # safe-guard: delegate to the parent how to deal with non-object values
         return super(objects, self).parse(object_data)
 
-    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
-                      indentation_increment='\t'):
+    def _print_object(self, indent_depth='', entry_separator='\n', object_start='\n',
+                      indent_increment='\t'):
         # override to change the way the object is printed out
         result = '{\n'
         for section in self.get_sections():
             phase = self._sections[section]
-            phase.sort(key=lambda x: x.get_id())
-            result += '\n/* Begin {0} section */\n'.format(section)
+            result += f'\n/* Begin {section} section */\n'
             for value in phase:
-                obj = value._print_object(indentation_depth + '\t', entry_separator, object_start,
-                                          indentation_increment)
-                result += indentation_depth + '\t{0} = {1};\n'.format(value.get_id().__repr__(), obj)
-            result += '/* End {0} section */\n'.format(section)
-        result += indentation_depth + '}'
+                obj = value._print_object(indent_depth + '\t', entry_separator, object_start,
+                                          indent_increment)
+                result += f'{indent_depth}\t{value.get_id().__repr__()} = {obj};\n'
+            result += f'/* End {section} section */\n'
+        result += f'{indent_depth}{"}"}'
         return result
 
     def get_keys(self):
         """
         :return: all the keys of the object (ids of objects)
         """
-        keys = []
-        for section in self.get_sections():
-            phase = self._sections[section]
-            for obj in phase:
-                keys += obj.get_id()
+        keys = list(self._objects_by_id.keys())
         keys.sort()
         return keys
 
@@ -62,32 +63,19 @@ class objects(PBXGenericObject):
         return sections
 
     def __getitem__(self, key):
-        def fill_cache_during_save(cache):
-            for section in self.get_sections():
-                phase = self._sections[section]
-                for obj in phase:
-                    cache[obj.get_id()] = obj
-
-        # Do a special behavior here while saving to avoid the linear lookup below and therefore
-        # be significantly faster.
-        if pbxproj.is_in_save(self):
-            return pbxproj.get_from_cache_during_save(self, 'OBJECTS', self, fill_cache_during_save, key)
-
-        # It's not safe to do the above optimization "normally" (outside of saving) since the objects
-        # may have been modified by the user, and the cache may therefore be invalid. So we fall back
-        # to a linear search.
-        for section in self.get_sections():
-            phase = self._sections[section]
-            for obj in phase:
-                if key == obj.get_id():
-                    return obj
-        return None
+        # retrieve the element from the dict representation for faster access.
+        return self._objects_by_id.get(key, None)
 
     def __setitem__(self, key, value):
         if value.isa not in self._sections:
             self._sections[value.isa] = []
 
-        self._sections[value.isa].append(value)
+        # use the bisect module to keep the list sorted at all times.
+        bisect.insort(self._sections[value.isa], value)
+
+        # add to the fast lookup dict
+        self._objects_by_id[value.get_id()] = value
+
         value._parent = self
 
     def __delitem__(self, key):
@@ -95,6 +83,8 @@ class objects(PBXGenericObject):
         if obj is not None:
             phase = self._sections[obj.isa]
             phase.remove(obj)
+            # remove from the fast lookup dict
+            del self._objects_by_id[obj.get_id()]
 
             # remove empty phases
             if phase.__len__() == 0:

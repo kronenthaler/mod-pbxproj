@@ -28,10 +28,10 @@ class PBXFileReference(PBXGenericObject):
             return self.explicitFileType
         return self.lastKnownFileType
 
-    def _print_object(self, indentation_depth='', entry_separator='\n', object_start='\n',
-                      indentation_increment='\t'):
+    def _print_object(self, indent_depth='', entry_separator='\n', object_start='\n',
+                      indent_increment='\t'):
         return super(PBXFileReference, self)._print_object('', entry_separator=' ', object_start='',
-                                                           indentation_increment='')
+                                                           indent_increment='')
 
     def get_name(self):
         if hasattr(self, 'name'):
@@ -44,5 +44,5 @@ class PBXFileReference(PBXGenericObject):
         # search on the BuildFiles if there is a build file to be removed, and remove it
         # search for each phase that has a reference to the build file and remove it from it.
         # remove the file reference from it's parent
-        pass
+        return True
 
