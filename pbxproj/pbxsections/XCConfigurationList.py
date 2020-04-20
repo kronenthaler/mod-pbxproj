@@ -18,7 +18,6 @@ class XCConfigurationList(PBXGenericObject):
             if target in obj.buildConfigurationList:
                 if hasattr(objects[obj.targets[0]], 'name'):
                     return obj.isa, objects[obj.targets[0]].name
-                else:
-                    return obj.isa, objects[obj.targets[0]].productName
+                return obj.isa, objects[obj.targets[0]].productName
 
         return '', ''

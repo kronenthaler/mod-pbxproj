@@ -28,7 +28,6 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
 
         for section in self.objects.get_sections():
             for obj in self.objects.get_objects_in_section(section):
-                file_ids = obj['files']
                 if 'files' in obj and obj['files'] is not None:
                     comment = obj._get_comment()
                     for file_id in obj['files']:
