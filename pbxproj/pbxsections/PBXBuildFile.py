@@ -141,7 +141,12 @@ class PBXBuildFile(PBXGenericObject):
         return True
 
     def remove(self, recursive=True):
-        # TODO: search for each phase that has a reference to the build file and remove it from it.
-        del self._parent[self.get_id()]
+        if recursive:
+            build_phases = [build_phase for build_phase in self.get_parent().get_sections() if build_phase.endswith('BuildPhase')]
+            for build_phase in self.get_parent().get_objects_in_section(*build_phases):
+                # if this build_phase contains a reference to this build_file...
+                if 'files' in build_phase and self.get_id() in build_phase.files:
+                    build_phase.remove_build_file(self)
 
+        del self.get_parent()[self.get_id()]
         return True
