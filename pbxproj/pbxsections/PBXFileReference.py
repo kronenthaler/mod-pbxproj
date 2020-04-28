@@ -36,9 +36,7 @@ class PBXFileReference(PBXGenericObject):
     def get_name(self):
         if hasattr(self, 'name'):
             return self.name
-        if hasattr(self, 'path'):
-            return self.path
-        return None
+        return self.path
 
     def remove(self, recursive=True):
         parent = self.get_parent()

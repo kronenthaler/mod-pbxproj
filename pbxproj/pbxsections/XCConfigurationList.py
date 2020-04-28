@@ -8,16 +8,14 @@ class XCConfigurationList(PBXGenericObject):
 
     def _get_section(self):
         objects = self.get_parent()
-        target = self.get_id()
+        target_id = self.get_id()
 
         for obj in objects.get_objects_in_section('PBXNativeTarget', 'PBXAggregateTarget'):
-            if target in obj.buildConfigurationList:
+            if target_id in obj.buildConfigurationList:
                 return obj.isa, obj.name
 
-        for obj in objects.get_objects_in_section('PBXProject'):
-            if target in obj.buildConfigurationList:
-                if hasattr(objects[obj.targets[0]], 'name'):
-                    return obj.isa, objects[obj.targets[0]].name
-                return obj.isa, objects[obj.targets[0]].productName
-
-        return '', ''
+        projects = filter(lambda o: target_id in o.buildConfigurationList, objects.get_objects_in_section('PBXProject'))
+        project = projects.__next__()
+        target = objects[project.targets[0]]
+        name = target.name if hasattr(target, 'name') else target.productName
+        return project.isa, name
