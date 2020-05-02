@@ -74,9 +74,6 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
             if build_configuration_obj is not None:
                 result.append(build_configuration_obj.name)
 
-        if len(result) == 0:
-            return None
-
         return result
 
     def get_target_by_name(self, name):

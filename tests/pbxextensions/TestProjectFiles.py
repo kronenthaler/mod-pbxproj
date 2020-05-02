@@ -305,7 +305,7 @@ class ProjectFilesTest(unittest.TestCase):
 
         self.assertEqual(samples[0].children.__len__(), 3) # dirA, test.framework, testLibrary.a
         self.assertEqual(dirA[0].children.__len__(), 2)  # dirB, fileA.m
-        self.assertEqual(dirB[0].children.__len__(), 1)  # fileB.m
+        self.assertEqual(dirB[0].children.__len__(), 2)  # fileB.m, fileB.h
 
     def testAddFolderWithExclusions(self):
         project = XcodeProject(self.obj)
@@ -321,7 +321,7 @@ class ProjectFilesTest(unittest.TestCase):
 
         self.assertEqual(samples[0].children.__len__(), 1)  # dirA, -test.framework, -testLibrary.a
         self.assertEqual(dirA[0].children.__len__(), 1)  # dirB, -fileA.m
-        self.assertEqual(dirB[0].children.__len__(), 0)  # -fileB.m
+        self.assertEqual(dirB[0].children.__len__(), 1)  # -fileB.m, +fileB.h
 
     def testAddFolderAsReference(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")

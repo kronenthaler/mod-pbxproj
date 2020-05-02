@@ -6,18 +6,21 @@ from pbxproj.PBXObjects import *
 class PBXGroupTests(unittest.TestCase):
     def setUp(self):
         self.obj = {
-            "1": {"isa": "PBXGroup", "children": ["2", "3"], "path": "X", "sourceTree": "<group>"},
-            "2": {"isa": "PBXGroup", "children": ["4", "5"], "path": "Y", "sourceTree": "<group>"},
+            "z1": {"isa": "PBXGroup", "children": ["3a"], "path": "X", "sourceTree": "<group>"},
+            "1": {"isa": "PBXGroup", "children": ["2", "3a"], "path": "X", "sourceTree": "<group>"},
+            "2": {"isa": "PBXGroup", "children": ["4", "5a"], "path": "Y", "sourceTree": "<group>"},
             "3": {"isa": "PBXBuildFile", "fileRef": "3a"},
             "3a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "3a.h",
                    "path": "Source/3a.h", "sourceTree": "SOURCE_ROOT"},
-            "4": {"isa": "PBXGroup", "children": ["6"], "path": "Y", "sourceTree": "<group>"},
+            "4": {"isa": "PBXGroup", "children": ["6a"], "path": "Y", "sourceTree": "<group>"},
             "5": {"isa": "PBXBuildFile", "fileRef": "5a"},
             "5a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "5a.h",
                    "path": "Source/5a.h", "sourceTree": "SOURCE_ROOT"},
             "6": {"isa": "PBXBuildFile", "fileRef": "6a"},
             "6a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "6a.h",
                    "path": "Source/6a.h", "sourceTree": "SOURCE_ROOT"},
+            "bp": {"isa": "PBXSourcesBuildPhase", "files": ["3", "5", "6"]},
+            "ss": {"isa": "PBXShellScriptBuildPhase"}
         }
 
     def testCreateWithoutName(self):
@@ -62,9 +65,14 @@ class PBXGroupTests(unittest.TestCase):
         self.assertIsNone(objs["1"])
         self.assertIsNone(objs["2"])
         self.assertIsNone(objs["3"])
+        self.assertIsNone(objs["3a"])
         self.assertIsNone(objs["4"])
         self.assertIsNone(objs["5"])
+        self.assertIsNone(objs["5a"])
         self.assertIsNone(objs["6"])
+        self.assertIsNone(objs["6a"])
+        self.assertEqual(objs["bp"].files, [])
+        self.assertEqual(objs["z1"].children, [])
 
     def testRemoveGroupNonRecusively(self):
         objs = objects().parse(self.obj)
@@ -73,6 +81,11 @@ class PBXGroupTests(unittest.TestCase):
         self.assertIsNone(objs["1"])
         self.assertIsNotNone(objs["2"])
         self.assertIsNotNone(objs["3"])
+        self.assertIsNotNone(objs["3a"])
         self.assertIsNotNone(objs["4"])
         self.assertIsNotNone(objs["5"])
+        self.assertIsNotNone(objs["5a"])
         self.assertIsNotNone(objs["6"])
+        self.assertIsNotNone(objs["6a"])
+        self.assertNotEqual(objs["bp"].files, [])
+        self.assertNotEqual(objs["z1"].children, [])
