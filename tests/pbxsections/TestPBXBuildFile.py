@@ -81,6 +81,14 @@ class PBXBuildFileTest(unittest.TestCase):
         self.assertIsNotNone(dobj.settings.ATTRIBUTES)
         self.assertEqual(dobj.settings.ATTRIBUTES, ['Weak'])
 
+    def testAddAttributeList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        dobj.add_attributes(['Weak', 'Custom'])
+
+        self.assertIsNotNone(dobj.settings.ATTRIBUTES)
+        self.assertEqual(dobj.settings.ATTRIBUTES, ['Weak', 'Custom'])
+
     def testAddAttributesWithoutAttributes(self):
         dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='x')
 
@@ -100,6 +108,13 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj = PBXBuildFile.create(PBXGenericObject())
 
         dobj.remove_attributes('Weak')
+
+        self.assertIsNone(dobj['settings'])
+
+    def testRemoveAttributeList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), attributes=['Weak', 'Custom'])
+
+        dobj.remove_attributes(['Weak', 'Custom'])
 
         self.assertIsNone(dobj['settings'])
 
@@ -139,3 +154,27 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj.remove_compiler_flags('Weak')
 
         self.assertIsNone(dobj['settings'])
+
+    def testRemoveCompilerFlagsList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags=['Weak', 'Custom', 'Another'])
+
+        dobj.remove_compiler_flags(['Weak', 'Custom'])
+
+        self.assertIsNotNone(dobj['settings'])
+        self.assertEqual(dobj['settings'].__repr__(), PBXGenericObject().parse({'COMPILER_FLAGS': 'Another'}).__repr__())
+
+    def testRemoveNonRecursive(self):
+        obj = {
+            'objects': {
+                '1': {'isa': 'PBXBuildFile', 'fileRef': '0'},
+                '0': {'isa': 'PBXFileReference', 'path': 'x'},
+                '2': {'isa': 'PBXGenericBuildPhase', 'files': ['1']}
+            }
+        }
+
+        project = PBXGenericObject().parse(obj)
+        project.objects['1'].remove(recursive=False)
+
+        self.assertIsNone(project.objects['1'])
+        self.assertIsNotNone(project.objects['2'])
+

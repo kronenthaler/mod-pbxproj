@@ -64,7 +64,7 @@ def _add(project, args):
                           ignore_unknown_type=args['--ignore-unknown-types'],
                           embed_framework=not args['--no-embed'],
                           code_sign_on_copy=args['--sign-on-copy'],
-                          header_scope=header_scope)
+                          header_scope=header_scope.title())
 
     build_files = project.add_folder(args['<path>'], excludes=args['--exclude'], recursive=args['--recursive'],
                                      create_groups=not args['--no-create-groups'], target_name=args['--target'],

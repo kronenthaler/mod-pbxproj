@@ -94,7 +94,7 @@ class PBXBuildFile(PBXGenericObject):
         if not isinstance(attributes, list):
             attributes = [attributes]
 
-        for attribute in self.settings.ATTRIBUTES:
+        for attribute in attributes:
             self.settings.ATTRIBUTES.remove(attribute)
 
         return self._clean_up_settings()

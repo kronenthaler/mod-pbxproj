@@ -1,6 +1,7 @@
 import unittest
 import shutil
 import sys
+from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import *
 import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 
@@ -178,3 +179,29 @@ class PBXProjFileTest(unittest.TestCase):
 
         self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
         self.assertEqual(result, 'File added to the project.\n3 PBXBuildFile sections created.')
+
+    def testAddFilesWithHeadersScope(self):
+        args = {
+            '<project>': 'samplescli/test.pbxproj',
+            '<path>': 'samples/dirA/dirB/fileB.h',
+            '--target': None,
+            '--tree': 'SOURCE_ROOT',
+            '--parent': 'Samples',
+            '--delete': False,
+            '--weak': False,
+            '--no-embed': False,
+            '--sign-on-copy': False,
+            '--ignore-unknown-types': False,
+            '--no-create-build-files': False,
+            '--header-scope': 'public'
+        }
+        project = open_project(args)
+
+        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        result = pbxproj_file.execute(project, args)
+
+        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertEqual(result, 'File added to the project.\n3 PBXBuildFile sections created.')
+        file = project.get_files_by_name('fileB.h')
+        build_file = project.get_build_files_for_file(file[0].get_id())
+        self.assertEqual(build_file[0].settings.__repr__(), PBXGenericObject().parse({"ATTRIBUTES": ['Public']}).__repr__())

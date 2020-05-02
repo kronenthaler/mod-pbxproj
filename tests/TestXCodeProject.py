@@ -96,6 +96,13 @@ class XCodeProjectTest(unittest.TestCase):
             'app')
         self.assertListEqual(build_Configurations, ['Release', 'Debug'])
 
+    def testGetBuildConfigurationsByTargetNotExistent(self):
+        project = XcodeProject(self.obj)
+
+        build_Configurations = project.get_build_configurations_by_target(
+            'appThatDoesNotExists')
+        self.assertIsNone(build_Configurations)
+
     def testConsistency(self):
         with open('samplescli/massive.pbxproj', 'r') as file:
             original = file.read()
