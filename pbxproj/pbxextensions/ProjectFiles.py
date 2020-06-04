@@ -161,9 +161,9 @@ class ProjectFiles:
         # the path is absolute and it's outside the scope of the project for linking purposes
         library_path = os.path.join('$(SRCROOT)', os.path.split(file_ref.path)[0])
         if os.path.isfile(abs_path):
-            self.add_library_search_paths([library_path], recursive=False)
+            self.add_library_search_paths([library_path], recursive=False, escape=" " in library_path)
         else:
-            self.add_framework_search_paths([library_path, '$(inherited)'], recursive=False)
+            self.add_framework_search_paths([library_path, '$(inherited)'], recursive=False, escape=" " in library_path)
 
         return results
 
