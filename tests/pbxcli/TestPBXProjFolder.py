@@ -3,6 +3,7 @@ import shutil
 import sys
 from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import *
+from pbxproj.pbxextensions.ProjectFiles import TreeType
 import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
 
 class PBXProjFolderTest(unittest.TestCase):
@@ -64,10 +65,10 @@ class PBXProjFolderTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args['<path>'], tree=TreeType.GROUP), [])
         result = pbxproj_folder.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args['<path>'], tree=TreeType.GROUP).__len__(), 0)
         self.assertEqual(result, 'Folder added to the project, no build file sections created.')
 
     def testAddFolderError(self):
@@ -88,11 +89,11 @@ class PBXProjFolderTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args['<path>'], tree=TreeType.GROUP), [])
         with self.assertRaisesRegex(Exception, '^No files were added to the project.'):
             pbxproj_folder.execute(project, args)
 
-        self.assertEqual(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertEqual(project.get_files_by_path(args['<path>'], tree=TreeType.GROUP).__len__(), 0)
 
     def testAddFolderSuccess(self):
         args = {
@@ -112,10 +113,12 @@ class PBXProjFolderTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a'), [])
+        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                       tree=TreeType.GROUP), [])
         result = pbxproj_folder.execute(project, args)
 
-        self.assertEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a').__len__(), 0)
+        self.assertEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                   tree=TreeType.GROUP).__len__(), 0)
         self.assertEqual(result, 'Folder added to the project.\n6 PBXBuildFile sections created.')
 
     def testAddFolderSuccessRecursive(self):
@@ -136,10 +139,12 @@ class PBXProjFolderTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a'), [])
+        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                       tree=TreeType.GROUP), [])
         result = pbxproj_folder.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a').__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                     tree=TreeType.GROUP).__len__(), 0)
         self.assertEqual(result, 'Folder added to the project.\n18 PBXBuildFile sections created.')
 
     def testAddFolderSuccessWithPublicHeaders(self):
@@ -161,11 +166,14 @@ class PBXProjFolderTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a'), [])
+        self.assertListEqual(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                       tree=TreeType.GROUP), [])
         result = pbxproj_folder.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a').__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args['<path>']+'/path with spaces/testLibrary.a',
+                                                     tree=TreeType.GROUP).__len__(), 0)
         self.assertEqual(result, 'Folder added to the project.\n18 PBXBuildFile sections created.')
         file = project.get_files_by_name('fileB.h')
         build_file = project.get_build_files_for_file(file[0].get_id())
-        self.assertEqual(build_file[0].settings.__repr__(), PBXGenericObject().parse({"ATTRIBUTES": ['Public']}).__repr__())
+        self.assertEqual(build_file[0].settings.__repr__(),
+                         PBXGenericObject().parse({"ATTRIBUTES": ['Public']}).__repr__())
