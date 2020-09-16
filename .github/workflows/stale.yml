@@ -2,7 +2,7 @@ name: "close-stale-issues"
 
 on:
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "* * */5 * *"
 
 jobs:
   stale:
@@ -11,8 +11,8 @@ jobs:
     - uses: actions/stale@v1
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        days-before-stale: 30
-        days-before-close: 5
-        stale-issue-message: 'This issue has become stale, the required information has not been provided and it is been marked for closure in the next 5 days'
+        days-before-stale: 60
+        days-before-close: 10
+        stale-issue-message: 'This issue has become stale, the required information has not been provided and it is been marked for closure in the next 10 days'
         stale-issue-label: 'not-enough-info'
         exempt-issue-label: 'enhancement'
