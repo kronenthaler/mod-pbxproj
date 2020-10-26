@@ -65,3 +65,10 @@ class PBXCLITest(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, '^1'):
             parser({u'<project>': u'whatever/project.pbxproj', u'--backup': False})
         self.assertEqual(sys.stdout.getvalue().strip(), u'Project file not found')
+
+    def testOpenFileWithBrokenReferences(self):
+        sys.stderr = StringIO()
+        project = open_project({'<project>': 'samplescli/broken-references.pbxproj'})
+        self.assertEqual(sys.stderr.getvalue().strip(), '[WARNING] The project contains missing/broken references that '
+                                                        'may cause other problems. Open your project in Xcode and '
+                                                        'resolve all red-colored files.')

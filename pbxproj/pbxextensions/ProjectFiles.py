@@ -174,6 +174,9 @@ class ProjectFiles:
                 build_phase = self.get_object(build_phase_id)
                 for build_file_id in build_phase.files:
                     build_file = self.get_object(build_file_id)
+                    if build_file is None:
+                        continue
+
                     file_ref = self.get_object(build_file.fileRef)
                     if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path):
                         potential_targets.remove(target)
@@ -316,6 +319,9 @@ class ProjectFiles:
                 build_phase = self.objects[build_phase_id]
 
                 for build_file_id in build_phase.files:
+                    if build_file_id not in self.objects:
+                        continue
+
                     build_file = self.objects[build_file_id]
 
                     if build_file.fileRef == file_ref.get_id():

@@ -1,5 +1,6 @@
 import shutil
 import datetime
+import sys
 from pbxproj.pbxextensions import *
 
 
@@ -26,13 +27,21 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         if 'objects' not in self:
             return
 
+        missing_references = False
         for section in self.objects.get_sections():
             for obj in self.objects.get_objects_in_section(section):
                 if 'files' in obj and obj['files'] is not None:
                     comment = obj._get_comment()
                     for file_id in obj['files']:
-                        # set the section into the objects
-                        self.objects[file_id]._section = comment
+                        if self.objects[file_id] is not None:
+                            # set the section into the objects
+                            self.objects[file_id]._section = comment
+                        else:
+                            missing_references = True
+
+        if missing_references:
+            print('[WARNING] The project contains missing/broken references that may cause other problems.'
+                  ' Open your project in Xcode and resolve all red-colored files.', file=sys.stderr)
 
     def save(self, path=None):
         if path is None:
