@@ -1,5 +1,5 @@
 from pbxproj.pbxsections import *
-
+from pbxproj.pbxextensions.ProjectFiles import *
 
 class ProjectGroups:
     """
@@ -117,13 +117,16 @@ class ProjectGroups:
 
         return groups
 
-    def get_or_create_group(self, name, path=None, parent=None):
+    def get_or_create_group(self, name, path=None, parent=None, make_relative=False):
         if not name:
             return None
 
         groups = self.get_groups_by_name(name, parent)
         if groups.__len__() > 0:
             return groups[0]
+
+        if make_relative and path is not None:
+            abs_path, path, tree = self._get_path_and_tree(self._source_root, path, TreeType.SOURCE_ROOT)
 
         return self.add_group(name, path, parent)
 

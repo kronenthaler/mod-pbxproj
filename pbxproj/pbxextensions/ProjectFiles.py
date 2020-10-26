@@ -155,7 +155,7 @@ class ProjectFiles:
         results.extend(self._create_build_files(file_ref, target_name, expected_build_phase, file_options))
 
         # special case for the frameworks and libraries to update the search paths
-        if tree != TreeType.SOURCE_ROOT or abs_path is None:
+        if abs_path is None:
             return results
 
         # the path is absolute and it's outside the scope of the project for linking purposes
@@ -392,9 +392,10 @@ class ProjectFiles:
         # add the top folder as a group, make it the new parent
         path = os.path.abspath(path)
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
-            return self.add_file(path, parent, target_name=target_name, force=False, file_options=file_options)
+            return self.add_file(path, parent, target_name=target_name, force=False, tree=TreeType.GROUP,
+                                 file_options=file_options)
 
-        parent = self.get_or_create_group(os.path.split(path)[1], path, parent)
+        parent = self.get_or_create_group(os.path.split(path)[1], path, parent, make_relative=True)
 
         # iterate over the objects in the directory
         for child in os.listdir(path):
@@ -407,7 +408,7 @@ class ProjectFiles:
             if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS or \
                     not create_groups:
                 # check if the file exists already, if not add it
-                children = self.add_file(full_path, parent, target_name=target_name, force=False,
+                children = self.add_file(full_path, parent, target_name=target_name, force=False, tree=TreeType.GROUP,
                                          file_options=file_options)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
@@ -415,7 +416,7 @@ class ProjectFiles:
                     children = self.add_folder(full_path, parent, excludes, recursive, target_name=target_name,
                                                file_options=file_options)
                 else:
-                    self.get_or_create_group(child, child, parent)
+                    self.get_or_create_group(child, child, parent, make_relative=True)
 
             results.extend(children)
 
@@ -502,7 +503,7 @@ class ProjectFiles:
             if not os.path.exists(path):
                 return None, None, None
 
-            if tree == TreeType.SOURCE_ROOT:
+            if tree == TreeType.SOURCE_ROOT or tree == TreeType.GROUP:
                 path = os.path.relpath(path, source_root)
             else:
                 tree = TreeType.ABSOLUTE
