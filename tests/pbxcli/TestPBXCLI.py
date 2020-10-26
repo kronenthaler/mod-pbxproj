@@ -19,6 +19,10 @@ class PBXCLITest(unittest.TestCase):
         project = open_project({'<project>': 'samplescli'})
         self.assertIsNotNone(project)
 
+    def testLoadingPlistFormat(self):
+        project = open_project({'<project>': 'samplescli/plist.pbxproj'})
+        self.assertIsNotNone(project)
+
     def testOpenProjectInvalidPath(self):
         with self.assertRaisesRegex(Exception, '^Project file not found'):
             open_project({'<project>': 'whatever'})

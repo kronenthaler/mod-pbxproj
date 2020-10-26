@@ -1,3 +1,4 @@
+import sys
 import pbxproj
 from pbxproj import *
 
@@ -47,7 +48,7 @@ class PBXBuildFile(PBXGenericObject):
         if self._section is not None:
             return self._section
 
-        print('[WARN] falling back to slow mechanism')
+        print('[WARNING] falling back to slow mechanism', file=sys.stderr)
         objects = self.get_parent()
         target = self.get_id()
 

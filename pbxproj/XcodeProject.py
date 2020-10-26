@@ -1,6 +1,7 @@
 import shutil
 import datetime
 import sys
+import plistlib
 from pbxproj.pbxextensions import *
 
 
@@ -97,6 +98,10 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
     @classmethod
     def load(cls, path):
         import openstep_parser as osp
-        with open(path, 'r') as file:
-            tree = osp.OpenStepDecoder.ParseFromFile(file)
-            return XcodeProject(tree, path)
+        try:
+            with open(path, 'r') as file:
+                tree = osp.OpenStepDecoder.ParseFromFile(file)
+                return XcodeProject(tree, path)
+        except:
+            with open(path, 'rb') as file:
+                return XcodeProject(plistlib.load(file), path)
