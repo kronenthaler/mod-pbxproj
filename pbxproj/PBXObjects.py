@@ -136,3 +136,17 @@ class objects(PBXGenericObject):
             for configuration in configuration_list.buildConfigurations:
                 if configuration_name is None or self[configuration].name == configuration_name:
                     yield self[configuration]
+
+    def get_project_configurations(self, configuration_name=None):
+        """
+        Retrieves all configuration given a name on the root project
+        :param configuration_name: Searches for a specific configuration, if None all configuration of the target
+            are used
+        :return: A generator of configurations objects from the root project the given configuration name (or all if
+            nothing is specified)
+        """
+        project = self[self._parent.rootObject]
+        configuration_list = self[project.buildConfigurationList]
+        for configuration in configuration_list.buildConfigurations:
+            if configuration_name is None or self[configuration].name == configuration_name:
+                yield self[configuration]

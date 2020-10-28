@@ -6,17 +6,20 @@ class ProjectFlagsTest(unittest.TestCase):
     def setUp(self):
         self.obj = {
             'objects': {
-                '0': {'isa': 'PBXProject'},
+                '0': {'isa': 'PBXProject', 'buildConfigurationList': '4a'},
                 '1': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildConfigurationList': '3',
                       'buildPhases': ['compile']},
                 '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
                       'buildPhases': ['compile']},
                 '3': {'isa': 'XCConfigurationList', 'buildConfigurations': ['5', '6']},
                 '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '4a': {'isa': 'XCConfigurationList', 'buildConfigurations': ['9', '10']},
                 '5': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'buildSettings': {'base': 'a'}},
                 '6': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '6'},
                 '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
                 '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                '9': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '9'},
+                '10': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '10', 'buildSettings': {'base': 'x'}},
             },
             'rootObject': '0'
         }
@@ -34,11 +37,24 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertEqual(project.objects['7'].buildSettings.flag, '-flag')
         self.assertEqual(project.objects['8'].buildSettings.flag, '-flag')
 
+    def testAddProjectFlags(self):
+        project = XcodeProject(self.obj)
+        project.add_project_flags('flag', '-flag')
+
+        self.assertEqual(project.objects['9'].buildSettings.flag, '-flag')
+        self.assertEqual(project.objects['10'].buildSettings.flag, '-flag')
+
     def testRemoveFlags(self):
         project = XcodeProject(self.obj)
         project.remove_flags('base', 'a')
 
         self.assertIsNone(project.objects['5'].buildSettings['base'])
+
+    def testRemoveProjectFlags(self):
+        project = XcodeProject(self.obj)
+        project.remove_project_flags('base', 'x')
+
+        self.assertIsNone(project.objects['10'].buildSettings['base'])
 
     def testAddOtherCFlags(self):
         project = XcodeProject(self.obj)
