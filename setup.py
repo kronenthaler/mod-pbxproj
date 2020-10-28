@@ -60,7 +60,7 @@ setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
       long_description=long_description,
-      long_description_content_type='text/markdown',
+      long_description_content_type='text/x-rst',
       entry_points={
         "console_scripts": [
             'pbxproj = pbxproj.__main__:main',
