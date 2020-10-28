@@ -174,6 +174,18 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].shellScript, u'ls -la')
         self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].shellScript, u'ls -la')
 
+    def testAddRunScriptWithInputFiles(self):
+        project = XcodeProject(self.obj)
+        script = u'ls -la ${SCRIPT_INPUT_FILE_0} ${SCRIPT_INPUT_FILE_1} > ${SCRIPT_OUTPUT_FILE_0}'
+        project.add_run_script(script, input_files=['a.txt', '/tmp/b.txt'], output_files=['../output.log'])
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].shellScript, script)
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].inputPaths, ['a.txt', '/tmp/b.txt'])
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].outputPaths, ['../output.log'])
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].shellScript, script)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].inputPaths, ['a.txt', '/tmp/b.txt'])
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].outputPaths, ['../output.log'])
+
     def testRemoveRunScript(self):
         project = XcodeProject(self.obj)
         project.add_run_script(u'ls -la', insert_before_compile=True)
