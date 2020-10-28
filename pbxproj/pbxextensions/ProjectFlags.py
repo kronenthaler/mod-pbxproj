@@ -12,7 +12,7 @@ class ProjectFlags:
 
     def add_flags(self, flag_name, flags, target_name=None, configuration_name=None):
         """
-        Adds the given flags to the flag_name section of the target on the configurations
+        Adds the given flags to the flag_name section of the target on the given configurations
         :param flag_name: name of the flag to be added the values to
         :param flags: A string or array of strings
         :param target_name: Target name or list of target names to add the flag to or None for every target
@@ -20,6 +20,17 @@ class ProjectFlags:
         :return: void
         """
         for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
+            configuration.add_flags(flag_name, flags)
+
+    def add_project_flags(self, flag_name, flags, configuration_name=None):
+        """
+        Adds the given flags to the flag_name section of the root project on the given configurations
+        :param flag_name: name of the flag to be added the values to
+        :param flags: A string or array of strings
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return: void
+        """
+        for configuration in self.objects.get_project_configurations(configuration_name):
             configuration.add_flags(flag_name, flags)
 
     def set_flags(self, flag_name, flags, target_name=None, configuration_name=None):
@@ -44,6 +55,17 @@ class ProjectFlags:
         :return: void
         """
         for configuration in self.objects.get_configurations_on_targets(target_name, configuration_name):
+            configuration.remove_flags(flag_name, flags)
+
+    def remove_project_flags(self, flag_name, flags, configuration_name=None):
+        """
+        Removes the given flags to the flag_name section of the root project on the given configurations.
+        :param flag_name: name of the flag to be added the values to
+        :param flags: A string or array of strings
+        :param configuration_name: Configuration name to add the flag to or None for every configuration
+        :return: void
+        """
+        for configuration in self.objects.get_project_configurations(configuration_name):
             configuration.remove_flags(flag_name, flags)
 
     def add_other_cflags(self, flags, target_name=None, configuration_name=None):
