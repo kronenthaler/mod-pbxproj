@@ -5,6 +5,7 @@ on:
     branches:
       - '*'
   pull_request:
+    types: [opened, synchronize, edited, reopened]
     branches:
       - master
 
