@@ -37,11 +37,13 @@ jobs:
           python setup.py coverage
 
       - name: Coveralls
+        if: github.repository == 'kronenthaler/mod-pbxproj'
         run: coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
       - name: Codacy
+        if: github.repository == 'kronenthaler/mod-pbxproj'
         run: python-codacy-coverage -r tests/coverage.xml
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
