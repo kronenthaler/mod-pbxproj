@@ -47,7 +47,7 @@ class FileOptions:
         self.header_scope = header_scope
 
     def get_attributes(self, file_ref, build_phase):
-        if file_ref.get_file_type() != 'wrapper.framework' and file_ref.get_file_type() != 'sourcecode.c.h':
+        if file_ref.get_file_type() not in ('wrapper.framework', 'wrapper.xcframework') and file_ref.get_file_type() != 'sourcecode.c.h':
             return None
 
         attributes = None
@@ -76,6 +76,7 @@ class ProjectFiles:
         '.c': ('sourcecode.c.c', 'PBXSourcesBuildPhase'),
         '.cpp': ('sourcecode.cpp.cpp', 'PBXSourcesBuildPhase'),
         '.framework': ('wrapper.framework', 'PBXFrameworksBuildPhase'),
+        '.xcframework': ('wrapper.xcframework', 'PBXFrameworksBuildPhase'),
         '.h': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
         '.hpp': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
         '.pch': ('sourcecode.c.h', 'PBXHeadersBuildPhase'),
@@ -453,7 +454,7 @@ class ProjectFiles:
 
             # if it's a framework and it needs to be embedded
             if file_options.embed_framework and expected_build_phase == 'PBXFrameworksBuildPhase' and \
-                    file_ref.get_file_type() == 'wrapper.framework':
+                    file_ref.get_file_type() in ('wrapper.framework', 'wrapper.xcframework'):
                 embed_phase = target.get_or_create_build_phase('PBXCopyFilesBuildPhase',
                                                                search_parameters={'dstSubfolderSpec': '10'},
                                                                create_parameters=(PBXCopyFilesBuildPhaseNames.EMBEDDED_FRAMEWORKS,))
