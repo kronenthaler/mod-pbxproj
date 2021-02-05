@@ -205,7 +205,8 @@ class ProjectFlags:
         """
         self.remove_search_paths(XCBuildConfigurationFlags.FRAMEWORK_SEARCH_PATHS, paths, target_name, configuration_name)
 
-    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None, output_files=None):
+    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None,
+                       output_files=None, **kwargs):
         """
         Adds a run script phase into the given target, optionally before compilation phase
         :param script: Script to be inserted on the run script
@@ -217,7 +218,8 @@ class ProjectFlags:
         :return:
         """
         for target in self.objects.get_targets(target_name):
-            shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files, output_paths=output_files)
+            shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files,
+                                                    output_paths=output_files, **kwargs)
 
             self.objects[shell.get_id()] = shell
             target.add_build_phase(shell, 0 if insert_before_compile else None)
