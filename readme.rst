@@ -34,7 +34,7 @@ How to use it
 The typical tasks with an Xcode project are adding files to the project and setting some standard compilation flags.
 It can be achieved with a simple snippet like this:
 
-.. code-block::
+.. code-block:: python
 
    from pbxproj import XcodeProject
    # open the project
