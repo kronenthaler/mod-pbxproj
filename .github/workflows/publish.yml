@@ -29,4 +29,4 @@ jobs:
           twine upload dist/*
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-          TWINE_USERNAME: kronenthaler
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
