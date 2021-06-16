@@ -9,13 +9,20 @@ class PBXBuildFile(PBXGenericObject):
         self._section = None
 
     @classmethod
-    def create(cls, file_ref, attributes=None, compiler_flags=None):
-        return cls().parse({
-            '_id': cls._generate_id(),
-            'isa': cls.__name__,
-            'fileRef': file_ref.get_id(),
-            'settings': cls._get_settings(attributes, compiler_flags)
-        })
+    def create(cls, file_ref, attributes=None, compiler_flags=None, is_product=False):
+        if is_product:
+            return cls().parse({
+                '_id': cls._generate_id(),
+                'isa': cls.__name__,
+                'productRef': file_ref.get_id()
+            })
+        else:
+            return cls().parse({
+                '_id': cls._generate_id(),
+                'isa': cls.__name__,
+                'fileRef': file_ref.get_id(),
+                'settings': cls._get_settings(attributes, compiler_flags)
+            })
 
     @classmethod
     def _get_settings(cls, attributes=None, compiler_flags=None):
@@ -42,6 +49,8 @@ class PBXBuildFile(PBXGenericObject):
         comment = '(null)'
         if hasattr(self, 'fileRef'):
             comment = self.fileRef._get_comment()
+        if hasattr(self, 'productRef'):
+            comment = self.productRef._get_comment()
         return f'{comment} in {self._get_section()}'
 
     def _get_section(self):
