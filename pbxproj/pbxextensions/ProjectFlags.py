@@ -8,7 +8,8 @@ class ProjectFlags:
     """
 
     def __init__(self):
-        raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
+        raise EnvironmentError(
+            'This class cannot be instantiated directly, use XcodeProject instead')
 
     def add_flags(self, flag_name, flags, target_name=None, configuration_name=None):
         """
@@ -76,7 +77,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.add_flags(XCBuildConfigurationFlags.OTHER_CFLAGS, flags, target_name, configuration_name)
+        self.add_flags(XCBuildConfigurationFlags.OTHER_CFLAGS,
+                       flags, target_name, configuration_name)
 
     def remove_other_cflags(self, flags, target_name=None, configuration_name=None):
         """
@@ -86,7 +88,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.remove_flags(XCBuildConfigurationFlags.OTHER_CFLAGS, flags, target_name, configuration_name)
+        self.remove_flags(XCBuildConfigurationFlags.OTHER_CFLAGS,
+                          flags, target_name, configuration_name)
 
     def add_other_ldflags(self, flags, target_name=None, configuration_name=None):
         """
@@ -96,7 +99,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.add_flags(XCBuildConfigurationFlags.OTHER_LDFLAGS, flags, target_name, configuration_name)
+        self.add_flags(XCBuildConfigurationFlags.OTHER_LDFLAGS,
+                       flags, target_name, configuration_name)
 
     def remove_other_ldflags(self, flags, target_name=None, configuration_name=None):
         """
@@ -106,7 +110,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.remove_flags(XCBuildConfigurationFlags.OTHER_LDFLAGS, flags, target_name, configuration_name)
+        self.remove_flags(XCBuildConfigurationFlags.OTHER_LDFLAGS,
+                          flags, target_name, configuration_name)
 
     def add_search_paths(self, path_type, paths, recursive=True, escape=False, target_name=None,
                          configuration_name=None):
@@ -156,7 +161,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.remove_search_paths(XCBuildConfigurationFlags.HEADER_SEARCH_PATHS, paths, target_name, configuration_name)
+        self.remove_search_paths(
+            XCBuildConfigurationFlags.HEADER_SEARCH_PATHS, paths, target_name, configuration_name)
 
     def add_library_search_paths(self, paths, recursive=True, escape=False, target_name=None, configuration_name=None):
         """
@@ -179,7 +185,8 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.remove_search_paths(XCBuildConfigurationFlags.LIBRARY_SEARCH_PATHS, paths, target_name, configuration_name)
+        self.remove_search_paths(
+            XCBuildConfigurationFlags.LIBRARY_SEARCH_PATHS, paths, target_name, configuration_name)
 
     def add_framework_search_paths(self, paths, recursive=True, escape=False, target_name=None,
                                    configuration_name=None):
@@ -203,9 +210,10 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return: void
         """
-        self.remove_search_paths(XCBuildConfigurationFlags.FRAMEWORK_SEARCH_PATHS, paths, target_name, configuration_name)
+        self.remove_search_paths(
+            XCBuildConfigurationFlags.FRAMEWORK_SEARCH_PATHS, paths, target_name, configuration_name)
 
-    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None, output_files=None, run_install_build=False):
+    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None, output_files=None, run_install_build=0):
         """
         Adds a run script phase into the given target, optionally before compilation phase
         :param script: Script to be inserted on the run script
@@ -214,11 +222,12 @@ class ProjectFlags:
         it's added at the end.
         :param input_files: An array of input file paths to be added to the run script
         :param input_files: An array of input file paths to be added to the run script
-        :param run_install_build: Toggle For install builds only on Run Script phase.  Default is false
+        :param run_install_build: Toggle For install builds only on Run Script phase.  Default is 0
         :return:
         """
         for target in self.objects.get_targets(target_name):
-            shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files, output_paths=output_files, run_install_build=run_install_build)
+            shell = PBXShellScriptBuildPhase.create(
+                script, input_paths=input_files, output_paths=output_files, run_install_build=run_install_build)
 
             self.objects[shell.get_id()] = shell
             target.add_build_phase(shell, 0 if insert_before_compile else None)
@@ -256,10 +265,15 @@ class ProjectFlags:
         :param configuration_name: Configuration name to add the flag to or None for every configuration
         :return:
         """
-        self.set_flags('CODE_SIGN_IDENTITY[sdk=iphoneos*]', code_sign_identity, target_name, configuration_name)
-        self.set_flags('DEVELOPMENT_TEAM', development_team, target_name, configuration_name)
-        self.set_flags('PROVISIONING_PROFILE', provisioning_profile_uuid, target_name, configuration_name)
-        self.set_flags('PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
+        self.set_flags('CODE_SIGN_IDENTITY[sdk=iphoneos*]',
+                       code_sign_identity, target_name, configuration_name)
+        self.set_flags('DEVELOPMENT_TEAM', development_team,
+                       target_name, configuration_name)
+        self.set_flags('PROVISIONING_PROFILE',
+                       provisioning_profile_uuid, target_name, configuration_name)
+        self.set_flags('PROVISIONING_PROFILE_SPECIFIER',
+                       provisioning_profile_specifier, target_name, configuration_name)
 
         for target in self.objects.get_targets(target_name):
-            self.objects[self.rootObject].set_provisioning_style(PBXProvioningTypes.MANUAL, target)
+            self.objects[self.rootObject].set_provisioning_style(
+                PBXProvioningTypes.MANUAL, target)
