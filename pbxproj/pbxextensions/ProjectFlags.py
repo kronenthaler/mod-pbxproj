@@ -205,7 +205,7 @@ class ProjectFlags:
         """
         self.remove_search_paths(XCBuildConfigurationFlags.FRAMEWORK_SEARCH_PATHS, paths, target_name, configuration_name)
 
-    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None, output_files=None):
+    def add_run_script(self, script, target_name=None, insert_before_compile=False, input_files=None, output_files=None, run_install_build=0):
         """
         Adds a run script phase into the given target, optionally before compilation phase
         :param script: Script to be inserted on the run script
@@ -214,6 +214,7 @@ class ProjectFlags:
         it's added at the end.
         :param input_files: An array of input file paths to be added to the run script
         :param output_files: An array of output file paths to be added to the run script
+        :param run_install_build: Toggle For install builds only on Run Script phase.  Default is 0
         :return:
         """
         for target in self.objects.get_targets(target_name):

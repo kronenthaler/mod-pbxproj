@@ -224,6 +224,18 @@ class ProjectFlagsTest(unittest.TestCase):
         self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
         self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
 
+    def testAddRunScriptWithoutInstallBuild(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la', run_install_build=0)
+
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 0)
+
+    def testAddRunScriptWithInstallBuild(self):
+        project = XcodeProject(self.obj)
+        project.add_run_script(u'ls -la', run_install_build=1)
+
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 0)
+
     def testAddCodeSignAllTargetAllConfigurations(self):
         project = XcodeProject(self.obj)
 
@@ -300,4 +312,3 @@ class ProjectFlagsTest(unittest.TestCase):
 
         self.assertEqual(project.objects['5'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
         self.assertEqual(project.objects['7'].buildSettings['PROVISIONING_PROFILE_SPECIFIER'], 'Provisioning name')
-
