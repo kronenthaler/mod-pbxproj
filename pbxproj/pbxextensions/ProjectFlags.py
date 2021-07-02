@@ -218,7 +218,7 @@ class ProjectFlags:
         :return:
         """
         for target in self.objects.get_targets(target_name):
-            shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files, output_paths=output_files)
+            shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files, output_paths=output_files, run_install_build=run_install_build)
 
             self.objects[shell.get_id()] = shell
             target.add_build_phase(shell, 0 if insert_before_compile else None)

@@ -234,7 +234,7 @@ class ProjectFlagsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         project.add_run_script(u'ls -la', run_install_build=1)
 
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 0)
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 1)
 
     def testAddCodeSignAllTargetAllConfigurations(self):
         project = XcodeProject(self.obj)
