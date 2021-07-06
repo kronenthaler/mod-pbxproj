@@ -423,6 +423,89 @@ class ProjectFiles:
 
         return results
 
+    def add_package(self, repositoryURL, product_name, target_name, package_requirement={}):
+        package_ref, is_created = self.get_or_create_package_reference(repositoryURL, (repositoryURL, package_requirement,))
+
+        if is_created:
+            for project_object in self.objects.get_objects_in_section('PBXProject'):
+                if 'packageReferences' not in project_object:
+                    project_object['packageReferences'] = PBXList()
+
+                if package_ref.get_id() not in project_object['packageReferences']:
+                    project_object.packageReferences.append(package_ref.get_id())
+
+        if not isinstance(product_name, list):
+            product_name = [product_name]
+
+        for name in product_name:
+            package_dep, is_created = self.get_or_create_package_dependency(name, (package_ref, name,))
+
+            if is_created:
+                # add build files (PBXBuildFile section and PBXFrameworksBuildPhase section)
+                self._create_build_products(package_dep, target_name)
+
+                # add packageProductDependencies to PBXNativeTarget section
+                target = self.get_target_by_name(name=target_name)
+                if 'packageProductDependencies' not in target:
+                    target['packageProductDependencies'] = PBXList()
+
+                if package_dep.get_id() not in target['packageProductDependencies']:
+                    target.packageProductDependencies.append(package_dep.get_id())
+
+    def get_or_create_package_reference(self, url, create_parameters=()):
+        if not url:
+            return None, False
+
+        package_ref = self.get_package_reference_by_url(url)
+        if package_ref is not None:
+            return package_ref, False
+
+        return self.add_package_reference(create_parameters), True
+
+    def get_package_reference_by_url(self, url):
+        """
+        Retrieve package reference matching the given url.
+        :param url: The name of the package reference that has to be returned
+        :return: The matching package reference
+        """
+        package_refs = self.objects.get_objects_in_section('XCRemoteSwiftPackageReference')
+        package_refs = [package_ref for package_ref in package_refs if package_ref.repositoryURL == url]
+
+        return package_refs[0] if package_refs.__len__() > 0 else None
+
+    def add_package_reference(self, create_parameters=()):
+        package_ref = XCRemoteSwiftPackageReference.create(*create_parameters)
+        self.objects[package_ref.get_id()] = package_ref
+
+        return package_ref
+
+    def get_or_create_package_dependency(self, product_name, create_parameters=()):
+        if not product_name:
+            return None, False
+
+        package_dep = self.get_package_dependency_by_name(product_name)
+        if package_dep is not None:
+            return package_dep, False
+
+        return self.add_package_dependency(create_parameters), True
+
+    def get_package_dependency_by_name(self, product_name):
+        """
+        Retrieve package dependency matching the given product name.
+        :param product_name: The product name of the package dependency that has to be returned
+        :return: The matching package dependency
+        """
+        package_deps = self.objects.get_objects_in_section('XCSwiftPackageProductDependency')
+        package_deps = [package_dep for package_dep in package_deps if package_dep.productName == product_name]
+
+        return package_deps[0] if package_deps.__len__() > 0 else None
+
+    def add_package_dependency(self, create_parameters=()):
+        package_dep = XCSwiftPackageProductDependency.create(*create_parameters)
+        self.objects[package_dep.get_id()] = package_dep
+
+        return package_dep
+
     # miscellaneous functions, candidates to be extracted and decouple implementation
 
     def _add_file_reference(self, path, parent, tree, force, file_options):
@@ -466,6 +549,21 @@ class ProjectFiles:
             # create the build file and add it to the phase
             for target_build_phase in build_phases:
                 build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase))
+                self.objects[build_file.get_id()] = build_file
+                target_build_phase.add_build_file(build_file)
+
+                results.append(build_file)
+
+        return results
+
+    def _create_build_products(self, product_ref, target_name):
+        results = []
+        for target in self.objects.get_targets(target_name):
+            build_phases = target.get_or_create_build_phase('PBXFrameworksBuildPhase')
+
+            # create the build file and add it to the phase
+            for target_build_phase in build_phases:
+                build_file = PBXBuildFile.create(product_ref, is_product=True)
                 self.objects[build_file.get_id()] = build_file
                 target_build_phase.add_build_file(build_file)
 
