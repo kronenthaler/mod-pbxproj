@@ -38,7 +38,7 @@ jobs:
           python setup.py coverage
 
       - name: Codacy
-        if: github.repository == 'kronenthaler/mod-pbxproj'
+        if: github.event_name != 'pull_request'
         run: python-codacy-coverage -r tests/coverage.xml
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
