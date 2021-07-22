@@ -3,11 +3,11 @@ from pbxproj import PBXGenericObject
 
 class XCRemoteSwiftPackageReference(PBXGenericObject):
     @classmethod
-    def create(cls, repositoryURL, requirement={}):
+    def create(cls, repository_url, requirement):
         return cls().parse({
             '_id': cls._generate_id(),
             'isa': cls.__name__,
-            'repositoryURL': repositoryURL,
+            'repositoryURL': repository_url,
             'requirement': PBXGenericObject().parse(requirement)
         })
 

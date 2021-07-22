@@ -10,19 +10,13 @@ class PBXBuildFile(PBXGenericObject):
 
     @classmethod
     def create(cls, file_ref, attributes=None, compiler_flags=None, is_product=False):
-        if is_product:
-            return cls().parse({
-                '_id': cls._generate_id(),
-                'isa': cls.__name__,
-                'productRef': file_ref.get_id()
-            })
-        else:
-            return cls().parse({
-                '_id': cls._generate_id(),
-                'isa': cls.__name__,
-                'fileRef': file_ref.get_id(),
-                'settings': cls._get_settings(attributes, compiler_flags)
-            })
+        ref_key = 'productRef' if is_product else 'fileRef'
+        return cls().parse({
+            '_id': cls._generate_id(),
+            'isa': cls.__name__,
+            ref_key: file_ref.get_id(),
+            'settings': cls._get_settings(attributes, compiler_flags)
+        })
 
     @classmethod
     def _get_settings(cls, attributes=None, compiler_flags=None):
