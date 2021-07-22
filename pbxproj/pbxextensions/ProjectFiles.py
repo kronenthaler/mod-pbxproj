@@ -423,48 +423,53 @@ class ProjectFiles:
 
         return results
 
-    def add_package(self, repositoryURL, product_name, target_name, package_requirement={}):
-        package_ref, is_created = self.get_or_create_package_reference(repositoryURL, (repositoryURL, package_requirement,))
+    def add_package(self, repository_url, package_requirement, product_name, target_name):
+        """
+        Add Swift package and its package product(s) to project.
+        Each package product is added for a given target.
 
-        if is_created:
-            for project_object in self.objects.get_objects_in_section('PBXProject'):
-                if 'packageReferences' not in project_object:
-                    project_object['packageReferences'] = PBXList()
+        :param repository_url: repository url of Swift package to be added
+        :param package_requirement: dictionary containing rules used to determine Swift package version
+        :param product_name: product name or list of product names to be added
+        :param target_name: target name to which the product is added
+        :return: a list of elements that were added or found as 
+            XCRemoteSwiftPackageReference and XCSwiftPackageProductDependency objects
+        """
+        results = []
 
-                if package_ref.get_id() not in project_object['packageReferences']:
-                    project_object.packageReferences.append(package_ref.get_id())
+        package_ref = self.get_or_create_package_reference(repository_url, (repository_url, package_requirement,))
+        results.append(package_ref)
 
         if not isinstance(product_name, list):
             product_name = [product_name]
 
         for name in product_name:
-            package_dep, is_created = self.get_or_create_package_dependency(name, (package_ref, name,))
+            package_dep = self.get_or_create_package_dependency(name, target_name, (package_ref, name,))
+            results.append(package_dep)
 
-            if is_created:
-                # add build files (PBXBuildFile section and PBXFrameworksBuildPhase section)
-                self._create_build_products(package_dep, target_name)
-
-                # add packageProductDependencies to PBXNativeTarget section
-                target = self.get_target_by_name(name=target_name)
-                if 'packageProductDependencies' not in target:
-                    target['packageProductDependencies'] = PBXList()
-
-                if package_dep.get_id() not in target['packageProductDependencies']:
-                    target.packageProductDependencies.append(package_dep.get_id())
+        return results
 
     def get_or_create_package_reference(self, url, create_parameters=()):
+        """
+        Get or create Swift package reference.
+
+        :param url: url of Swift package repository
+        :param create_parameters: parameters required in XCRemoteSwiftPackageReference.create  
+        :return: XCRemoteSwiftPackageReference object found or created
+        """
         if not url:
-            return None, False
+            return None
 
         package_ref = self.get_package_reference_by_url(url)
         if package_ref is not None:
-            return package_ref, False
+            return package_ref
 
-        return self.add_package_reference(create_parameters), True
+        return self.add_package_reference(create_parameters)
 
     def get_package_reference_by_url(self, url):
         """
         Retrieve package reference matching the given url.
+
         :param url: The name of the package reference that has to be returned
         :return: The matching package reference
         """
@@ -474,24 +479,46 @@ class ProjectFiles:
         return package_refs[0] if package_refs.__len__() > 0 else None
 
     def add_package_reference(self, create_parameters=()):
+        """
+        Add Swift package reference to project.
+
+        :param create_parameters: parameters required in XCRemoteSwiftPackageReference.create  
+        :return: XCRemoteSwiftPackageReference object created
+        """
         package_ref = XCRemoteSwiftPackageReference.create(*create_parameters)
         self.objects[package_ref.get_id()] = package_ref
 
+        for project_object in self.objects.get_objects_in_section('PBXProject'):
+            if 'packageReferences' not in project_object:
+                project_object['packageReferences'] = PBXList()
+
+            if package_ref.get_id() not in project_object['packageReferences']:
+                project_object.packageReferences.append(package_ref.get_id())
+
         return package_ref
 
-    def get_or_create_package_dependency(self, product_name, create_parameters=()):
+    def get_or_create_package_dependency(self, product_name, target_name, create_parameters=()):
+        """
+        Get or create Swift package product dependency.
+
+        :param product_name: name of anyone product available in the Swift package
+        :param target_name: target name to which the product is added if it is not found
+        :param create_parameters: parameters required in XCSwiftPackageProductDependency.create  
+        :return: XCSwiftPackageProductDependency object found or created
+        """
         if not product_name:
-            return None, False
+            return None
 
         package_dep = self.get_package_dependency_by_name(product_name)
         if package_dep is not None:
-            return package_dep, False
+            return package_dep
 
-        return self.add_package_dependency(create_parameters), True
+        return self.add_package_dependency(target_name, create_parameters)
 
     def get_package_dependency_by_name(self, product_name):
         """
         Retrieve package dependency matching the given product name.
+
         :param product_name: The product name of the package dependency that has to be returned
         :return: The matching package dependency
         """
@@ -500,9 +527,27 @@ class ProjectFiles:
 
         return package_deps[0] if package_deps.__len__() > 0 else None
 
-    def add_package_dependency(self, create_parameters=()):
+    def add_package_dependency(self, target_name, create_parameters=()):
+        """
+        Add Swift package dependency to project.
+
+        :param target_name: target name to which the product dependency is added
+        :param create_parameters: parameters required in XCRemoteSwiftPackageReference.create  
+        :return: XCRemoteSwiftPackageReference object created
+        """
         package_dep = XCSwiftPackageProductDependency.create(*create_parameters)
         self.objects[package_dep.get_id()] = package_dep
+
+        # add build files (PBXBuildFile section and PBXFrameworksBuildPhase section)
+        self._create_build_products(package_dep, target_name)
+
+        # add packageProductDependencies to PBXNativeTarget section
+        target = self.get_target_by_name(name=target_name)
+        if 'packageProductDependencies' not in target:
+            target['packageProductDependencies'] = PBXList()
+
+        if package_dep.get_id() not in target['packageProductDependencies']:
+            target.packageProductDependencies.append(package_dep.get_id())
 
         return package_dep
 
