@@ -178,3 +178,38 @@ class PBXBuildFileTest(unittest.TestCase):
         self.assertIsNone(project.objects['1'])
         self.assertIsNotNone(project.objects['2'])
 
+    def testGetCommentOfProduct(self):
+        obj = {
+            'objects': {
+                '1': {'isa': 'PBXBuildFile', 'productRef': 'FDDF6A571C68E5B100D7A645'},
+                'FDDF6A571C68E5B100D7A645': {'isa': 'PBXFileReference', 'name': 'real name'},
+                'X': {'isa': 'phase', 'name': 'X', 'files': ['1']}
+            }
+        }
+        dobj = XcodeProject().parse(obj)
+
+        self.assertEqual(dobj.objects['1']._get_comment(), 'real name in X')
+
+    def testPrintFile(self):
+        obj = {"isa": "PBXBuildFile", "fileRef": "X" }
+        dobj = PBXBuildFile().parse(obj)
+
+        self.assertEqual(dobj.__repr__(), "{isa = PBXBuildFile; fileRef = X; }")
+
+    def testPrintProduct(self):
+        obj = {"isa": "PBXBuildFile", "productRef": "X" }
+        dobj = PBXBuildFile().parse(obj)
+
+        self.assertEqual(dobj.__repr__(), "{isa = PBXBuildFile; productRef = X; }")
+
+    def testIsFile(self):
+        obj = PBXGenericObject().parse({"_id": "1" })
+        dobj = PBXBuildFile.create(obj)
+
+        self.assertTrue(hasattr(dobj, "fileRef"))
+
+    def testIsProduct(self):
+        obj = PBXGenericObject().parse({"_id": "1" })
+        dobj = PBXBuildFile.create(obj, is_product=True)
+
+        self.assertTrue(hasattr(dobj, "productRef"))
