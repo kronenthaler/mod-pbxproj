@@ -464,3 +464,63 @@ class ProjectFilesTest(unittest.TestCase):
 
         self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
         self.assertIsNone(references[0]['settings'], None)
+
+    def testAddPackage(self):
+        project = XcodeProject({
+            'objects': {
+                '0': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildPhases': []},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+        results = project.add_package('http://myrepo.com/some-package', { 
+            "kind": "upToNextMajorVersion",
+            "minimumVersion": "5.0.1"}, 'some-package', 'app')
+
+        # create swift package reference and its entry into PBXProject package references
+        self.assertIsInstance(results[0], pbxproj.pbxsections.XCRemoteSwiftPackageReference)
+        self.assertEqual(project.objects.get_objects_in_section('PBXProject')[0].packageReferences.__len__(), 1)
+        # create package product dependency and its entry into PBXNativeTarget package product depedency, 
+        # PBXBuildFile and PBXFrameworksBuildPhase
+        self.assertIsInstance(results[1], pbxproj.pbxsections.XCSwiftPackageProductDependency)
+        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 1)
+        self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 1)
+        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 1)
+
+    def testAddPackageWithTwoProducts(self):
+        project = XcodeProject({
+            'objects': {
+                '0': {'isa': 'PBXNativeTarget', 'name': 'app', 'buildPhases': []},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+        results = project.add_package('http://myrepo.com/some-package', { 
+            "kind": "upToNextMajorVersion",
+            "minimumVersion": "5.0.1"}, ['some-package','other-package'], 'app')
+
+        # create two package product dependency and their entry into PBXNativeTarget package product depedency, 
+        # PBXBuildFile and PBXFrameworksBuildPhase
+        self.assertIsInstance(results[1], pbxproj.pbxsections.XCSwiftPackageProductDependency)
+        self.assertIsInstance(results[2], pbxproj.pbxsections.XCSwiftPackageProductDependency)
+        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 2)
+        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 2)
+
+    def testGetPackageReference(self):
+        project = XcodeProject({
+            'objects': {
+                '0': {'isa': 'XCRemoteSwiftPackageReference', 'repositoryURL': 'http://myrepo.com/some-package' }
+            }
+        })
+
+        result = project.get_or_create_package_reference('http://myrepo.com/some-package', {})
+        self.assertIsNotNone(result)
+
+    def testGetPackageDependency(self):
+        project = XcodeProject({
+            'objects': {
+                '0': {'isa': 'XCSwiftPackageProductDependency', 'productName': 'Some Product' }
+            }
+        })
+
+        result = project.get_or_create_package_dependency('Some Product', '', {})
+        self.assertIsNotNone(result)
