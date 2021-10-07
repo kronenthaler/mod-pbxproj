@@ -2,7 +2,7 @@ name: "close-stale-issues"
 
 on:
   schedule:
-  - cron: "* * */5 * *"
+  - cron: "0 0 1 * *"
 
 jobs:
   stale:

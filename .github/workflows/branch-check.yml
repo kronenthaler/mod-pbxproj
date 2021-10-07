@@ -5,6 +5,7 @@ on:
     branches:
       - '*'
   pull_request:
+    types: [opened, synchronize, edited, reopened]
     branches:
       - master
 
@@ -36,12 +37,8 @@ jobs:
         run: |
           python setup.py coverage
 
-      - name: Coveralls
-        run: coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
       - name: Codacy
+        if: github.event_name != 'pull_request'
         run: python-codacy-coverage -r tests/coverage.xml
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}

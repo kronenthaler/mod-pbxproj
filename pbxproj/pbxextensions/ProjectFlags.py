@@ -215,12 +215,13 @@ class ProjectFlags:
         it's added at the end.
         :param input_files: An array of input file paths to be added to the run script
         :param output_files: An array of output file paths to be added to the run script
+        :param run_install_build: Toggle For install builds only on Run Script phase.  Default is 0
         :return:
         """
         for target in self.objects.get_targets(target_name):
             shell = PBXShellScriptBuildPhase.create(script, input_paths=input_files,
                                                     output_paths=output_files, **kwargs)
-
+ 
             self.objects[shell.get_id()] = shell
             target.add_build_phase(shell, 0 if insert_before_compile else None)
 
