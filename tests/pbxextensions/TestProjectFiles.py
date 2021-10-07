@@ -349,11 +349,15 @@ class ProjectFilesTest(unittest.TestCase):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")
         parent_group = project.get_or_create_group('parent_group')
 
-        #copy the samples to the project, and set its path same as name which is samples.
-        #so the samples group is along with project
-        shutil.copy2('samples', 'parent_group')
-        target_path = '/parent_group/samples'
-        project.add_folder(parent=parent_group, path=target_path, is_group_abspath=False)
+        # Copy the samples folder into a folder to be added to the project.
+        shutil.copytree('samples', 'parent_group/samples')
+
+        target_path = 'parent_group/samples'
+        project.add_folder(parent=parent_group, path=target_path, file_options=FileOptions(add_groups_relative=False))
+
+        self.assertEqual(project.get_or_create_group('samples').path, os.path.abspath(target_path))
+
+        shutil.rmtree('parent_group')
 
     def testEmbedFrameworkInRightCopySection(self):
         project = XcodeProject(self.obj)
