@@ -27,7 +27,7 @@ class FileOptions:
     Wrapper class for all file parameters required at the moment of adding a file to the project.
     """
     def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
-                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT):
+                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT, add_groups_relative=True):
         """
         Creates an object specifying options to be considered during the file creation into the project.
 
@@ -38,6 +38,7 @@ class FileOptions:
         :param code_sign_on_copy: When embedding a framework, sets the code sign attribute
         :param header_scope: When adding a header file, adds the header as HeaderScope.PROJECT (default),
             HeaderScope.PRIVATE or HeaderScope.PUBLIC.
+        :param add_groups_relative: Sets the group name to match the relative path is representing (default).
         """
         self.create_build_files = create_build_files
         self.weak = weak
@@ -45,6 +46,7 @@ class FileOptions:
         self.embed_framework = embed_framework
         self.code_sign_on_copy = code_sign_on_copy
         self.header_scope = header_scope
+        self.add_groups_relative = add_groups_relative
 
     def get_attributes(self, file_ref, build_phase):
         if file_ref.get_file_type() not in ('wrapper.framework', 'wrapper.xcframework') and file_ref.get_file_type() != 'sourcecode.c.h':
@@ -396,7 +398,7 @@ class ProjectFiles:
             return self.add_file(path, parent, target_name=target_name, force=False, tree=TreeType.GROUP,
                                  file_options=file_options)
 
-        parent = self.get_or_create_group(os.path.split(path)[1], path, parent, make_relative=True)
+        parent = self.get_or_create_group(os.path.split(path)[1], path, parent, make_relative=file_options.add_groups_relative)
 
         # iterate over the objects in the directory
         for child in os.listdir(path):

@@ -345,6 +345,20 @@ class ProjectFilesTest(unittest.TestCase):
         self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
         self.assertEqual(build_file.__len__(), 2)
 
+    def testAddFolderWithPathSameAsName(self):
+        project = XcodeProject(self.obj, path="tests/project.pbxproj")
+        parent_group = project.get_or_create_group('parent_group')
+
+        # Copy the samples folder into a folder to be added to the project.
+        shutil.copytree('samples', 'parent_group/samples')
+
+        target_path = 'parent_group/samples'
+        project.add_folder(parent=parent_group, path=target_path, file_options=FileOptions(add_groups_relative=False))
+
+        self.assertEqual(project.get_or_create_group('samples').path, os.path.abspath(target_path))
+
+        shutil.rmtree('parent_group')
+
     def testEmbedFrameworkInRightCopySection(self):
         project = XcodeProject(self.obj)
         self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 1)
