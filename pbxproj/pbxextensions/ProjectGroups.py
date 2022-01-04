@@ -126,7 +126,7 @@ class ProjectGroups:
             return groups[0]
 
         if make_relative and path is not None:
-            abs_path, path, tree = self._get_path_and_tree(self._source_root, path, TreeType.SOURCE_ROOT)
+            _, path, tree = self._get_path_and_tree(self._source_root, path, TreeType.SOURCE_ROOT)
 
         return self.add_group(name, path, parent)
 
