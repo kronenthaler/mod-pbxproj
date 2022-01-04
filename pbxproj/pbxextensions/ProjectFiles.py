@@ -173,19 +173,17 @@ class ProjectFiles:
     def _filter_targets_without_path(self, path, target_name):
         potential_targets = self.objects.get_targets(target_name)
         for target in potential_targets.copy():
-            def _check_file():
-                for build_phase_id in target.buildPhases:
-                    build_phase = self.get_object(build_phase_id)
-                    for build_file_id in build_phase.files:
-                        build_file = self.get_object(build_file_id)
-                        if build_file is None:
-                            continue
+            for build_phase_id in target.buildPhases:
+                build_phase = self.get_object(build_phase_id)
+                for build_file_id in build_phase.files:
+                    build_file = self.get_object(build_file_id)
+                    if build_file is None:
+                        continue
 
-                        file_ref = self.get_object(build_file.fileRef)
-                        if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path):
-                            potential_targets.remove(target)
-                            return
-            _check_file()
+                    file_ref = self.get_object(build_file.fileRef)
+                    if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path) \
+                            and target in potential_targets:
+                        potential_targets.remove(target)
 
         if potential_targets.__len__() == 0:
             return []
