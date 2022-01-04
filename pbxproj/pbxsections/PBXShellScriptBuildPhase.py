@@ -4,7 +4,7 @@ from pbxproj.pbxsections.PBXGenericBuildPhase import PBXGenericBuildPhase
 class PBXShellScriptBuildPhase(PBXGenericBuildPhase):
 
     @classmethod
-    def create(cls, script, name=None, shell_path="/bin/sh", files=None, input_paths=None, output_paths=None,
+    def create(cls, script, name=None, files=None, shell_path="/bin/sh", input_paths=None, output_paths=None,
                show_in_log='0', run_install_build=0):
         return cls().parse({
             '_id': cls._generate_id(),
