@@ -181,7 +181,8 @@ class ProjectFiles:
                         continue
 
                     file_ref = self.get_object(build_file.fileRef)
-                    if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path):
+                    if 'path' in file_ref and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(file_ref.path) \
+                            and target in potential_targets:
                         potential_targets.remove(target)
 
         if potential_targets.__len__() == 0:
