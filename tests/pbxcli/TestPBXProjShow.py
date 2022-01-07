@@ -4,21 +4,22 @@ import sys
 import unittest
 
 import pbxproj.pbxcli.pbxproj_show as pbxproj_show
-from pbxproj.pbxcli import open_project
+from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER
+from tests.pbxcli import SAMPLE_PROJECT_PATH, BASE_PROJECT_PATH
 
 
 class PBXProjShowTest(unittest.TestCase):
     def setUp(self):
         # copy the project.pbxproj, into a file that can be used by the tests
-        shutil.copyfile('samplescli/project.pbxproj', 'samplescli/test.pbxproj')
+        shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
-        os.remove('samplescli/test.pbxproj')
+        os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
 
     def testShowAllTargetsInfo(self):
         args = {
-            u'<project>': u'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             u'--target': None
         }
         project = open_project(args)
@@ -36,7 +37,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetBasicInfo(self):
         args = {
-            u'<project>': u'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             u'--target': u'test',
             u'--source-files': None,
             u'--header-files': None,
@@ -56,7 +57,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetConfigurations(self):
         args = {
-            u'<project>': u'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             u'--target': u'test',
             u'--source-files': None,
             u'--header-files': None,
@@ -74,7 +75,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetSources(self):
         args = {
-            u'<project>': u'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             u'--target': u'test',
             u'--source-files': True,
             u'--header-files': None,
@@ -94,7 +95,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetResources(self):
         args = {
-            u'<project>': u'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             u'--target': u'test',
             u'--source-files': None,
             u'--header-files': None,
@@ -115,7 +116,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetHeaders(self):
         args = {
-            u'<project>': u'samplescli/dependency.xcodeproj/project.pbxproj',
+            PROJECT_PLACEHOLDER: u'samplescli/dependency.xcodeproj/project.pbxproj',
             u'--target': u'helloworld',
             u'--source-files': None,
             u'--header-files': True,
@@ -135,7 +136,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetFrameworks(self):
         args = {
-            u'<project>': u'samplescli/dependency.xcodeproj/project.pbxproj',
+            PROJECT_PLACEHOLDER: u'samplescli/dependency.xcodeproj/project.pbxproj',
             u'--target': u'helloworld',
             u'--source-files': None,
             u'--header-files': None,
@@ -154,7 +155,7 @@ class PBXProjShowTest(unittest.TestCase):
 
     def testShowTargetExplicitBuildPhase(self):
         args = {
-            u'<project>': u'samplescli/dependency.xcodeproj/project.pbxproj',
+            PROJECT_PLACEHOLDER: u'samplescli/dependency.xcodeproj/project.pbxproj',
             u'--target': u'helloworld',
             u'--source-files': None,
             u'--header-files': None,

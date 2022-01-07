@@ -4,21 +4,22 @@ import sys
 import unittest
 
 import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
-from pbxproj.pbxcli import open_project
+from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER
+from tests.pbxcli import SAMPLE_PROJECT_PATH, BASE_PROJECT_PATH
 
 
 class TestPBXProjFlag(unittest.TestCase):
     def setUp(self):
         # copy the project.pbxproj, into a file that can be used by the tests
-        shutil.copyfile('samplescli/project.pbxproj', 'samplescli/test.pbxproj')
+        shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
-        os.remove('samplescli/test.pbxproj')
+        os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
 
     def testAddFlags(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             '--delete': False,
             '--target': None,
             '--configuration': None,
@@ -40,7 +41,7 @@ class TestPBXProjFlag(unittest.TestCase):
 
     def testRemoveFlags(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
             '--delete': True,
             '--target': None,
             '--configuration': None,

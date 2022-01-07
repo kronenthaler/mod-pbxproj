@@ -1,8 +1,11 @@
-import shutil
 import datetime
-import sys
+import os
 import plistlib
-from pbxproj.pbxextensions import *
+import shutil
+import sys
+
+from pbxproj import PBXGenericObject
+from pbxproj.pbxextensions import ProjectFiles, ProjectFlags, ProjectGroups
 
 
 class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
@@ -28,21 +31,22 @@ class XcodeProject(PBXGenericObject, ProjectFiles, ProjectFlags, ProjectGroups):
         if 'objects' not in self:
             return
 
+        if self._check_missing_references():
+            print('[WARNING] The project contains missing/broken references that may cause other problems.'
+                  ' Open your project in Xcode and resolve all red-colored files.', file=sys.stderr)
+
+    def _check_missing_references(self):
         missing_references = False
         for section in self.objects.get_sections():
             for obj in self.objects.get_objects_in_section(section):
-                if 'files' in obj and obj['files'] is not None:
-                    comment = obj._get_comment()
-                    for file_id in obj['files']:
-                        if self.objects[file_id] is not None:
-                            # set the section into the objects
-                            self.objects[file_id]._section = comment
-                        else:
-                            missing_references = True
-
-        if missing_references:
-            print('[WARNING] The project contains missing/broken references that may cause other problems.'
-                  ' Open your project in Xcode and resolve all red-colored files.', file=sys.stderr)
+                # if 'files' in obj and obj['files'] is not None:
+                for file_id in obj.get('files', []):
+                    if self.objects[file_id] is not None:
+                        # set the section into the objects
+                        self.objects[file_id]._section = obj._get_comment()
+                    else:
+                        missing_references = True
+        return missing_references
 
     def save(self, path=None):
         if path is None:

@@ -189,10 +189,14 @@ class ProjectFiles:
                             and target in potential_targets:
                         potential_targets.remove(target)
 
-        if potential_targets.__len__() == 0:
-            return []
-
         return [target.name for target in potential_targets]
+
+    def _file_exists(self, path):
+        for section in self.objects.get_sections():
+            for obj in self.objects.get_objects_in_section(section):
+                if 'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
+                    return True
+        return False
 
     def add_project(self, path, parent=None, tree=TreeType.GROUP, target_name=None, force=True,
                     file_options=FileOptions()):
@@ -211,11 +215,8 @@ class ProjectFiles:
         """
         results = []
         # if it's not forced to add the file stop if the file already exists.
-        if not force:
-            for section in self.objects.get_sections():
-                for obj in self.objects.get_objects_in_section(section):
-                    if 'path' in obj and ProjectFiles._path_leaf(path) == ProjectFiles._path_leaf(obj.path):
-                        return []
+        if not force and self._file_exists(path):
+            return []
 
         file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
                                                                                  file_options)
@@ -322,34 +323,26 @@ class ProjectFiles:
         if file_ref is None:
             return False
 
-        for target in self.objects.get_targets(target_name):
-            for build_phase_id in target.buildPhases:
-                build_phase = self.objects[build_phase_id]
+        for target, build_phase in self.objects.get_buildphases_on_target(target_name):
+            for build_file_id in filter(lambda x: x in self.objects, build_phase.files):
+                build_file = self.objects[build_file_id]
 
-                for build_file_id in build_phase.files:
-                    if build_file_id not in self.objects:
-                        continue
+                if build_file.fileRef == file_ref.get_id():
+                    # remove the build file from the phase
+                    build_phase.remove_build_file(build_file)
 
-                    build_file = self.objects[build_file_id]
-
-                    if build_file.fileRef == file_ref.get_id():
-                        # remove the build file from the phase
-                        build_phase.remove_build_file(build_file)
-
-                # if the build_phase is empty remove it too, unless it's a shell script.
-                if build_phase.files.__len__() == 0 and build_phase.isa != 'PBXShellScriptBuildPhase':
-                    # remove the build phase from the target
-                    target.remove_build_phase(build_phase)
+            # if the build_phase is empty remove it too, unless it's a shell script.
+            if build_phase.files.__len__() == 0 and build_phase.isa != 'PBXShellScriptBuildPhase':
+                # remove the build phase from the target
+                target.remove_build_phase(build_phase)
 
         # remove it iff it's removed from all targets or no build file reference it
-        for build_file in self.objects.get_objects_in_section('PBXBuildFile'):
-            if build_file.fileRef == file_ref.get_id():
-                return True
+        if len([1 for x in self.objects.get_objects_in_section('PBXBuildFile') if x.fileRef == file_ref.get_id()]) != 0:
+            return True
 
         # remove the file from any groups if there is no reference from any target
-        for group in self.objects.get_objects_in_section('PBXGroup'):
-            if file_ref.get_id() in group.children:
-                group.remove_child(file_ref)
+        for group in filter(lambda x: file_ref.get_id() in x.children, self.objects.get_objects_in_section('PBXGroup')):
+            group.remove_child(file_ref)
 
         # the file is not referenced in any build file, remove it
         del self.objects[file_ref.get_id()]

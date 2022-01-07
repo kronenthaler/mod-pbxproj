@@ -5,22 +5,23 @@ import unittest
 
 import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 from pbxproj import PBXGenericObject
-from pbxproj.pbxcli import open_project
+from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER, PATH_PLACEHOLDER
+from tests.pbxcli import BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH
 
 
 class PBXProjFileTest(unittest.TestCase):
     def setUp(self):
         # copy the project.pbxproj, into a file that can be used by the tests
-        shutil.copyfile('samplescli/project.pbxproj', 'samplescli/test.pbxproj')
+        shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
-        os.remove('samplescli/test.pbxproj')
+        os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
 
     def testRemoveFileUnknown(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'whatever',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'whatever',
             '--tree': 'SOURCE_ROOT',
             '--delete': True,
             '--target': None
@@ -32,8 +33,8 @@ class PBXProjFileTest(unittest.TestCase):
 
     def testRemoveFileKnown(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'AppDelegate.swift',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'AppDelegate.swift',
             '--tree': '<group>',
             '--delete': True,
             '--target': None
@@ -41,18 +42,18 @@ class PBXProjFileTest(unittest.TestCase):
 
         project = open_project(args)
 
-        self.assertIsNotNone(project.get_files_by_path(args['<path>'], tree=args['--tree']))
-        self.assertGreater(project.get_files_by_path(args['<path>'], tree=args['--tree']).__len__(), 0)
+        self.assertIsNotNone(project.get_files_by_path(args[PATH_PLACEHOLDER], tree=args['--tree']))
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER], tree=args['--tree']).__len__(), 0)
 
         result = pbxproj_file.execute(project, args)
         self.assertEqual(result, 'File removed from the project.')
 
-        self.assertListEqual(project.get_files_by_path(args['<path>'], tree=args['--tree']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER], tree=args['--tree']), [])
 
     def testAddFilesNoResult(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': None,
@@ -65,16 +66,16 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         result = pbxproj_file.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
         self.assertEqual(result, 'File added to the project, no build file sections created.')
 
     def testAddFilesError(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': '/samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: '/samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': None,
@@ -87,16 +88,16 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         with self.assertRaisesRegex(Exception, '^No files were added to the project.'):
             pbxproj_file.execute(project, args)
 
-        self.assertEqual(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
 
     def testAddFilesSuccess(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': None,
@@ -109,16 +110,16 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         result = pbxproj_file.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
         self.assertEqual(result, 'File added to the project.\n3 PBXBuildFile sections created.')
 
     def testAddFilesWithParentNoResult(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': 'Samples',
@@ -131,17 +132,17 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         result = pbxproj_file.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
         self.assertEqual(result, 'File added to the project, no build file sections created.')
 
 
     def testAddFilesWithParentError(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': '/samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: '/samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': 'Samples',
@@ -154,17 +155,17 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         with self.assertRaisesRegex(Exception, '^No files were added to the project.'):
             pbxproj_file.execute(project, args)
 
-        self.assertEqual(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
 
 
     def testAddFilesWithParentSuccess(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'samples/testLibrary.a',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'samples/testLibrary.a',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': 'Samples',
@@ -177,16 +178,16 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         result = pbxproj_file.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
         self.assertEqual(result, 'File added to the project.\n3 PBXBuildFile sections created.')
 
     def testAddFilesWithHeadersScope(self):
         args = {
-            '<project>': 'samplescli/test.pbxproj',
-            '<path>': 'samples/dirA/dirB/fileB.h',
+            PROJECT_PLACEHOLDER: SAMPLE_PROJECT_PATH,
+            PATH_PLACEHOLDER: 'samples/dirA/dirB/fileB.h',
             '--target': None,
             '--tree': 'SOURCE_ROOT',
             '--parent': 'Samples',
@@ -200,10 +201,10 @@ class PBXProjFileTest(unittest.TestCase):
         }
         project = open_project(args)
 
-        self.assertListEqual(project.get_files_by_path(args['<path>']), [])
+        self.assertListEqual(project.get_files_by_path(args[PATH_PLACEHOLDER]), [])
         result = pbxproj_file.execute(project, args)
 
-        self.assertGreater(project.get_files_by_path(args['<path>']).__len__(), 0)
+        self.assertGreater(project.get_files_by_path(args[PATH_PLACEHOLDER]).__len__(), 0)
         self.assertEqual(result, 'File added to the project.\n3 PBXBuildFile sections created.')
         file = project.get_files_by_name('fileB.h')
         build_file = project.get_build_files_for_file(file[0].get_id())

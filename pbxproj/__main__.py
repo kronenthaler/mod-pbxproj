@@ -14,24 +14,28 @@ commands:
 
 See pbxproj <command> --help, for more information about a specific command.
 """
-from pbxproj.pbxcli import *
-import pbxproj
+
 from docopt import docopt
+
+import pbxproj
+from pbxproj.pbxcli import command_parser
 
 
 def main():
     args = docopt(__doc__, options_first=True, version=f'pbxproj version {pbxproj.__version__}')
-    argv = [args['<command>']] + args['<args>']
-    if args['<command>'] == 'file':
+    cmd = args['<command>']
+    argv = [cmd] + args['<args>']
+
+    if cmd == 'file':
         import pbxproj.pbxcli.pbxproj_file as pbxproj_file
         command_parser(pbxproj_file.execute)(docopt(pbxproj_file.__doc__, argv=argv))
-    elif args['<command>'] == 'flag':
+    elif cmd == 'flag':
         import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
         command_parser(pbxproj_flag.execute)(docopt(pbxproj_flag.__doc__, argv=argv))
-    elif args['<command>'] == 'folder':
+    elif cmd == 'folder':
         import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
         command_parser(pbxproj_folder.execute)(docopt(pbxproj_folder.__doc__, argv=argv))
-    elif args['<command>'] == 'show':
+    elif cmd == 'show':
         import pbxproj.pbxcli.pbxproj_show as pbxproj_show
         command_parser(pbxproj_show.execute, auto_save=False)(docopt(pbxproj_show.__doc__, argv=argv))
 

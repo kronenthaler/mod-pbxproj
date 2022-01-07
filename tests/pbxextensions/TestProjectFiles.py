@@ -154,10 +154,10 @@ class ProjectFilesTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         build_file = project.add_file(os.path.abspath("samples/test with spaces.framework"), tree='DEVELOPER_DIR')
 
-        self.assertEqual(project.objects[build_file[0].fileRef].sourceTree, '<absolute>')
-        self.assertEqual(project.objects[build_file[1].fileRef].sourceTree, '<absolute>')
-        self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, '<absolute>')
-        self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, '<absolute>')
+        self.assertEqual(project.objects[build_file[0].fileRef].sourceTree, TreeType.ABSOLUTE)
+        self.assertEqual(project.objects[build_file[1].fileRef].sourceTree, TreeType.ABSOLUTE)
+        self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, TreeType.ABSOLUTE)
+        self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, TreeType.ABSOLUTE)
 
     def testAddReferenceFile(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")
