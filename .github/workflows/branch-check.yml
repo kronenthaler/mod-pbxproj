@@ -37,9 +37,6 @@ jobs:
       - name: Test
         run: python setup.py coverage
 
-      - name: Event
-        run: echo "${{ toJSON(github.event) }}"
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         if: github.event_name == 'pull_request'
