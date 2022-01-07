@@ -1,6 +1,6 @@
 import sys
-import pbxproj
-from pbxproj import *
+
+from pbxproj import PBXGenericObject, PBXList
 
 
 class PBXBuildFile(PBXGenericObject):

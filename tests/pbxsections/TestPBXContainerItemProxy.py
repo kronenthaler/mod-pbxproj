@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.PBXContainerItemProxy import *
+
+from pbxproj import PBXContainerItemProxy
 
 
 class PBXContainerItemProxyTest(unittest.TestCase):

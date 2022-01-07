@@ -1,5 +1,7 @@
 import unittest
-from pbxproj.XcodeProject import *
+
+from pbxproj import XcodeProject, PBXProvisioningTypes
+from pbxproj.pbxextensions import ProjectFlags
 
 
 class ProjectFlagsTest(unittest.TestCase):
@@ -241,9 +243,9 @@ class ProjectFlagsTest(unittest.TestCase):
 
         project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name')
 
-        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.MANUAL)
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvisioningTypes.MANUAL)
         self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'2'].ProvisioningStyle,
-                         PBXProvioningTypes.MANUAL)
+                         PBXProvisioningTypes.MANUAL)
 
         self.assertEqual(project.objects['5'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
         self.assertEqual(project.objects['6'].buildSettings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'], 'iPhone Distribution')
@@ -271,7 +273,7 @@ class ProjectFlagsTest(unittest.TestCase):
         project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name', target_name='app')
 
         self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle,
-                         PBXProvioningTypes.MANUAL)
+                         PBXProvisioningTypes.MANUAL)
         self.assertIsNone(project.objects['0'].attributes.TargetAttributes[u'2'])
 
         self.assertIsNone(project.objects['7']['buildSettings'])
@@ -295,9 +297,9 @@ class ProjectFlagsTest(unittest.TestCase):
 
         project.add_code_sign('iPhone Distribution', 'MYTEAM', '0x0x0x0x0', 'Provisioning name', configuration_name='Release')
 
-        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.MANUAL)
+        self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvisioningTypes.MANUAL)
         self.assertEqual(project.objects['0'].attributes.TargetAttributes[u'2'].ProvisioningStyle,
-                         PBXProvioningTypes.MANUAL)
+                         PBXProvisioningTypes.MANUAL)
 
         self.assertIsNone(project.objects['6']['buildSettings'])
         self.assertIsNone(project.objects['8']['buildSettings'])

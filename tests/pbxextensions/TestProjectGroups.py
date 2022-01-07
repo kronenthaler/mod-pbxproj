@@ -1,5 +1,7 @@
 import unittest
-from pbxproj.XcodeProject import *
+
+from pbxproj import XcodeProject
+from pbxproj.pbxextensions import ProjectGroups
 
 
 class ProjectGroupsTest(unittest.TestCase):

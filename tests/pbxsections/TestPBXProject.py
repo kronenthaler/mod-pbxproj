@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.PBXProject import *
+
+from pbxproj import PBXProject, PBXProvisioningTypes, PBXGenericObject
 
 
 class PBXProjectTest(unittest.TestCase):
@@ -13,9 +14,9 @@ class PBXProjectTest(unittest.TestCase):
 
         self.assertIsNone(obj[u'attributes'])
 
-        obj.set_provisioning_style(PBXProvioningTypes.MANUAL, target)
+        obj.set_provisioning_style(PBXProvisioningTypes.MANUAL, target)
 
-        self.assertEqual(obj.attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.MANUAL)
+        self.assertEqual(obj.attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvisioningTypes.MANUAL)
 
     def testSetProvisioningTypeAutomatic(self):
         obj = PBXProject()
@@ -23,9 +24,9 @@ class PBXProjectTest(unittest.TestCase):
 
         self.assertIsNone(obj[u'attributes'])
 
-        obj.set_provisioning_style(PBXProvioningTypes.AUTOMATIC, target)
+        obj.set_provisioning_style(PBXProvisioningTypes.AUTOMATIC, target)
 
-        self.assertEqual(obj.attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvioningTypes.AUTOMATIC)
+        self.assertEqual(obj.attributes.TargetAttributes[u'1'].ProvisioningStyle, PBXProvisioningTypes.AUTOMATIC)
 
     def testRetainProjectReferences(self):
         obj = PBXProject().parse({'projectReferences': [

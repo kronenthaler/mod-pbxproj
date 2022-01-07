@@ -1,8 +1,8 @@
 import unittest
 
-from pbxproj.pbxsections.PBXBuildFile import PBXBuildFile
 from pbxproj.PBXGenericObject import PBXGenericObject
 from pbxproj.XcodeProject import XcodeProject
+from pbxproj.pbxsections.PBXBuildFile import PBXBuildFile
 
 
 class PBXBuildFileTest(unittest.TestCase):

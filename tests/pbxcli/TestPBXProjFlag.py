@@ -1,9 +1,10 @@
-import unittest
 import os
-import sys
 import shutil
-from pbxproj.pbxcli import *
+import sys
+import unittest
+
 import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
+from pbxproj.pbxcli import open_project
 
 
 class TestPBXProjFlag(unittest.TestCase):

@@ -47,5 +47,5 @@ except:
 # force the refresh of the packages
 reload(site)
 
-# import publicly
+# expose import publicly
 from pbxproj import *

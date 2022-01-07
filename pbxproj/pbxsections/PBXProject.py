@@ -1,7 +1,7 @@
 from pbxproj import PBXGenericObject
 
 
-class PBXProvioningTypes:
+class PBXProvisioningTypes:
     MANUAL = 'Manual'
     AUTOMATIC = 'Automatic'
 

@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.XCBuildConfiguration import *
+
+from pbxproj.pbxsections.XCBuildConfiguration import XCBuildConfiguration
 
 
 class XCBuildConfigurationTest(unittest.TestCase):

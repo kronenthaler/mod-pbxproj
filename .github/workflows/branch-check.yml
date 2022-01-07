@@ -20,7 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        id: checkout
+        with:
+          fetch-depth: 0
 
       - name: Setup
         uses: actions/setup-python@v1
@@ -30,8 +31,59 @@ jobs:
       - name: Dependencies
         run: pip install .
 
+      - name: Get Version
+        run: echo "VERSION=$(python setup.py version | tail -n1).${{ github.sha }}" >> $GITHUB_ENV
+
       - name: Test
         run: python setup.py coverage
+
+      - name: Event
+        run: echo "${{ toJSON(github.event) }}"
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: github.event_name == 'pull_request'
+        with:
+          args: >
+            -Dsonar.projectVersion=${{ env.VERSION }}
+            -Dsonar.pullrequest.key=${{ github.event.number }}
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref  }}
+            -Dsonar.organization=kronenthaler
+            -Dsonar.projectKey=kronenthaler_mod-pbxproj
+            -Dsonar.projectName=mod-pbxproj
+            -Dsonar.python.coverage.reportPaths=tests/coverage.xml
+            -Dsonar.sources=pbxproj/
+            -Dsonar.tests=tests/
+            -Dsonar.verbose=true
+            -Dsonar.c.file.suffixes=-
+            -Dsonar.cpp.file.suffixes=-
+            -Dsonar.objc.file.suffixes=-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: github.event_name == 'push'
+        with:
+          args: >
+            -Dsonar.projectVersion=${{ env.VERSION }}
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.organization=kronenthaler
+            -Dsonar.projectKey=kronenthaler_mod-pbxproj
+            -Dsonar.projectName=mod-pbxproj
+            -Dsonar.python.coverage.reportPaths=tests/coverage.xml
+            -Dsonar.sources=pbxproj/
+            -Dsonar.tests=tests/
+            -Dsonar.verbose=true
+            -Dsonar.c.file.suffixes=-
+            -Dsonar.cpp.file.suffixes=-
+            -Dsonar.objc.file.suffixes=-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
       - name: Codacy
         if: github.event_name != 'pull_request'

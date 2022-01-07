@@ -1,4 +1,5 @@
-from pbxproj.pbxsections import *
+from pbxproj.pbxsections import XCBuildConfigurationFlags, PBXShellScriptBuildPhase
+from pbxproj.pbxsections.PBXProject import PBXProvisioningTypes
 
 
 class ProjectFlags:
@@ -262,4 +263,4 @@ class ProjectFlags:
         self.set_flags('PROVISIONING_PROFILE_SPECIFIER', provisioning_profile_specifier, target_name, configuration_name)
 
         for target in self.objects.get_targets(target_name):
-            self.objects[self.rootObject].set_provisioning_style(PBXProvioningTypes.MANUAL, target)
+            self.objects[self.rootObject].set_provisioning_style(PBXProvisioningTypes.MANUAL, target)

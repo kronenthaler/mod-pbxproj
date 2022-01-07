@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.PBXCopyFilesBuildPhase import *
+
+from pbxproj.pbxsections.PBXCopyFilesBuildPhase import PBXCopyFilesBuildPhase
 
 
 class PBXCopyFilesBuildPhaseTest(unittest.TestCase):

@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.PBXResourcesBuildPhase import *
+
+from pbxproj.pbxsections import PBXResourcesBuildPhase
 
 
 class PBXResourcesBuildPhaseTest(unittest.TestCase):

@@ -1,8 +1,11 @@
-import unittest
+import os
 import sys
 import tempfile
+import unittest
 from io import StringIO
-from pbxproj.pbxcli import *
+
+from pbxproj import XcodeProject
+from pbxproj.pbxcli import open_project, resolve_backup, backup_project, command_parser
 
 
 class PBXCLITest(unittest.TestCase):
@@ -39,7 +42,7 @@ class PBXCLITest(unittest.TestCase):
 
     def testResolveBackupWithoutFlag(self):
         project = XcodeProject({}, path='samplescli/project.pbxproj')
-        setattr(project, 'save', lambda: 1 is 1)
+        setattr(project, 'save', lambda: True)
         tmpfile = tempfile.NamedTemporaryFile()
 
         resolve_backup(project, tmpfile.name, {'--backup': False})
@@ -48,7 +51,7 @@ class PBXCLITest(unittest.TestCase):
 
     def testResolveBackupWithFlag(self):
         project = XcodeProject({}, path='samplescli/project.pbxproj')
-        setattr(project, 'save', lambda: 1 is 1)
+        setattr(project, 'save', lambda: True)
         tmpfile = tempfile.NamedTemporaryFile(delete=False)
 
         resolve_backup(project, tmpfile.name, {'--backup': True})

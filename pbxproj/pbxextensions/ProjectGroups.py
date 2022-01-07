@@ -1,5 +1,6 @@
-from pbxproj.pbxsections import *
-from pbxproj.pbxextensions.ProjectFiles import *
+from pbxproj.pbxextensions import TreeType
+from pbxproj.pbxsections import PBXGroup, PBXFileReference
+
 
 class ProjectGroups:
     """

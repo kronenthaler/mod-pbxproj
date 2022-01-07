@@ -39,6 +39,11 @@ class NoseTestCoverage(TestCommand):
                             '-w', 'tests'])
 
 
+class Version(TestCommand):
+    def run_tests(self):
+        print(find_version("pbxproj", "__init__.py"))
+
+
 def find_version(*file_paths):
     def read(*parts):
         import codecs
@@ -76,4 +81,4 @@ setup(name='pbxproj',
       python_requires='>=3.6',
       packages=find_packages(exclude=['tests']),
       setup_requires=['nose', 'coverage'],
-      cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage})
+      cmdclass={'test': NoseTestCommand, 'coverage': NoseTestCoverage, 'version': Version})

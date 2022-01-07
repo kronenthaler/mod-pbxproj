@@ -1,5 +1,5 @@
-from pbxproj.PBXGenericObject import *
-from pbxproj.pbxsections import *
+from pbxproj import PBXGenericObject
+from pbxproj.pbxsections import PBXFileReference, PBXReferenceProxy
 
 
 class PBXGroup(PBXGenericObject):

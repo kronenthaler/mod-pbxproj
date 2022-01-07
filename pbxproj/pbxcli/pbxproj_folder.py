@@ -40,9 +40,10 @@ add options:
     -H, --header-scope <scope>      Add header file using the given scope. Available options: public or private, project.
                                        [default: project]
 """
-from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import FileOptions
 from docopt import docopt
+
+from pbxproj.pbxcli import command_parser
+from pbxproj.pbxextensions.ProjectFiles import FileOptions
 
 
 def execute(project, args):

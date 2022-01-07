@@ -1,5 +1,9 @@
+import os
+import shutil
 import unittest
-from pbxproj.XcodeProject import *
+
+from pbxproj import XcodeProject
+from pbxproj.pbxextensions import ProjectFiles, FileOptions, TreeType, HeaderScope
 
 
 class ProjectFilesTest(unittest.TestCase):
@@ -296,14 +300,14 @@ class ProjectFilesTest(unittest.TestCase):
 
         # should add test with spaces.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')
-        dirA = project.get_groups_by_name('dirA')
-        dirB = project.get_groups_by_name('dirB')
+        dir_a = project.get_groups_by_name('dirA')
+        dir_b = project.get_groups_by_name('dirB')
         self.assertNotEqual(samples, [])
-        self.assertNotEqual(dirA, [])
-        self.assertEqual(dirB, [])
+        self.assertNotEqual(dir_a, [])
+        self.assertEqual(dir_b, [])
 
         self.assertEqual(samples[0].children.__len__(), 3) # dirA, test with spaces.framework, testLibrary.a
-        self.assertEqual(dirA[0].children.__len__(), 0)
+        self.assertEqual(dir_a[0].children.__len__(), 0)
 
     def testAddFolderRecursive(self):
         project = XcodeProject(self.obj)
@@ -311,15 +315,15 @@ class ProjectFilesTest(unittest.TestCase):
 
         # should add test with spaces.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')
-        dirA = project.get_groups_by_name('dirA')
-        dirB = project.get_groups_by_name('dirB')
+        dir_a = project.get_groups_by_name('dirA')
+        dir_b = project.get_groups_by_name('dirB')
         self.assertNotEqual(samples, [])
-        self.assertNotEqual(dirA, [])
-        self.assertNotEqual(dirB, [])
+        self.assertNotEqual(dir_a, [])
+        self.assertNotEqual(dir_b, [])
 
         self.assertEqual(samples[0].children.__len__(), 3) # dirA, test with spaces.framework, testLibrary.a
-        self.assertEqual(dirA[0].children.__len__(), 2)  # dirB, fileA.m
-        self.assertEqual(dirB[0].children.__len__(), 2)  # fileB.m, fileB.h
+        self.assertEqual(dir_a[0].children.__len__(), 2)  # dirB, fileA.m
+        self.assertEqual(dir_b[0].children.__len__(), 2)  # fileB.m, fileB.h
 
     def testAddFolderWithExclusions(self):
         project = XcodeProject(self.obj)
@@ -327,15 +331,15 @@ class ProjectFilesTest(unittest.TestCase):
 
         # should add test with spaces.framework and testLibrary.a and 2 groups, samples, dirA
         samples = project.get_groups_by_name('samples')
-        dirA = project.get_groups_by_name('dirA')
-        dirB = project.get_groups_by_name('dirB')
+        dir_a = project.get_groups_by_name('dirA')
+        dir_b = project.get_groups_by_name('dirB')
         self.assertNotEqual(samples, [])
-        self.assertNotEqual(dirA, [])
-        self.assertNotEqual(dirB, [])
+        self.assertNotEqual(dir_a, [])
+        self.assertNotEqual(dir_b, [])
 
         self.assertEqual(samples[0].children.__len__(), 2)  # dirA, -test with spaces.framework, -testLibrary.a
-        self.assertEqual(dirA[0].children.__len__(), 1)  # dirB, -fileA.m
-        self.assertEqual(dirB[0].children.__len__(), 1)  # -fileB.m, +fileB.h
+        self.assertEqual(dir_a[0].children.__len__(), 1)  # dirB, -fileA.m
+        self.assertEqual(dir_b[0].children.__len__(), 1)  # -fileB.m, +fileB.h
 
     def testAddFolderAsReference(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")

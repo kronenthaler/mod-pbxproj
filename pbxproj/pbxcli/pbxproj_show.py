@@ -24,9 +24,6 @@ target options:
     -B, --build-phase-files <type>  Show the files associated to the build phase of the given type.
 """
 
-from pbxproj.pbxcli import *
-
-
 def execute(project, args):
     # make a decision of what function to call based on the -D flag
     if args['--target']:
