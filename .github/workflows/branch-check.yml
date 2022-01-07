@@ -20,7 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        id: checkout
+        with:
+          fetch-depth: 0
 
       - name: Setup
         uses: actions/setup-python@v1
@@ -30,8 +31,27 @@ jobs:
       - name: Dependencies
         run: pip install .
 
+      - name: Get Version
+        run: echo "VERSION=$(python setup.py version | tail -n1).${{ github.sha }}" >> $GITHUB_ENV
+
       - name: Test
         run: python setup.py coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.organization=kronenthaler
+            -Dsonar.projectKey=kronenthaler_mod-pbxproj
+            -Dsonar.projectName=mod-pbxproj
+            -Dsonar.projectVersion=${{ env.VERSION }}
+            -Dsonar.python.coverage.reportPaths=tests/coverage.xml
+            -Dsonar.sources=.
+            -Dsonar.tests=tests/
+            -Dsonar.verbose=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Codacy
         if: github.event_name != 'pull_request'
