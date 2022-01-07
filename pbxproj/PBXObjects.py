@@ -122,6 +122,11 @@ class objects(PBXGenericObject):
 
         return [target for target in targets if target.name in name]
 
+    def get_buildphases_on_target(self, target_name=None):
+        for target in self.get_targets(target_name):
+            for build_phase_id in target.buildPhases:
+                yield (target, self[build_phase_id])
+
     def get_configurations_on_targets(self, target_name=None, configuration_name=None):
         """
         Retrieves all configuration given a name on the specified target

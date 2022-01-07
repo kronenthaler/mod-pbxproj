@@ -2,19 +2,20 @@ import unittest
 
 from pbxproj import PBXGenericObject
 from pbxproj.PBXObjects import objects
+from pbxproj.pbxextensions import TreeType
 from pbxproj.pbxsections import PBXGroup
 
 
 class PBXGroupTests(unittest.TestCase):
     def setUp(self):
         self.obj = {
-            "z1": {"isa": "PBXGroup", "children": ["3a"], "path": "X", "sourceTree": "<group>"},
-            "1": {"isa": "PBXGroup", "children": ["2", "3a"], "path": "X", "sourceTree": "<group>"},
-            "2": {"isa": "PBXGroup", "children": ["4", "5a"], "path": "Y", "sourceTree": "<group>"},
+            "z1": {"isa": "PBXGroup", "children": ["3a"], "path": "X", "sourceTree": TreeType.GROUP},
+            "1": {"isa": "PBXGroup", "children": ["2", "3a"], "path": "X", "sourceTree": TreeType.GROUP},
+            "2": {"isa": "PBXGroup", "children": ["4", "5a"], "path": "Y", "sourceTree": TreeType.GROUP},
             "3": {"isa": "PBXBuildFile", "fileRef": "3a"},
             "3a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "3a.h",
                    "path": "Source/3a.h", "sourceTree": "SOURCE_ROOT"},
-            "4": {"isa": "PBXGroup", "children": ["6a"], "path": "Y", "sourceTree": "<group>"},
+            "4": {"isa": "PBXGroup", "children": ["6a"], "path": "Y", "sourceTree": TreeType.GROUP},
             "5": {"isa": "PBXBuildFile", "fileRef": "5a"},
             "5a": {"isa": "PBXFileReference", "lastKnownFileType": "sourcecode.c.h", "name": "5a.h",
                    "path": "Source/5a.h", "sourceTree": "SOURCE_ROOT"},

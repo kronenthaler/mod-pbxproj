@@ -3,8 +3,12 @@ import unittest
 from pbxproj import XcodeProject, PBXProvisioningTypes
 from pbxproj.pbxextensions import ProjectFlags
 
+LS_LA_COMMAND = u'ls -la'
+PATH_TO_SEARCH_PATTERN = 'path/to/search/**'
+
 
 class ProjectFlagsTest(unittest.TestCase):
+
     def setUp(self):
         self.obj = {
             'objects': {
@@ -110,39 +114,39 @@ class ProjectFlagsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         project.add_header_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
     def testAddLibrarySearchPaths(self):
         project = XcodeProject(self.obj)
         project.add_library_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
     def testAddFrameworkSearchPaths(self):
         project = XcodeProject(self.obj)
         project.add_framework_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
     def testRemoveHeaderSearchPaths(self):
         project = XcodeProject(self.obj)
         project.add_header_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.HEADER_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
-        project.remove_header_search_paths('path/to/search/**')
+        project.remove_header_search_paths(PATH_TO_SEARCH_PATTERN)
         self.assertIsNone(project.objects['5'].buildSettings['HEADER_SEARCH_PATHS'])
         self.assertIsNone(project.objects['6'].buildSettings['HEADER_SEARCH_PATHS'])
         self.assertIsNone(project.objects['7'].buildSettings['HEADER_SEARCH_PATHS'])
@@ -152,12 +156,12 @@ class ProjectFlagsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         project.add_library_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
-        project.remove_library_search_paths('path/to/search/**')
+        project.remove_library_search_paths(PATH_TO_SEARCH_PATTERN)
         self.assertIsNone(project.objects['5'].buildSettings['LIBRARY_SEARCH_PATHS'])
         self.assertIsNone(project.objects['6'].buildSettings['LIBRARY_SEARCH_PATHS'])
         self.assertIsNone(project.objects['7'].buildSettings['LIBRARY_SEARCH_PATHS'])
@@ -167,12 +171,12 @@ class ProjectFlagsTest(unittest.TestCase):
         project = XcodeProject(self.obj)
         project.add_framework_search_paths('path/to/search')
 
-        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
-        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, 'path/to/search/**')
+        self.assertEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
+        self.assertEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, PATH_TO_SEARCH_PATTERN)
 
-        project.remove_framework_search_paths('path/to/search/**')
+        project.remove_framework_search_paths(PATH_TO_SEARCH_PATTERN)
         self.assertIsNone(project.objects['5'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
         self.assertIsNone(project.objects['6'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
         self.assertIsNone(project.objects['7'].buildSettings['FRAMEWORK_SEARCH_PATHS'])
@@ -180,17 +184,17 @@ class ProjectFlagsTest(unittest.TestCase):
 
     def testAddRunScriptBeforeCompile(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la', insert_before_compile=True)
+        project.add_run_script(LS_LA_COMMAND, insert_before_compile=True)
 
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
-        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, LS_LA_COMMAND)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, LS_LA_COMMAND)
 
     def testAddRunScriptAfterCompile(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la')
+        project.add_run_script(LS_LA_COMMAND)
 
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].shellScript, u'ls -la')
-        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].shellScript, LS_LA_COMMAND)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].shellScript, LS_LA_COMMAND)
 
     def testAddRunScriptWithInputFiles(self):
         project = XcodeProject(self.obj)
@@ -206,35 +210,35 @@ class ProjectFlagsTest(unittest.TestCase):
 
     def testRemoveRunScript(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la', insert_before_compile=True)
+        project.add_run_script(LS_LA_COMMAND, insert_before_compile=True)
 
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
-        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, LS_LA_COMMAND)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, LS_LA_COMMAND)
 
-        project.remove_run_script(u'ls -la')
+        project.remove_run_script(LS_LA_COMMAND)
         self.assertEqual(project.objects['1'].buildPhases[0], u'compile')
         self.assertEqual(project.objects['2'].buildPhases[0], u'compile')
 
     def testRemoveRunScriptNotFound(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la', insert_before_compile=True)
+        project.add_run_script(LS_LA_COMMAND, insert_before_compile=True)
 
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
-        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, LS_LA_COMMAND)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, LS_LA_COMMAND)
 
         project.remove_run_script(u'ls')
-        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, u'ls -la')
-        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, u'ls -la')
+        self.assertEqual(project.objects[project.objects['1'].buildPhases[0]].shellScript, LS_LA_COMMAND)
+        self.assertEqual(project.objects[project.objects['2'].buildPhases[0]].shellScript, LS_LA_COMMAND)
 
     def testAddRunScriptWithoutInstallBuild(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la', run_install_build=0)
+        project.add_run_script(LS_LA_COMMAND, run_install_build=0)
 
         self.assertEqual(project.objects[project.objects['2'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 0)
 
     def testAddRunScriptWithInstallBuild(self):
         project = XcodeProject(self.obj)
-        project.add_run_script(u'ls -la', run_install_build=1)
+        project.add_run_script(LS_LA_COMMAND, run_install_build=1)
 
         self.assertEqual(project.objects[project.objects['1'].buildPhases[1]].runOnlyForDeploymentPostprocessing, 1)
 

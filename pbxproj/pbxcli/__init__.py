@@ -2,15 +2,18 @@ import os
 
 from pbxproj.XcodeProject import XcodeProject
 
+PROJECT_PLACEHOLDER = '<project>'
+PATH_PLACEHOLDER = '<path>'
+
 
 def open_project(args):
-    if os.path.isdir(args['<project>']):
-        args['<project>'] += '/project.pbxproj'
+    if os.path.isdir(args[PROJECT_PLACEHOLDER]):
+        args[PROJECT_PLACEHOLDER] += '/project.pbxproj'
 
-    if not os.path.isfile(args['<project>']):
-        raise Exception('Project file not found')
+    if not os.path.isfile(args[PROJECT_PLACEHOLDER]):
+        raise FileNotFoundError('Project file not found')
 
-    return XcodeProject.load(args['<project>'])
+    return XcodeProject.load(args[PROJECT_PLACEHOLDER])
 
 
 def backup_project(project, args):
