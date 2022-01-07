@@ -1,5 +1,6 @@
 import unittest
-from pbxproj.pbxsections.PBXTargetDependency import *
+
+from pbxproj.pbxsections.PBXTargetDependency import PBXTargetDependency
 
 
 class PBXTargetDependencyTest(unittest.TestCase):

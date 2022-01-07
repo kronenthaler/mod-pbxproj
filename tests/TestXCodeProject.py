@@ -1,6 +1,7 @@
+import os
 import shutil
 import unittest
-from pbxproj import *
+
 from pbxproj import XcodeProject
 
 
@@ -92,16 +93,16 @@ class XCodeProjectTest(unittest.TestCase):
     def testGetBuildConfigurationsByTarget(self):
         project = XcodeProject(self.obj)
 
-        build_Configurations = project.get_build_configurations_by_target(
+        build_configurations = project.get_build_configurations_by_target(
             'app')
-        self.assertListEqual(build_Configurations, ['Release', 'Debug'])
+        self.assertListEqual(build_configurations, ['Release', 'Debug'])
 
     def testGetBuildConfigurationsByTargetNotExistent(self):
         project = XcodeProject(self.obj)
 
-        build_Configurations = project.get_build_configurations_by_target(
+        build_configurations = project.get_build_configurations_by_target(
             'appThatDoesNotExists')
-        self.assertIsNone(build_Configurations)
+        self.assertIsNone(build_configurations)
 
     def testConsistency(self):
         with open('samplescli/massive.pbxproj', 'r') as file:

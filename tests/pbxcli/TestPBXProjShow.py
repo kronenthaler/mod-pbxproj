@@ -1,8 +1,11 @@
-import unittest
+import os
 import shutil
 import sys
-from pbxproj.pbxcli import *
+import unittest
+
 import pbxproj.pbxcli.pbxproj_show as pbxproj_show
+from pbxproj.pbxcli import open_project
+
 
 class PBXProjShowTest(unittest.TestCase):
     def setUp(self):

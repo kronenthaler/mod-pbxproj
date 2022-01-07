@@ -1,5 +1,9 @@
-from pbxproj.pbxsections import *
-from pbxproj import PBXList
+import os
+import re
+
+from pbxproj import PBXList, PBXGenericObject
+from pbxproj.pbxsections import PBXGroup, PBXContainerItemProxy, PBXReferenceProxy, PBXFileReference, \
+    PBXCopyFilesBuildPhaseNames, XCBuildConfigurationFlags, PBXBuildFile
 
 
 class TreeType:

@@ -1,10 +1,13 @@
-import unittest
+import os
 import shutil
 import sys
-from pbxproj import PBXGenericObject
-from pbxproj.pbxcli import *
-from pbxproj.pbxextensions.ProjectFiles import TreeType
+import unittest
+
 import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
+from pbxproj import PBXGenericObject
+from pbxproj.pbxcli import open_project
+from pbxproj.pbxextensions.ProjectFiles import TreeType
+
 
 class PBXProjFolderTest(unittest.TestCase):
     def setUp(self):

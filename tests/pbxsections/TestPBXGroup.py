@@ -1,6 +1,8 @@
 import unittest
-from pbxproj.pbxsections.PBXGroup import *
-from pbxproj.PBXObjects import *
+
+from pbxproj import PBXGenericObject
+from pbxproj.PBXObjects import objects
+from pbxproj.pbxsections import PBXGroup
 
 
 class PBXGroupTests(unittest.TestCase):

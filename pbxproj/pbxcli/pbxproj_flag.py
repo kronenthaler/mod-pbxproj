@@ -25,9 +25,9 @@ delete options:
 
 # Future addition to the command line:
 # pbxproj flag [options] (--delete | -D) (--all | -A) <project> [--] <flag_name>...
-
-from pbxproj.pbxcli import *
 from docopt import docopt
+
+from pbxproj.pbxcli import command_parser
 
 
 def execute(project, args):
