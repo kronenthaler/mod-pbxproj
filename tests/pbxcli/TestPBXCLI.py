@@ -37,7 +37,6 @@ class PBXCLITest(unittest.TestCase):
         self.assertIsNone(self.backup_file)
 
     def testBackupWithFlag(self):
-        project = XcodeProject({}, path=BASE_PROJECT_PATH)
         self.backup_file = backup_project(project, {'--backup': True})
         self.assertIsNotNone(self.backup_file)
 
