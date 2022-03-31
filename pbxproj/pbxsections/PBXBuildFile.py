@@ -9,11 +9,12 @@ class PBXBuildFile(PBXGenericObject):
         self._section = None
 
     @classmethod
-    def create(cls, file_ref, attributes=None, compiler_flags=None):
+    def create(cls, file_ref, attributes=None, compiler_flags=None, is_product=False):
+        ref_key = 'productRef' if is_product else 'fileRef'
         return cls().parse({
             '_id': cls._generate_id(),
             'isa': cls.__name__,
-            'fileRef': file_ref.get_id(),
+            ref_key: file_ref.get_id(),
             'settings': cls._get_settings(attributes, compiler_flags)
         })
 
@@ -42,6 +43,8 @@ class PBXBuildFile(PBXGenericObject):
         comment = '(null)'
         if hasattr(self, 'fileRef'):
             comment = self.fileRef._get_comment()
+        if hasattr(self, 'productRef'):
+            comment = self.productRef._get_comment()
         return f'{comment} in {self._get_section()}'
 
     def _get_section(self):
