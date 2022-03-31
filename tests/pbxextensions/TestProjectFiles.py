@@ -4,7 +4,7 @@ import unittest
 
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions import ProjectFiles, FileOptions, TreeType, HeaderScope
-
+from pbxproj.pbxsections import XCRemoteSwiftPackageReference, XCSwiftPackageProductDependency
 
 class ProjectFilesTest(unittest.TestCase):
     def setUp(self):
@@ -495,11 +495,11 @@ class ProjectFilesTest(unittest.TestCase):
             "minimumVersion": "5.0.1"}, 'some-package', 'app')
 
         # create swift package reference and its entry into PBXProject package references
-        self.assertIsInstance(results[0], pbxproj.pbxsections.XCRemoteSwiftPackageReference)
+        self.assertIsInstance(results[0], XCRemoteSwiftPackageReference)
         self.assertEqual(project.objects.get_objects_in_section('PBXProject')[0].packageReferences.__len__(), 1)
         # create package product dependency and its entry into PBXNativeTarget package product depedency, 
         # PBXBuildFile and PBXFrameworksBuildPhase
-        self.assertIsInstance(results[1], pbxproj.pbxsections.XCSwiftPackageProductDependency)
+        self.assertIsInstance(results[1], XCSwiftPackageProductDependency)
         self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 1)
         self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 1)
         self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 1)
@@ -517,8 +517,8 @@ class ProjectFilesTest(unittest.TestCase):
 
         # create two package product dependency and their entry into PBXNativeTarget package product depedency, 
         # PBXBuildFile and PBXFrameworksBuildPhase
-        self.assertIsInstance(results[1], pbxproj.pbxsections.XCSwiftPackageProductDependency)
-        self.assertIsInstance(results[2], pbxproj.pbxsections.XCSwiftPackageProductDependency)
+        self.assertIsInstance(results[1], XCSwiftPackageProductDependency)
+        self.assertIsInstance(results[2], XCSwiftPackageProductDependency)
         self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 2)
         self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 2)
         self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 2)

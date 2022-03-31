@@ -3,7 +3,8 @@ import re
 
 from pbxproj import PBXList, PBXGenericObject
 from pbxproj.pbxsections import PBXGroup, PBXContainerItemProxy, PBXReferenceProxy, PBXFileReference, \
-    PBXCopyFilesBuildPhaseNames, XCBuildConfigurationFlags, PBXBuildFile
+    PBXCopyFilesBuildPhaseNames, XCBuildConfigurationFlags, PBXBuildFile, XCRemoteSwiftPackageReference, \
+    XCSwiftPackageProductDependency
 
 
 class TreeType:
