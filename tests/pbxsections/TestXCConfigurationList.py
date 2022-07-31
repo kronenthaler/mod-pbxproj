@@ -11,7 +11,7 @@ class XCConfigurationListTest(unittest.TestCase):
 
         self.assertEqual(config._get_comment(), 'Build configuration list for TargetType "name"')
 
-    def testGetSectionOnTarget(self):
+    def testGetSectionOnNativeTarget(self):
         objs = objects(None).parse(
             {
                 '1': {
@@ -25,6 +25,21 @@ class XCConfigurationListTest(unittest.TestCase):
             })
         config = objs['2']
         self.assertEqual(config._get_comment(), 'Build configuration list for PBXNativeTarget "the-target-name"')
+
+    def testGetSectionOnLegacyTarget(self):
+        objs = objects(None).parse(
+            {
+                '1': {
+                    'isa': 'PBXLegacyTarget',
+                    'buildConfigurationList': ['2'],
+                    'name': 'the-target-name'
+                },
+                '2': {
+                    'isa': 'XCConfigurationList'
+                }
+            })
+        config = objs['2']
+        self.assertEqual(config._get_comment(), 'Build configuration list for PBXLegacyTarget "the-target-name"')
 
     def testGetSectionOnProject(self):
         objs = objects(None).parse(
