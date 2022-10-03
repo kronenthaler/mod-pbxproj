@@ -6,7 +6,9 @@ import unittest
 import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER, PATH_PLACEHOLDER
-from tests.pbxcli import BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH
+
+SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
+BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
 
 
 class PBXProjFileTest(unittest.TestCase):

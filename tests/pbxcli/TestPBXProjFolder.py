@@ -7,7 +7,9 @@ import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
 from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER, PATH_PLACEHOLDER
 from pbxproj.pbxextensions.ProjectFiles import TreeType
-from tests.pbxcli import BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH
+
+SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
+BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
 
 
 class PBXProjFolderTest(unittest.TestCase):

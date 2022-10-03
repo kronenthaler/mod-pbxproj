@@ -29,13 +29,15 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Dependencies
-        run: pip install .
+        run: |
+          pip install .
+          pip install nox
 
       - name: Get Version
-        run: echo "VERSION=$(python setup.py version | tail -n1).${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "VERSION=$(python -m pbxproj --version).${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Test
-        run: python setup.py coverage
+        run: nox -s coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -80,7 +82,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
 
       - name: Codacy
         if: github.event_name != 'pull_request'
