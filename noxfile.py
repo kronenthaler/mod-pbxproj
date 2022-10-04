@@ -18,4 +18,5 @@ def coverage(session):
                 '--cov-config=../.coveragerc',
                 '--cov-report=xml',
                 '--cov=pbxproj',
-                '--cov-branch')
+                '--cov-branch'
+                )

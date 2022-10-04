@@ -50,7 +50,7 @@ jobs:
             -Dsonar.projectKey=kronenthaler_mod-pbxproj
             -Dsonar.projectName=mod-pbxproj
             -Dsonar.python.coverage.reportPaths=tests/coverage.xml
-            -Dsonar.sources=pbxproj/
+            -Dsonar.sources=.nox/coverage/lib/python${{ matrix.python }}/site-packages/pbxproj/
             -Dsonar.tests=tests/
             -Dsonar.verbose=true
             -Dsonar.c.file.suffixes=-
@@ -71,7 +71,7 @@ jobs:
             -Dsonar.projectKey=kronenthaler_mod-pbxproj
             -Dsonar.projectName=mod-pbxproj
             -Dsonar.python.coverage.reportPaths=tests/coverage.xml
-            -Dsonar.sources=pbxproj/
+            -Dsonar.sources=.nox/coverage/lib/python${{ matrix.python }}/site-packages/pbxproj/
             -Dsonar.tests=tests/
             -Dsonar.verbose=true
             -Dsonar.c.file.suffixes=-
