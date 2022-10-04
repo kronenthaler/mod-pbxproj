@@ -1,6 +1,5 @@
 [run]
 relative_files = True
-source = pbxproj/
 
 [report]
 show_missing = True

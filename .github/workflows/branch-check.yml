@@ -35,8 +35,8 @@ jobs:
         run: echo "VERSION=$(python -m pbxproj --version).${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Test
-        run: nox -s coverage
-
+        run: make coverage
+        
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         if: github.event_name == 'pull_request'
@@ -50,7 +50,7 @@ jobs:
             -Dsonar.projectKey=kronenthaler_mod-pbxproj
             -Dsonar.projectName=mod-pbxproj
             -Dsonar.python.coverage.reportPaths=tests/coverage.xml
-            -Dsonar.sources=.nox/coverage/lib/python${{ matrix.python }}/site-packages/pbxproj/
+            -Dsonar.sources=pbxproj/
             -Dsonar.tests=tests/
             -Dsonar.verbose=true
             -Dsonar.c.file.suffixes=-
@@ -71,7 +71,7 @@ jobs:
             -Dsonar.projectKey=kronenthaler_mod-pbxproj
             -Dsonar.projectName=mod-pbxproj
             -Dsonar.python.coverage.reportPaths=tests/coverage.xml
-            -Dsonar.sources=.nox/coverage/lib/python${{ matrix.python }}/site-packages/pbxproj/
+            -Dsonar.sources=pbxproj/
             -Dsonar.tests=tests/
             -Dsonar.verbose=true
             -Dsonar.c.file.suffixes=-
