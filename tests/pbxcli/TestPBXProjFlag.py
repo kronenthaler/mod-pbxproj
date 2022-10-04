@@ -5,9 +5,7 @@ import unittest
 
 import pbxproj.pbxcli.pbxproj_flag as pbxproj_flag
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER
-
-SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
+from tests.pbxcli import SAMPLE_PROJECT_PATH, BASE_PROJECT_PATH
 
 
 class TestPBXProjFlag(unittest.TestCase):

@@ -6,8 +6,7 @@ from io import StringIO
 
 from pbxproj import XcodeProject
 from pbxproj.pbxcli import open_project, resolve_backup, backup_project, command_parser, PROJECT_PLACEHOLDER
-
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
+from tests.pbxcli import BASE_PROJECT_PATH
 
 
 class PBXCLITest(unittest.TestCase):

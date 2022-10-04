@@ -5,9 +5,7 @@ import unittest
 
 import pbxproj.pbxcli.pbxproj_show as pbxproj_show
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER
-
-SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
+from tests.pbxcli import SAMPLE_PROJECT_PATH, BASE_PROJECT_PATH
 
 
 class PBXProjShowTest(unittest.TestCase):
