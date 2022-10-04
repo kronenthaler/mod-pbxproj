@@ -3,19 +3,19 @@ import nox
 
 @nox.session
 def test(session):
-    session.install('nose')
+    session.run('pip3', 'install', '-r', 'dev-requirements.txt')
     session.run('pip3', 'install', '.')
-    session.run('nosetests', '-w', 'tests')
+    session.cd('tests')
+    session.run('pytest')
 
 
 @nox.session
 def coverage(session):
-    session.install('nose', 'coverage')
+    session.run('pip3', 'install', '-r', 'dev-requirements.txt')
     session.run('pip3', 'install', '.')
-    session.run('nosetests',
-                '--with-coverage',
-                '--cover-xml',
-                '--cover-erase',
-                '--cover-branches',
-                '--cover-package=pbxproj',
-                '-w', 'tests')
+    session.cd('tests')
+    session.run('pytest',
+                '--cov-config=../.coveragerc',
+                '--cov-report=xml',
+                '--cov=pbxproj',
+                '--cov-branch')

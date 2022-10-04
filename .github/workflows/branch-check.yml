@@ -29,9 +29,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Dependencies
-        run: |
-          pip install .
-          pip install nox
+        run: pip install -r dev-requirements.txt
 
       - name: Get Version
         run: echo "VERSION=$(python -m pbxproj --version).${{ github.sha }}" >> $GITHUB_ENV
