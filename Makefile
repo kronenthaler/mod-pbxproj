@@ -1,10 +1,12 @@
-.PHONY: coverage test
+.PHONY: coverage coverage-term test
 
 coverage:
-	cd tests; PYTHONPATH=../ pytest --cov-report=xml --cov=../pbxproj --cov-branch
+	cd tests; pytest --cov-report=xml --cov=../pbxproj --cov-branch;
+	cd tests; rm -rf .coverage
 
 coverage-term:
-	cd tests; PYTHONPATH=../ pytest --cov-report=term --cov=../pbxproj --cov-branch
+	cd tests; pytest --cov-report=term --cov=../pbxproj --cov-branch;
+	cd tests; rm -rf .coverage
 
 test:
-	cd tests; PYTHONPATH=../ pytest
+	cd tests; pytest

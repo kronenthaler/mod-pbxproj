@@ -36,7 +36,7 @@ jobs:
 
       - name: Test
         run: make coverage
-        
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         if: github.event_name == 'pull_request'
