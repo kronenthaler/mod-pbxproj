@@ -22,7 +22,7 @@ from pbxproj.pbxcli import command_parser
 
 
 def main():
-    args = docopt(__doc__, options_first=True, version=f'pbxproj version {pbxproj.__version__}')
+    args = docopt(__doc__, options_first=True, version=f'{pbxproj.__version__}')
     cmd = args['<command>']
     argv = [cmd] + args['<args>']
 
