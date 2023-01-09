@@ -1,4 +1,3 @@
-
 .. image:: https://img.shields.io/github/workflow/status/kronenthaler/mod-pbxproj/branch-check/master?logo=github&style=flat-square
    :target: https://github.com/kronenthaler/mod-pbxproj/actions?query=workflow%3Abranch-check
    :alt: GitHub Workflow Status (branch)
@@ -47,7 +46,7 @@ It can be achieved with a simple snippet like this:
    # add a file to it, force=false to not add it if it's already in the project
    project.add_file('MyClass.swift', force=False)
 
-   # set a Other Linker Flags
+   # set an Other Linker Flags
    project.add_other_ldflags('-ObjC')
 
    # save the project, otherwise your changes won't be picked up by Xcode
