@@ -42,5 +42,5 @@ setup(name='pbxproj',
       version=find_version("pbxproj", "__init__.py"),
       license='MIT License',
       install_requires=['openstep_parser>=1.5.1', 'docopt'],
-      python_requires='>=3.7',
+      python_requires='>=3.8',
       packages=find_packages(exclude=['tests']))
