@@ -5,6 +5,7 @@ import unittest
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions import ProjectFiles, FileOptions, TreeType, HeaderScope
 from pbxproj.pbxsections import XCRemoteSwiftPackageReference, XCSwiftPackageProductDependency
+import pytest
 
 class ProjectFilesTest(unittest.TestCase):
     def setUp(self):
@@ -41,12 +42,12 @@ class ProjectFilesTest(unittest.TestCase):
         }
 
     def testInit(self):
-        with self.assertRaisesRegex(EnvironmentError, '^This class cannot be instantiated directly'):
+        with pytest.raises(EnvironmentError, match='^This class cannot be instantiated directly'):
             ProjectFiles()
 
     def testAddFileUnknown(self):
         project = XcodeProject(self.obj)
-        with self.assertRaisesRegex(ValueError, '^Unknown file extension: '):
+        with pytest.raises(ValueError, match='^Unknown file extension: '):
             project.add_file("file.unknowntype")
 
     def testAddFileUnknownAllowed(self):
@@ -54,15 +55,15 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.unknowntype", file_options=FileOptions(ignore_unknown_type=True))
 
         # unknown files are added as resources
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 2)
+        assert project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 2
 
     def testAddFileNoPath(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file(".", tree=None)
 
         # no tree or no path cannot be added
-        self.assertIsNone(build_file)
+        assert build_file is None
 
     def testAddFileNoCreateBuildFiles(self):
         project = XcodeProject(self.obj)
@@ -70,16 +71,16 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file(".", file_options=FileOptions(create_build_files=False))
 
         # no create build file flag
-        self.assertEqual(project.objects.__len__(), items)
-        self.assertEqual(build_file, [])
+        assert project.objects.__len__() == items
+        assert build_file == []
 
     def testAddFileSource(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file("file.m")
 
         # 2 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 2)
+        assert project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 2
 
     def testAddFileXCFrameworkEmbedded(self):
         project = XcodeProject(self.obj)
@@ -87,13 +88,13 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.xcframework", file_options=options)
 
         # 2 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
-        self.assertEqual(build_file.__len__(), 4)
-        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
-        self.assertListEqual(build_file[1].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
-        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak'])
-        self.assertListEqual(build_file[3].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
+        assert project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__() == 3
+        assert build_file.__len__() == 4
+        assert build_file[0].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[1].settings.ATTRIBUTES == [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+        assert build_file[2].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[3].settings.ATTRIBUTES == [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
 
     def testAddFileFrameworkEmbedded(self):
         project = XcodeProject(self.obj)
@@ -101,13 +102,13 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.framework", file_options=options)
 
         # 2 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
-        self.assertEqual(build_file.__len__(), 4)
-        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
-        self.assertListEqual(build_file[1].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
-        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak'])
-        self.assertListEqual(build_file[3].settings.ATTRIBUTES, [u'CodeSignOnCopy', u'RemoveHeadersOnCopy'])
+        assert project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__() == 3
+        assert build_file.__len__() == 4
+        assert build_file[0].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[1].settings.ATTRIBUTES == [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
+        assert build_file[2].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[3].settings.ATTRIBUTES == [u'CodeSignOnCopy', u'RemoveHeadersOnCopy']
 
     def testAddFileFrameworkFromSDKRootIgnoresEmbedAndCodeSign(self):
         project = XcodeProject(self.obj)
@@ -115,79 +116,79 @@ class ProjectFilesTest(unittest.TestCase):
         build_file = project.add_file("file.framework", tree=TreeType.SDKROOT, file_options=options)
 
         # 2 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
-        self.assertEqual(build_file.__len__(), 4)
-        self.assertListEqual(build_file[0].settings.ATTRIBUTES, [u'Weak'])
-        self.assertIsNone(build_file[1]['settings'])
-        self.assertListEqual(build_file[2].settings.ATTRIBUTES, [u'Weak'])
-        self.assertIsNone(build_file[3]['settings'])
+        assert project.objects.get_objects_in_section(u'PBXFrameworksBuildPhase').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__() == 3
+        assert build_file.__len__() == 4
+        assert build_file[0].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[1]['settings'] is None
+        assert build_file[2].settings.ATTRIBUTES == [u'Weak']
+        assert build_file[3]['settings'] is None
 
     def testAddFileFrameworkWithAbsolutePath(self):
         project = XcodeProject(self.obj)
         project.add_file(os.path.abspath("samples/test with spaces.framework"))
 
         expected_flags = ["$(SRCROOT)/tests/samples", "$(inherited)"]
-        self.assertListEqual(project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
-        self.assertListEqual(project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
-        self.assertListEqual(project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
-        self.assertListEqual(project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS, expected_flags)
+        assert project.objects['5'].buildSettings.FRAMEWORK_SEARCH_PATHS == expected_flags
+        assert project.objects['6'].buildSettings.FRAMEWORK_SEARCH_PATHS == expected_flags
+        assert project.objects['7'].buildSettings.FRAMEWORK_SEARCH_PATHS == expected_flags
+        assert project.objects['8'].buildSettings.FRAMEWORK_SEARCH_PATHS == expected_flags
 
     def testAddFileLibraryWithAbsolutePath(self):
         project = XcodeProject(self.obj)
         project.add_file(os.path.abspath("samples/path with spaces/testLibrary.a"))
 
         expected_flags = "\"$(SRCROOT)/tests/samples/path with spaces\""
-        self.assertEqual(project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
-        self.assertEqual(project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
-        self.assertEqual(project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
-        self.assertEqual(project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS, expected_flags)
+        assert project.objects['5'].buildSettings.LIBRARY_SEARCH_PATHS == expected_flags
+        assert project.objects['6'].buildSettings.LIBRARY_SEARCH_PATHS == expected_flags
+        assert project.objects['7'].buildSettings.LIBRARY_SEARCH_PATHS == expected_flags
+        assert project.objects['8'].buildSettings.LIBRARY_SEARCH_PATHS == expected_flags
 
     def testAddFileWithAbsolutePathDoesNotExist(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file(os.path.abspath("samples/unexistingFile.m"))
 
         # nothing to do if the file is absolute but doesn't exist
-        self.assertIsNone(build_file)
+        assert build_file is None
 
     def testAddFileWithAbsolutePathOnUnknownTree(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file(os.path.abspath("samples/test with spaces.framework"), tree='DEVELOPER_DIR')
 
-        self.assertEqual(project.objects[build_file[0].fileRef].sourceTree, TreeType.ABSOLUTE)
-        self.assertEqual(project.objects[build_file[1].fileRef].sourceTree, TreeType.ABSOLUTE)
-        self.assertEqual(project.objects[build_file[2].fileRef].sourceTree, TreeType.ABSOLUTE)
-        self.assertEqual(project.objects[build_file[3].fileRef].sourceTree, TreeType.ABSOLUTE)
+        assert project.objects[build_file[0].fileRef].sourceTree == TreeType.ABSOLUTE
+        assert project.objects[build_file[1].fileRef].sourceTree == TreeType.ABSOLUTE
+        assert project.objects[build_file[2].fileRef].sourceTree == TreeType.ABSOLUTE
+        assert project.objects[build_file[3].fileRef].sourceTree == TreeType.ABSOLUTE
 
     def testAddReferenceFile(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")
         build_file = project.add_file(os.path.abspath("samples/dirA"))
 
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 2)
+        assert project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 2
 
     def testAddFileIfExists(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file("file.m", force=False)
 
         # 2 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 2)
+        assert project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 2
 
         build_file = project.add_file("file.m", force=False)
-        self.assertEqual(build_file, [])
+        assert build_file == []
 
     def testAddFileIfExistsToMissingTargets(self):
         project = XcodeProject(self.obj)
         build_file = project.add_file("file.m", target_name='app', force=False)
 
         # 1 source files are created 1 x target
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 1)
-        self.assertEqual(build_file.__len__(), 1)
+        assert project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__() == 1
+        assert build_file.__len__() == 1
 
         build_file = project.add_file("file.m", force=False)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 1)
+        assert project.objects.get_objects_in_section(u'PBXSourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 1
 
     def testAddFileOfAllTypes(self):
         for ext in ProjectFiles._FILE_TYPES:
@@ -200,41 +201,41 @@ class ProjectFilesTest(unittest.TestCase):
             if phase is not None:
                 amount = 2
 
-            self.assertEqual(project.objects.get_objects_in_section(phase).__len__(), amount)
-            self.assertEqual(build_file.__len__(), amount)
+            assert project.objects.get_objects_in_section(phase).__len__() == amount
+            assert build_file.__len__() == amount
 
     def testGetFilesByNameWithNoParent(self):
         project = XcodeProject(self.obj)
         files = project.get_files_by_name('file')
 
-        self.assertEqual(files.__len__(), 3)
+        assert files.__len__() == 3
 
     def testGetFilesByNameWithParent(self):
         project = XcodeProject(self.obj)
 
         files = project.get_files_by_name('file', 'group2')
-        self.assertEqual(files.__len__(), 2)
+        assert files.__len__() == 2
 
         files = project.get_files_by_name('file', 'group3')
-        self.assertEqual(files.__len__(), 1)
+        assert files.__len__() == 1
 
     def testGetFilesByNameWithoutName(self):
         project = XcodeProject(self.obj)
         files = project.get_files_by_name('file1')
 
-        self.assertEqual(files.__len__(), 2)
+        assert files.__len__() == 2
 
     def testGetFileByPathWithNoTree(self):
         project = XcodeProject(self.obj)
 
         files = project.get_files_by_path('file')
-        self.assertEqual(files.__len__(), 2)
+        assert files.__len__() == 2
 
     def testGetFileByPathWithTree(self):
         project = XcodeProject(self.obj)
 
         files = project.get_files_by_path('file', TreeType.SDKROOT)
-        self.assertEqual(files.__len__(), 1)
+        assert files.__len__() == 1
 
     def testRemoveFileById(self):
         project = XcodeProject(self.obj)
@@ -244,8 +245,8 @@ class ProjectFilesTest(unittest.TestCase):
         file = project.get_files_by_name('file.m')[0]
         result = project.remove_file_by_id(file.get_id())
 
-        self.assertTrue(result)
-        self.assertEqual(project.__str__(), original)
+        assert result
+        assert project.__str__() == original
 
     def testRemoveFileByIdKeepShellScriptBuildPhases(self):
         project = XcodeProject(self.obj)
@@ -257,8 +258,8 @@ class ProjectFilesTest(unittest.TestCase):
         file = project.get_files_by_name('file.m')[0]
         result = project.remove_file_by_id(file.get_id())
 
-        self.assertTrue(result)
-        self.assertEqual(project.__str__(), original)
+        assert result
+        assert project.__str__() == original
 
     def testRemoveFileByIdFromTarget(self):
         project = XcodeProject(self.obj)
@@ -267,16 +268,16 @@ class ProjectFilesTest(unittest.TestCase):
         file_ref = project.get_files_by_name('file.m')[0]
         result = project.remove_file_by_id(file_ref.get_id(), target_name='report')
 
-        self.assertTrue(result)
-        self.assertIsNotNone(project.objects[file_ref.get_id()])
-        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 3)
-        self.assertEqual(project.objects.get_objects_in_section('PBXSourcesBuildPhase').__len__(), 1)
+        assert result
+        assert project.objects[file_ref.get_id()] is not None
+        assert project.objects.get_objects_in_section('PBXBuildFile').__len__() == 3
+        assert project.objects.get_objects_in_section('PBXSourcesBuildPhase').__len__() == 1
 
     def testRemoveFileByIdOnlyFiles(self):
         project = XcodeProject(self.obj)
         result = project.remove_file_by_id('group1')
 
-        self.assertFalse(result)
+        assert not result
 
     def testRemoveFilesByPath(self):
         project = XcodeProject(self.obj)
@@ -285,14 +286,14 @@ class ProjectFilesTest(unittest.TestCase):
 
         result = project.remove_files_by_path('file.m')
 
-        self.assertTrue(result)
-        self.assertEqual(project.__str__(), original)
+        assert result
+        assert project.__str__() == original
 
     def testAddFolderNotAFolder(self):
         project = XcodeProject(self.obj)
         result = project.add_folder('samples/testLibrary.a')
 
-        self.assertIsNone(result)
+        assert result is None
 
     def testAddFolderNonRecursive(self):
         project = XcodeProject(self.obj)
@@ -302,12 +303,12 @@ class ProjectFilesTest(unittest.TestCase):
         samples = project.get_groups_by_name('samples')
         dir_a = project.get_groups_by_name('dirA')
         dir_b = project.get_groups_by_name('dirB')
-        self.assertNotEqual(samples, [])
-        self.assertNotEqual(dir_a, [])
-        self.assertEqual(dir_b, [])
+        assert samples != []
+        assert dir_a != []
+        assert dir_b == []
 
-        self.assertEqual(samples[0].children.__len__(), 3) # dirA, test with spaces.framework, testLibrary.a
-        self.assertEqual(dir_a[0].children.__len__(), 0)
+        assert samples[0].children.__len__() == 3 # dirA, test with spaces.framework, testLibrary.a
+        assert dir_a[0].children.__len__() == 0
 
     def testAddFolderRecursive(self):
         project = XcodeProject(self.obj)
@@ -317,13 +318,13 @@ class ProjectFilesTest(unittest.TestCase):
         samples = project.get_groups_by_name('samples')
         dir_a = project.get_groups_by_name('dirA')
         dir_b = project.get_groups_by_name('dirB')
-        self.assertNotEqual(samples, [])
-        self.assertNotEqual(dir_a, [])
-        self.assertNotEqual(dir_b, [])
+        assert samples != []
+        assert dir_a != []
+        assert dir_b != []
 
-        self.assertEqual(samples[0].children.__len__(), 3) # dirA, test with spaces.framework, testLibrary.a
-        self.assertEqual(dir_a[0].children.__len__(), 2)  # dirB, fileA.m
-        self.assertEqual(dir_b[0].children.__len__(), 2)  # fileB.m, fileB.h
+        assert samples[0].children.__len__() == 3 # dirA, test with spaces.framework, testLibrary.a
+        assert dir_a[0].children.__len__() == 2  # dirB, fileA.m
+        assert dir_b[0].children.__len__() == 2  # fileB.m, fileB.h
 
     def testAddFolderWithExclusions(self):
         project = XcodeProject(self.obj)
@@ -333,21 +334,21 @@ class ProjectFilesTest(unittest.TestCase):
         samples = project.get_groups_by_name('samples')
         dir_a = project.get_groups_by_name('dirA')
         dir_b = project.get_groups_by_name('dirB')
-        self.assertNotEqual(samples, [])
-        self.assertNotEqual(dir_a, [])
-        self.assertNotEqual(dir_b, [])
+        assert samples != []
+        assert dir_a != []
+        assert dir_b != []
 
-        self.assertEqual(samples[0].children.__len__(), 2)  # dirA, -test with spaces.framework, -testLibrary.a
-        self.assertEqual(dir_a[0].children.__len__(), 1)  # dirB, -fileA.m
-        self.assertEqual(dir_b[0].children.__len__(), 1)  # -fileB.m, +fileB.h
+        assert samples[0].children.__len__() == 2  # dirA, -test with spaces.framework, -testLibrary.a
+        assert dir_a[0].children.__len__() == 1  # dirB, -fileA.m
+        assert dir_b[0].children.__len__() == 1  # -fileB.m, +fileB.h
 
     def testAddFolderAsReference(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")
         build_file = project.add_folder('samples', create_groups=False)
 
-        self.assertListEqual(project.get_groups_by_name('samples'), [])
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__(), 2)
-        self.assertEqual(build_file.__len__(), 2)
+        assert project.get_groups_by_name('samples') == []
+        assert project.objects.get_objects_in_section(u'PBXResourcesBuildPhase').__len__() == 2
+        assert build_file.__len__() == 2
 
     def testAddFolderWithPathSameAsName(self):
         project = XcodeProject(self.obj, path="tests/project.pbxproj")
@@ -359,17 +360,17 @@ class ProjectFilesTest(unittest.TestCase):
         target_path = 'parent_group/samples'
         project.add_folder(parent=parent_group, path=target_path, file_options=FileOptions(add_groups_relative=False))
 
-        self.assertEqual(project.get_or_create_group('samples').path, os.path.abspath(target_path))
+        assert project.get_or_create_group('samples').path == os.path.abspath(target_path)
 
         shutil.rmtree('parent_group')
 
     def testEmbedFrameworkInRightCopySection(self):
         project = XcodeProject(self.obj)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 1)
+        assert project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__() == 1
 
         project.add_file('X.framework', file_options=FileOptions(embed_framework=True))
 
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__(), 3)
+        assert project.objects.get_objects_in_section(u'PBXCopyFilesBuildPhase').__len__() == 3
 
     def testAddProjectWithBuildPhases(self):
         project = XcodeProject(self.obj)
@@ -380,15 +381,15 @@ class ProjectFilesTest(unittest.TestCase):
 
         reference_proxies = project.add_project('samplescli/dependency.xcodeproj')
 
-        self.assertEqual(reference_proxies.__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+        assert reference_proxies.__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__() == 1
 
         # check that the buildFiles where added
-        self.assertGreater(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
-        self.assertGreater(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
-        self.assertGreater(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+        assert project.objects.get_objects_in_section('PBXBuildFile').__len__() > build_files
+        assert project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__() > frameworks
+        assert project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__() > resources
 
     def testAddProjectWithoutBuildPhases(self):
         project = XcodeProject(self.obj)
@@ -399,15 +400,15 @@ class ProjectFilesTest(unittest.TestCase):
 
         reference_proxies = project.add_project('samplescli/dependency.xcodeproj', file_options=FileOptions(create_build_files=False))
 
-        self.assertEqual(reference_proxies.__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__(), 1)
+        assert reference_proxies.__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXContainerItemProxy').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXReferenceProxy').__len__() == 2
+        assert project.objects.get_objects_in_section(u'PBXProject')[0].projectReferences.__len__() == 1
 
         # check that the buildFiles where added
-        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), build_files)
-        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__(), frameworks)
-        self.assertEqual(project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__(), resources)
+        assert project.objects.get_objects_in_section('PBXBuildFile').__len__() == build_files
+        assert project.objects.get_objects_in_section('PBXFrameworksBuildPhase').__len__() == frameworks
+        assert project.objects.get_objects_in_section('PBXResourcesBuildPhase').__len__() == resources
 
     def testAddProjectNotForced(self):
         project = XcodeProject(self.obj)
@@ -416,14 +417,14 @@ class ProjectFilesTest(unittest.TestCase):
         reference_proxies = project.add_project('samplescli/dependency.xcodeproj', force=False,
                                                 file_options=FileOptions(create_build_files=False))
 
-        self.assertListEqual(reference_proxies, [])
+        assert reference_proxies == []
 
     def testAddProjectDoesntExists(self):
         project = XcodeProject(self.obj)
         reference_proxies = project.add_project(os.path.abspath("samples/unexistingFile.m"))
 
         # nothing to do if the file is absolute but doesn't exist
-        self.assertIsNone(reference_proxies)
+        assert reference_proxies is None
 
     def testAddHeaderFilePublic(self):
         project = XcodeProject({
@@ -437,12 +438,12 @@ class ProjectFilesTest(unittest.TestCase):
             }
         })
 
-        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() == 0
 
         references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PUBLIC))
 
-        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
-        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Public'])
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() > 0
+        assert references[0].settings.ATTRIBUTES == ['Public']
 
 
     def testAddHeaderFilePrivate(self):
@@ -457,12 +458,12 @@ class ProjectFilesTest(unittest.TestCase):
             }
         })
 
-        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() == 0
 
         references = project.add_file("header.h", file_options=FileOptions(header_scope=HeaderScope.PRIVATE))
 
-        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
-        self.assertListEqual(references[0].settings.ATTRIBUTES, ['Private'])
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() > 0
+        assert references[0].settings.ATTRIBUTES == ['Private']
 
     def testAddHeaderFileProjectScope(self):
         project = XcodeProject({
@@ -476,12 +477,12 @@ class ProjectFilesTest(unittest.TestCase):
             }
         })
 
-        self.assertEqual(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() == 0
 
         references = project.add_file("header.h", file_options=FileOptions())
 
-        self.assertGreater(project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__(), 0)
-        self.assertIsNone(references[0]['settings'], None)
+        assert project.get_build_phases_by_name(u'PBXHeadersBuildPhase').__len__() > 0
+        assert references[0]['settings'] is None, None
 
     def testAddPackage(self):
         project = XcodeProject({
@@ -495,14 +496,14 @@ class ProjectFilesTest(unittest.TestCase):
             "minimumVersion": "5.0.1"}, 'some-package', 'app')
 
         # create swift package reference and its entry into PBXProject package references
-        self.assertIsInstance(results[0], XCRemoteSwiftPackageReference)
-        self.assertEqual(project.objects.get_objects_in_section('PBXProject')[0].packageReferences.__len__(), 1)
+        assert isinstance(results[0], XCRemoteSwiftPackageReference)
+        assert project.objects.get_objects_in_section('PBXProject')[0].packageReferences.__len__() == 1
         # create package product dependency and its entry into PBXNativeTarget package product depedency, 
         # PBXBuildFile and PBXFrameworksBuildPhase
-        self.assertIsInstance(results[1], XCSwiftPackageProductDependency)
-        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 1)
-        self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 1)
-        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 1)
+        assert isinstance(results[1], XCSwiftPackageProductDependency)
+        assert project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__() == 1
+        assert project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__() == 1
+        assert project.objects.get_objects_in_section('PBXBuildFile').__len__() == 1
 
     def testAddPackageWithTwoProducts(self):
         project = XcodeProject({
@@ -517,11 +518,11 @@ class ProjectFilesTest(unittest.TestCase):
 
         # create two package product dependency and their entry into PBXNativeTarget package product depedency, 
         # PBXBuildFile and PBXFrameworksBuildPhase
-        self.assertIsInstance(results[1], XCSwiftPackageProductDependency)
-        self.assertIsInstance(results[2], XCSwiftPackageProductDependency)
-        self.assertEqual(project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__(), 2)
-        self.assertEqual(project.objects.get_objects_in_section('PBXBuildFile').__len__(), 2)
+        assert isinstance(results[1], XCSwiftPackageProductDependency)
+        assert isinstance(results[2], XCSwiftPackageProductDependency)
+        assert project.objects.get_objects_in_section('PBXFrameworksBuildPhase')[0].files.__len__() == 2
+        assert project.objects.get_objects_in_section('PBXNativeTarget')[0].packageProductDependencies.__len__() == 2
+        assert project.objects.get_objects_in_section('PBXBuildFile').__len__() == 2
 
     def testGetPackageReference(self):
         project = XcodeProject({
@@ -531,7 +532,7 @@ class ProjectFilesTest(unittest.TestCase):
         })
 
         result = project.get_or_create_package_reference('http://myrepo.com/some-package', {})
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def testGetPackageDependency(self):
         project = XcodeProject({
@@ -541,4 +542,4 @@ class ProjectFilesTest(unittest.TestCase):
         })
 
         result = project.get_or_create_package_dependency('Some Product', '', {})
-        self.assertIsNotNone(result)
+        assert result is not None

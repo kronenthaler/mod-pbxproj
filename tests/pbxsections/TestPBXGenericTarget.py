@@ -14,7 +14,7 @@ class PBXGenericTargetTest(unittest.TestCase):
 
         build_phases = project.objects['1'].get_or_create_build_phase("PBXGenericBuildPhase")
 
-        self.assertListEqual(build_phases, [project.objects["2"]])
+        assert build_phases == [project.objects["2"]]
 
     def testRemoveBuildPhaseFailed(self):
         project = XcodeProject({
@@ -26,4 +26,4 @@ class PBXGenericTargetTest(unittest.TestCase):
 
         result = project.objects['1'].remove_build_phase(None)
 
-        self.assertFalse(result)
+        assert not result

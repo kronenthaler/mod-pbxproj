@@ -3,6 +3,7 @@ import shutil
 import unittest
 
 from pbxproj import XcodeProject
+import re
 
 
 class XCodeProjectTest(unittest.TestCase):
@@ -47,62 +48,62 @@ class XCodeProjectTest(unittest.TestCase):
     def testSaveOnGivenPath(self):
         XcodeProject().save("results/sample")
 
-        self.assertTrue(os.path.exists("results/sample"))
+        assert os.path.exists("results/sample")
 
     def testSaveOnDefaultPath(self):
         XcodeProject({}, "results/default").save()
 
-        self.assertTrue(os.path.exists("results/default"))
+        assert os.path.exists("results/default")
 
     def testBackup(self):
         project = XcodeProject({}, 'results/default')
         project.save('results/default')
         backup_name = project.backup()
 
-        self.assertRegex(backup_name, r'_[0-9]{6}-[0-9]{6}\.backup')
+        assert re.search(r'_[0-9]{6}-[0-9]{6}\.backup', backup_name)
 
     def testGetIds(self):
         project = XcodeProject({'objects':{'1':{'isa':'a'}, '2':{'isa':'a'}}})
 
-        self.assertListEqual(project.get_ids(), ['1', '2'])
+        assert project.get_ids() == ['1', '2']
 
     def testGetBuildFilesForFile(self):
         project = XcodeProject(self.obj)
 
         build_files = project.get_build_files_for_file('file1')
-        self.assertListEqual(build_files, [project.objects['build_file1']])
+        assert build_files == [project.objects['build_file1']]
 
     def testGetTargetByNameExisting(self):
         project = XcodeProject(self.obj)
 
         target = project.get_target_by_name('app')
-        self.assertEqual(target, project.objects['1'])
+        assert target == project.objects['1']
 
     def testGetTargetByNameNonExisting(self):
         project = XcodeProject(self.obj)
 
         target = project.get_target_by_name('non-existing')
-        self.assertIsNone(target)
+        assert target is None
 
     def testGetBuildPhasesByName(self):
         project = XcodeProject(self.obj)
 
         build_phases = project.get_build_phases_by_name('PBXGenericBuildPhase')
-        self.assertEqual(build_phases.__len__(), 2)
+        assert build_phases.__len__() == 2
 
     def testGetBuildConfigurationsByTarget(self):
         project = XcodeProject(self.obj)
 
         build_configurations = project.get_build_configurations_by_target(
             'app')
-        self.assertListEqual(build_configurations, ['Release', 'Debug'])
+        assert build_configurations == ['Release', 'Debug']
 
     def testGetBuildConfigurationsByTargetNotExistent(self):
         project = XcodeProject(self.obj)
 
         build_configurations = project.get_build_configurations_by_target(
             'appThatDoesNotExists')
-        self.assertIsNone(build_configurations)
+        assert build_configurations is None
 
     def testConsistency(self):
         with open('samplescli/massive.pbxproj', 'r') as file:
@@ -110,5 +111,5 @@ class XCodeProjectTest(unittest.TestCase):
             project = XcodeProject.load('samplescli/massive.pbxproj')
             saved = project.__repr__() + '\n'
 
-            self.assertEqual(saved, original)
+            assert saved == original
 

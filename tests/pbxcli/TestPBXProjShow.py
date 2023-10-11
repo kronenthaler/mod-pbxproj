@@ -25,15 +25,15 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('testUITests:', result)
-        self.assertIn('Product name: testUITests', result)
-        self.assertIn('Configurations: Debug, Release', result)
-        self.assertIn('Sources (PBXSourcesBuildPhase) file count: 1', result)
+        assert 'testUITests:' in result
+        assert 'Product name: testUITests' in result
+        assert 'Configurations: Debug, Release' in result
+        assert 'Sources (PBXSourcesBuildPhase) file count: 1' in result
 
-        self.assertIn('test:', result)
-        self.assertIn('Product name: test\n', result)
-        self.assertIn('Configurations: Debug, Release', result)
-        self.assertIn('Sources (PBXSourcesBuildPhase) file count: 2', result)
+        assert 'test:' in result
+        assert 'Product name: test\n' in result
+        assert 'Configurations: Debug, Release' in result
+        assert 'Sources (PBXSourcesBuildPhase) file count: 2' in result
 
     def testShowTargetBasicInfo(self):
         args = {
@@ -49,11 +49,11 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertNotIn('testUITests:', result)
-        self.assertNotIn('Product name: testUITests', result)
+        assert 'testUITests:' not in result
+        assert 'Product name: testUITests' not in result
 
-        self.assertIn('test:', result)
-        self.assertIn('Product name: test\n', result)
+        assert 'test:' in result
+        assert 'Product name: test\n' in result
 
     def testShowTargetConfigurations(self):
         args = {
@@ -69,9 +69,9 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('test:', result)
-        self.assertIn('Product name: test\n', result)
-        self.assertIn('Configurations: Debug, Release\n', result)
+        assert 'test:' in result
+        assert 'Product name: test\n' in result
+        assert 'Configurations: Debug, Release\n' in result
 
     def testShowTargetSources(self):
         args = {
@@ -87,11 +87,11 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('test:', result)
-        self.assertIn('Product name: test\n', result)
-        self.assertIn('Sources:', result)
-        self.assertIn('AppDelegate.swift', result)
-        self.assertIn('VīęwČøntröłler.swift', result)
+        assert 'test:' in result
+        assert 'Product name: test\n' in result
+        assert 'Sources:' in result
+        assert 'AppDelegate.swift' in result
+        assert 'VīęwČøntröłler.swift' in result
 
     def testShowTargetResources(self):
         args = {
@@ -107,12 +107,12 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('test:', result)
-        self.assertIn('Product name: test\n', result)
-        self.assertIn('Resources:', result)
-        self.assertIn('Assets.xcassets', result)
-        self.assertIn('LaunchScreen.storyboard', result)
-        self.assertIn('Main.storyboard', result)
+        assert 'test:' in result
+        assert 'Product name: test\n' in result
+        assert 'Resources:' in result
+        assert 'Assets.xcassets' in result
+        assert 'LaunchScreen.storyboard' in result
+        assert 'Main.storyboard' in result
 
     def testShowTargetHeaders(self):
         args = {
@@ -128,11 +128,11 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('helloworld:', result)
-        self.assertIn('Product name: helloworld\n', result)
-        self.assertIn('Headers:', result)
-        self.assertIn('doit.h', result)
-        self.assertIn('helloworld.h', result)
+        assert 'helloworld:' in result
+        assert 'Product name: helloworld\n' in result
+        assert 'Headers:' in result
+        assert 'doit.h' in result
+        assert 'helloworld.h' in result
 
     def testShowTargetFrameworks(self):
         args = {
@@ -148,10 +148,10 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('helloworld:', result)
-        self.assertIn('Product name: helloworld\n', result)
-        self.assertIn('Frameworks:', result)
-        self.assertIn('AppKit.framework', result)
+        assert 'helloworld:' in result
+        assert 'Product name: helloworld\n' in result
+        assert 'Frameworks:' in result
+        assert 'AppKit.framework' in result
 
     def testShowTargetExplicitBuildPhase(self):
         args = {
@@ -167,7 +167,7 @@ class PBXProjShowTest(unittest.TestCase):
         project = open_project(args)
         result = pbxproj_show.execute(project, args)
 
-        self.assertIn('helloworld:', result)
-        self.assertIn('Product name: helloworld\n', result)
-        self.assertIn('Frameworks:', result)
-        self.assertIn('AppKit.framework', result)
+        assert 'helloworld:' in result
+        assert 'Product name: helloworld\n' in result
+        assert 'Frameworks:' in result
+        assert 'AppKit.framework' in result

@@ -8,4 +8,4 @@ class PBXKeyTest(unittest.TestCase):
         key = PBXKey("123", None)
         key._get_comment = lambda: "comment"
 
-        self.assertEqual(key.__repr__(), "123 /* comment */")
+        assert key.__repr__() == "123 /* comment */"
