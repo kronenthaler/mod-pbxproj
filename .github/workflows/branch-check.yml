@@ -15,16 +15,16 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.x']
+        python: ['3.8', '3.9', '3.10', '3.11', '3.x']
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
