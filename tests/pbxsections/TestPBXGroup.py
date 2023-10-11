@@ -28,67 +28,67 @@ class PBXGroupTests(unittest.TestCase):
 
     def testCreateWithoutName(self):
         group = PBXGroup.create('folder_name')
-        self.assertFalse(u'name' in group)
-        self.assertEqual(group.path, 'folder_name')
+        assert not (u'name' in group)
+        assert group.path == 'folder_name'
 
     def testCreateWithName(self):
         group = PBXGroup.create('folder_name', 'Friendly Name')
-        self.assertTrue(u'name' in group)
-        self.assertEqual(group.path, 'folder_name')
-        self.assertEqual(group.name, 'Friendly Name')
+        assert u'name' in group
+        assert group.path == 'folder_name'
+        assert group.name == 'Friendly Name'
 
     def testGetNameWithoutName(self):
         group = PBXGroup.create('folder_name')
-        self.assertEqual(group.get_name(), 'folder_name')
+        assert group.get_name() == 'folder_name'
 
     def testGetNameWithName(self):
         group = PBXGroup.create('folder_name', 'Friendly Name')
-        self.assertEqual(group.get_name(), 'Friendly Name')
+        assert group.get_name() == 'Friendly Name'
 
     def testHasChild(self):
         group = PBXGroup.create('folder_name', children=['child1', 'child2'])
-        self.assertTrue(group.has_child('child1'))
-        self.assertTrue(group.has_child('child2'))
-        self.assertFalse(group.has_child('child3'))
+        assert group.has_child('child1')
+        assert group.has_child('child2')
+        assert not group.has_child('child3')
 
     def testHasChildIncomplete(self):
         group = PBXGroup().parse({'name': 'group'})
-        self.assertFalse(group.has_child('child1'))
+        assert not group.has_child('child1')
 
     def testAddInvalidChild(self):
         group = PBXGroup().parse({'name': 'group'})
         invalid_group = PBXGenericObject().parse({'_id': "not-a-group"})
         group.add_child(invalid_group)
-        self.assertFalse(group.has_child(invalid_group))
+        assert not group.has_child(invalid_group)
 
     def testRemoveGroupRecusively(self):
         objs = objects().parse(self.obj)
         objs["1"].remove()
 
-        self.assertIsNone(objs["1"])
-        self.assertIsNone(objs["2"])
-        self.assertIsNone(objs["3"])
-        self.assertIsNone(objs["3a"])
-        self.assertIsNone(objs["4"])
-        self.assertIsNone(objs["5"])
-        self.assertIsNone(objs["5a"])
-        self.assertIsNone(objs["6"])
-        self.assertIsNone(objs["6a"])
-        self.assertEqual(objs["bp"].files, [])
-        self.assertEqual(objs["z1"].children, [])
+        assert objs["1"] is None
+        assert objs["2"] is None
+        assert objs["3"] is None
+        assert objs["3a"] is None
+        assert objs["4"] is None
+        assert objs["5"] is None
+        assert objs["5a"] is None
+        assert objs["6"] is None
+        assert objs["6a"] is None
+        assert objs["bp"].files == []
+        assert objs["z1"].children == []
 
     def testRemoveGroupNonRecusively(self):
         objs = objects().parse(self.obj)
         objs["1"].remove(recursive=False)
 
-        self.assertIsNone(objs["1"])
-        self.assertIsNotNone(objs["2"])
-        self.assertIsNotNone(objs["3"])
-        self.assertIsNotNone(objs["3a"])
-        self.assertIsNotNone(objs["4"])
-        self.assertIsNotNone(objs["5"])
-        self.assertIsNotNone(objs["5a"])
-        self.assertIsNotNone(objs["6"])
-        self.assertIsNotNone(objs["6a"])
-        self.assertNotEqual(objs["bp"].files, [])
-        self.assertNotEqual(objs["z1"].children, [])
+        assert objs["1"] is None
+        assert objs["2"] is not None
+        assert objs["3"] is not None
+        assert objs["3a"] is not None
+        assert objs["4"] is not None
+        assert objs["5"] is not None
+        assert objs["5a"] is not None
+        assert objs["6"] is not None
+        assert objs["6a"] is not None
+        assert objs["bp"].files != []
+        assert objs["z1"].children != []

@@ -10,47 +10,47 @@ class PBXObjectTest(unittest.TestCase):
         obj = [1, 2, 3]
         dobj = objects().parse(obj)
 
-        self.assertIsInstance(dobj, list)
+        assert isinstance(dobj, list)
 
     def testGetKeys(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         keys = dobj.get_keys()
 
-        self.assertListEqual(keys, ['1', '2', '3'])
+        assert keys == ['1', '2', '3']
 
     def testParseGroupsPhases(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
 
-        self.assertEqual(dobj._sections.__len__(), 2)
-        self.assertEqual(dobj._sections['phase1'].__len__(), 2)
-        self.assertEqual(dobj._sections['phase2'].__len__(), 1)
+        assert dobj._sections.__len__() == 2
+        assert dobj._sections['phase1'].__len__() == 2
+        assert dobj._sections['phase2'].__len__() == 1
 
     def testPrintSeparateSections(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         string = dobj.__repr__()
 
-        self.assertTrue(string.__contains__('/* Begin phase1 section */'))
-        self.assertTrue(string.__contains__('/* End phase1 section */'))
-        self.assertTrue(string.__contains__('/* Begin phase2 section */'))
-        self.assertTrue(string.__contains__('/* End phase2 section */'))
+        assert string.__contains__('/* Begin phase1 section */')
+        assert string.__contains__('/* End phase1 section */')
+        assert string.__contains__('/* Begin phase2 section */')
+        assert string.__contains__('/* End phase2 section */')
 
     def testGetItem(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
-        self.assertIsNotNone(dobj['1'])
-        self.assertIsNone(dobj['4'])
+        assert dobj['1'] is not None
+        assert dobj['4'] is None
 
     def testContains(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
-        self.assertTrue('1' in dobj)
-        self.assertFalse('4' in dobj)
+        assert '1' in dobj
+        assert not ('4' in dobj)
 
     def testGetObjectsInsection(self):
         dobj = objects().parse(PBXObjectTest.MINIMUM_OBJ)
         sections = dobj.get_objects_in_section('phase1', 'phase2')
 
-        self.assertSetEqual(set(sections).intersection(dobj._sections['phase1']), set(dobj._sections['phase1']))
-        self.assertSetEqual(set(sections).intersection(dobj._sections['phase2']), set(dobj._sections['phase2']))
-        self.assertEqual(dobj.get_objects_in_section('phaseX'), [])
+        assert set(sections).intersection(dobj._sections['phase1']) == set(dobj._sections['phase1'])
+        assert set(sections).intersection(dobj._sections['phase2']) == set(dobj._sections['phase2'])
+        assert dobj.get_objects_in_section('phaseX') == []
 
     def testGetTargets(self):
         obj = {
@@ -60,11 +60,11 @@ class PBXObjectTest(unittest.TestCase):
         }
         dobj = objects().parse(obj)
 
-        self.assertEqual(dobj.get_targets().__len__(), 3)
-        self.assertEqual(dobj.get_targets('app').__len__(), 1)
-        self.assertEqual(dobj.get_targets('report').__len__(), 1)
-        self.assertEqual(dobj.get_targets('whatever').__len__(), 0)
-        self.assertEqual(dobj.get_targets(['app', 'something']).__len__(), 2)
+        assert dobj.get_targets().__len__() == 3
+        assert dobj.get_targets('app').__len__() == 1
+        assert dobj.get_targets('report').__len__() == 1
+        assert dobj.get_targets('whatever').__len__() == 0
+        assert dobj.get_targets(['app', 'something']).__len__() == 2
 
     def testGetConfigurationTargets(self):
         obj = {
@@ -80,16 +80,16 @@ class PBXObjectTest(unittest.TestCase):
         dobj = objects().parse(obj)
 
         result = [x for x in dobj.get_configurations_on_targets()]
-        self.assertEqual(result.__len__(), 4)
-        self.assertSetEqual({x.id for x in result}, {'5', '6', '7', '8'})
+        assert result.__len__() == 4
+        assert {x.id for x in result} == {'5', '6', '7', '8'}
 
         result = [x for x in dobj.get_configurations_on_targets(target_name='app')]
-        self.assertEqual(result.__len__(), 2)
-        self.assertSetEqual({x.id for x in result}, {'5', '6'})
+        assert result.__len__() == 2
+        assert {x.id for x in result} == {'5', '6'}
 
         result = [x for x in dobj.get_configurations_on_targets(configuration_name='Release')]
-        self.assertSetEqual({x.id for x in result}, {'5', '7'})
+        assert {x.id for x in result} == {'5', '7'}
 
         result = [x for x in dobj.get_configurations_on_targets(target_name='app', configuration_name='Release')]
-        self.assertEqual(result.__len__(), 1)
-        self.assertSetEqual({x.id for x in result}, {'5'})
+        assert result.__len__() == 1
+        assert {x.id for x in result} == {'5'}

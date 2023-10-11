@@ -30,14 +30,14 @@ class TestPBXProjFlag(unittest.TestCase):
         project = open_project(args)
 
         for configuration in project.objects.get_configurations_on_targets(args['--target'], args['--configuration']):
-            self.assertTrue('MYFLAG' not in configuration.buildSettings)
+            assert 'MYFLAG' not in configuration.buildSettings
 
         result = pbxproj_flag.execute(project, args)
-        self.assertEqual(result, 'Flags added successfully.')
+        assert result == 'Flags added successfully.'
 
         for configuration in project.objects.get_configurations_on_targets(args['--target'], args['--configuration']):
-            self.assertTrue('MYFLAG' in configuration.buildSettings)
-            self.assertListEqual(configuration.buildSettings['MYFLAG'], ['-ObjC', '-all'])
+            assert 'MYFLAG' in configuration.buildSettings
+            assert configuration.buildSettings['MYFLAG'] == ['-ObjC', '-all']
 
     def testRemoveFlags(self):
         args = {
@@ -53,7 +53,7 @@ class TestPBXProjFlag(unittest.TestCase):
         project.add_flags('MYFLAG', ['-ObjC', '-all'])
 
         result = pbxproj_flag.execute(project, args)
-        self.assertEqual(result, 'Flags removed successfully.')
+        assert result == 'Flags removed successfully.'
 
         for configuration in project.objects.get_configurations_on_targets(args['--target'], args['--configuration']):
-            self.assertTrue('MYFLAG' not in configuration.buildSettings)
+            assert 'MYFLAG' not in configuration.buildSettings
