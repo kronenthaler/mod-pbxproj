@@ -18,3 +18,4 @@ from pbxproj.pbxsections.PBXReferenceProxy import *
 from pbxproj.pbxsections.PBXGroup import *
 from pbxproj.pbxsections.XCSwiftPackageProductDependency import *
 from pbxproj.pbxsections.XCRemoteSwiftPackageReference import *
+from pbxproj.pbxsections.XCLocalSwiftPackageReference import *
