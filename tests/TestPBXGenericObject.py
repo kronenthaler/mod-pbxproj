@@ -27,6 +27,7 @@ class PBXGenericObjectTest(unittest.TestCase):
 
     def testEscapeItem(self):
         assert PBXGenericObject._escape("/bin/sh") == "/bin/sh"
+        assert PBXGenericObject._escape("/bin/sh\n") == '"/bin/sh\\n"'
         assert PBXGenericObject._escape("abcdefghijklmnopqrstuvwyz0123456789") == \
                          "abcdefghijklmnopqrstuvwyz0123456789"
         assert PBXGenericObject._escape("some spaces") == '"some spaces"'
