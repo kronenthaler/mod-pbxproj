@@ -39,7 +39,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        if: github.event_name == 'pull_request' && matrix.python == '3.x'
+        if: github.event_name == 'pull_request' && matrix.python == '3.x' && github.event.pull_request.head.repo.full_name != github.repository
         with:
           args: >
             -Dsonar.projectVersion=${{ env.VERSION }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        if: github.event_name == 'push' && matrix.python == '3.x'
+        if: github.event_name == 'push' && matrix.python == '3.x' && github.event.pull_request.head.repo.full_name != github.repository
         with:
           args: >
             -Dsonar.projectVersion=${{ env.VERSION }}
