@@ -116,7 +116,8 @@ class ProjectFiles:
         '.html':('text.html', 'PBXResourcesBuildPhase'),
         '.entitlements': ('text.plist.entitlements', 'PBXResourcesBuildPhase'),
         '.xcprivacy': ('text.plist.xml', 'PBXResourcesBuildPhase'),
-        '.md': ('text', 'PBXResourcesBuildPhase')
+        '.md': ('text', 'PBXResourcesBuildPhase'),
+        '.blend': ('file.blender', 'PBXResourcesBuildPhase')
     }
     _SPECIAL_FOLDERS = [
         '.bundle',
