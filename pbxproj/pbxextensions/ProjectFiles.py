@@ -118,7 +118,8 @@ class ProjectFiles:
         '.xcprivacy': ('text.plist.xml', 'PBXResourcesBuildPhase'),
         '.md': ('text', 'PBXResourcesBuildPhase'),
         '.blend': ('file.blender', 'PBXResourcesBuildPhase'),
-        '.xcf': ('file.xcf', 'PBXResourcesBuildPhase')
+        '.xcf': ('file.xcf', 'PBXResourcesBuildPhase'),
+        '.scene': ('file.scene', 'PBXResourcesBuildPhase')
     }
     _SPECIAL_FOLDERS = [
         '.bundle',
