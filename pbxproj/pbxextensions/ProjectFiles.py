@@ -115,7 +115,8 @@ class ProjectFiles:
         '.mlmodel':('file.mlmodel', 'PBXSourcesBuildPhase'),
         '.html':('text.html', 'PBXResourcesBuildPhase'),
         '.entitlements': ('text.plist.entitlements', 'PBXResourcesBuildPhase'),
-        '.xcprivacy': ('text.plist.xml', 'PBXResourcesBuildPhase')
+        '.xcprivacy': ('text.plist.xml', 'PBXResourcesBuildPhase'),
+        '.md': ('text', 'PBXResourcesBuildPhase')
     }
     _SPECIAL_FOLDERS = [
         '.bundle',
