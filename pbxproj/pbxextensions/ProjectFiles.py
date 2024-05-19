@@ -119,7 +119,19 @@ class ProjectFiles:
         '.md': ('text', 'PBXResourcesBuildPhase'),
         '.blend': ('file.blender', 'PBXResourcesBuildPhase'),
         '.xcf': ('file.xcf', 'PBXResourcesBuildPhase'),
-        '.scene': ('file.scene', 'PBXResourcesBuildPhase')
+        '.scene': ('file.scene', 'PBXResourcesBuildPhase'),
+        '.wav': ('audio.wav', 'PBXResourcesBuildPhase'),
+        '.ogg': ('audio.ogg', 'PBXResourcesBuildPhase'),
+        '.as': ('sourcecode.actionscript', 'PBXSourcesBuildPhase'),
+        '.mesh': ('file.mesh', 'PBXResourcesBuildPhase'),
+        '.ttf': ('file.ttf', 'PBXResourcesBuildPhase'),
+        '.vert': ('sourcecode.glsl', 'PBXResourcesBuildPhase'),
+        '.frag': ('sourcecode.glsl', 'PBXResourcesBuildPhase'),
+        '.jfif': ('image.jfif', 'PBXResourcesBuildPhase'),
+        '.py': ('sourcecode.python', 'PBXSourcesBuildPhase'),
+        '.S': ('sourcecode.asm', 'PBXSourcesBuildPhase'),
+        '.asm': ('sourcecode.asm', 'PBXSourcesBuildPhase'),
+        '.inl': ('sourcecode.c.h', 'PBXHeadersBuildPhase')
     }
     _SPECIAL_FOLDERS = [
         '.bundle',
