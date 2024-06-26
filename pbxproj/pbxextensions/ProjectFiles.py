@@ -355,11 +355,8 @@ class ProjectFiles:
                 target.remove_build_phase(build_phase)
 
         # remove it iff it's removed from all targets or no build file reference it
-        if len([
-            True
-            for x in self.objects.get_objects_in_section('PBXBuildFile')
-            if hasattr(x, 'fileRef') == file_ref.get_id()
-        ]) != 0:
+        if len([1 for x in self.objects.get_objects_in_section('PBXBuildFile') if
+                hasattr(x, 'fileRef') and x.fileRef == file_ref.get_id()]) != 0:
             return True
 
         # remove the file from any groups if there is no reference from any target
