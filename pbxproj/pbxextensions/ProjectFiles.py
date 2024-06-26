@@ -345,7 +345,7 @@ class ProjectFiles:
             for build_file_id in filter(lambda x: x in self.objects, build_phase.files):
                 build_file = self.objects[build_file_id]
 
-                if build_file.fileRef == file_ref.get_id():
+                if hasattr(build_file, 'fileRef') and build_file.fileRef == file_ref.get_id():
                     # remove the build file from the phase
                     build_phase.remove_build_file(build_file)
 
@@ -355,7 +355,11 @@ class ProjectFiles:
                 target.remove_build_phase(build_phase)
 
         # remove it iff it's removed from all targets or no build file reference it
-        if len([1 for x in self.objects.get_objects_in_section('PBXBuildFile') if x.fileRef == file_ref.get_id()]) != 0:
+        if len([
+            True
+            for x in self.objects.get_objects_in_section('PBXBuildFile')
+            if hasattr(x, 'fileRef') == file_ref.get_id()
+        ]) != 0:
             return True
 
         # remove the file from any groups if there is no reference from any target
