@@ -145,7 +145,7 @@ class ProjectFiles:
     def __init__(self):
         raise EnvironmentError('This class cannot be instantiated directly, use XcodeProject instead')
 
-    def add_file(self, path, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, force=True,
+    def add_file(self, path, name=None, parent=None, tree=TreeType.SOURCE_ROOT, target_name=None, force=True,
                  file_options=FileOptions()):
         """
         Adds a file to the project, taking care of the type of the file and creating additional structures depending on
@@ -153,6 +153,7 @@ class ProjectFiles:
         Header file will be added to the headers sections, but not compiled, whereas the source files will be added to
         the compilation phase.
         :param path: Path to the file to be added
+        :param name: Optional custom name of the file, if None is passed then "path" will be used.
         :param parent: Parent group to be added under
         :param tree: Tree where the path is relative to
         :param target_name: Target name or list of target names where the file should be added (none for every target)
@@ -167,7 +168,7 @@ class ProjectFiles:
             if target_name.__len__() == 0:
                 return []
 
-        file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
+        file_ref, abs_path, path, tree, expected_build_phase = self._add_file_reference(path, name, parent, tree, force,
                                                                                         file_options)
         if path is None or tree is None:
             return None
@@ -199,7 +200,7 @@ class ProjectFiles:
                 build_phase = self.get_object(build_phase_id)
                 for build_file_id in build_phase.files:
                     build_file = self.get_object(build_file_id)
-                    if build_file is None:
+                    if build_file is None or not hasattr(build_file, 'fileRef'):
                         continue
 
                     file_ref = self.get_object(build_file.fileRef)
@@ -236,7 +237,7 @@ class ProjectFiles:
         if not force and self._file_exists(path):
             return []
 
-        file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, parent, tree, force,
+        file_ref, _, path, tree, expected_build_phase = self._add_file_reference(path, None, parent, tree, force,
                                                                                  file_options)
         if path is None or tree is None:
             return None
@@ -360,7 +361,8 @@ class ProjectFiles:
             return True
 
         # remove the file from any groups if there is no reference from any target
-        for group in filter(lambda x: file_ref.get_id() in x.children, self.objects.get_objects_in_section('PBXGroup')):
+        for group in filter(lambda x: file_ref.get_id() in x.children,
+                            self.objects.get_objects_in_section('PBXGroup', 'PBXVariantGroup')):
             group.remove_child(file_ref)
 
         # the file is not referenced in any build file, remove it
@@ -572,14 +574,14 @@ class ProjectFiles:
 
     # miscellaneous functions, candidates to be extracted and decouple implementation
 
-    def _add_file_reference(self, path, parent, tree, force, file_options):
+    def _add_file_reference(self, path, name, parent, tree, force, file_options):
         # decide the proper tree and path to add
         abs_path, path, tree = ProjectFiles._get_path_and_tree(self._source_root, path, tree)
         if path is None or tree is None:
             return None, abs_path, path, tree, None
 
         # create a PBXFileReference for the new file
-        file_ref = PBXFileReference.create(path, tree)
+        file_ref = PBXFileReference.create(path, name, tree)
 
         # determine the type of the new file:
         file_type, expected_build_phase = ProjectFiles._determine_file_type(file_ref, file_options.ignore_unknown_type)
@@ -637,7 +639,7 @@ class ProjectFiles:
 
     @classmethod
     def _determine_file_type(cls, file_ref, unknown_type_allowed):
-        ext = os.path.splitext(file_ref.get_name())[1]
+        ext = os.path.splitext(file_ref.path)[1]
         if os.path.isdir(os.path.abspath(file_ref.path)) and ext not in ProjectFiles._SPECIAL_FOLDERS:
             file_type = 'folder'
             build_phase = 'PBXResourcesBuildPhase'
