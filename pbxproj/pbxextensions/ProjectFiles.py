@@ -414,8 +414,8 @@ class ProjectFiles:
         # add the top folder as a group, make it the new parent
         path = os.path.abspath(path)
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
-            return self.add_file(path, parent, target_name=target_name, force=False, tree=TreeType.GROUP,
-                                 file_options=file_options)
+            return self.add_file(path, name=None, parent=parent, target_name=target_name,
+                                 force=False, tree=TreeType.GROUP, file_options=file_options)
 
         parent = self.get_or_create_group(os.path.split(path)[1], path, parent, make_relative=file_options.add_groups_relative)
 
@@ -430,8 +430,8 @@ class ProjectFiles:
             if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS or \
                     not create_groups:
                 # check if the file exists already, if not add it
-                children = self.add_file(full_path, parent, target_name=target_name, force=False, tree=TreeType.GROUP,
-                                         file_options=file_options)
+                children = self.add_file(full_path, name=None, parent=parent, target_name=target_name,
+                                         force=False, tree=TreeType.GROUP, file_options=file_options)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
                 if recursive:
