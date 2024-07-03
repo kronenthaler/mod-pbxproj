@@ -414,7 +414,7 @@ class ProjectFiles:
         # add the top folder as a group, make it the new parent
         path = os.path.abspath(path)
         if not create_groups and os.path.splitext(path)[1] not in ProjectFiles._SPECIAL_FOLDERS:
-            return self.add_file(path, name=None, parent=parent, target_name=target_name,
+            return self.add_file(path, parent=parent, target_name=target_name,
                                  force=False, tree=TreeType.GROUP, file_options=file_options)
 
         parent = self.get_or_create_group(os.path.split(path)[1], path, parent, make_relative=file_options.add_groups_relative)
