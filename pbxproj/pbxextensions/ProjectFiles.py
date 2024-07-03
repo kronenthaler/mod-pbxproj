@@ -430,7 +430,7 @@ class ProjectFiles:
             if os.path.isfile(full_path) or os.path.splitext(child)[1] in ProjectFiles._SPECIAL_FOLDERS or \
                     not create_groups:
                 # check if the file exists already, if not add it
-                children = self.add_file(full_path, name=None, parent=parent, target_name=target_name,
+                children = self.add_file(full_path, parent=parent, target_name=target_name,
                                          force=False, tree=TreeType.GROUP, file_options=file_options)
             else:
                 # if recursive is true, go deeper, otherwise create the group here.
