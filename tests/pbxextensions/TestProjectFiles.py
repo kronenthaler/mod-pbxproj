@@ -41,6 +41,12 @@ class ProjectFilesTest(unittest.TestCase):
             }
         }
 
+        self.pwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
+    def tearDown(self):
+        os.chdir(self.pwd)
+
     def testInit(self):
         with pytest.raises(EnvironmentError, match='^This class cannot be instantiated directly'):
             ProjectFiles()

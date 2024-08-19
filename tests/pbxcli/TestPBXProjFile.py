@@ -6,20 +6,22 @@ import unittest
 import pbxproj.pbxcli.pbxproj_file as pbxproj_file
 from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER, PATH_PLACEHOLDER
+from tests.pbxcli import BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH
 import pytest
-
-SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
 
 
 class PBXProjFileTest(unittest.TestCase):
     def setUp(self):
         # copy the project.pbxproj, into a file that can be used by the tests
+        self.pwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
         shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
         os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
+        os.chdir(self.pwd)
 
     def testRemoveFileUnknown(self):
         args = {
