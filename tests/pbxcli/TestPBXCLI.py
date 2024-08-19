@@ -6,16 +6,20 @@ from io import StringIO
 
 from pbxproj import XcodeProject
 from pbxproj.pbxcli import open_project, resolve_backup, backup_project, command_parser, PROJECT_PLACEHOLDER
+from tests.pbxcli import BASE_PROJECT_PATH
 import pytest
-
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
 
 
 class PBXCLITest(unittest.TestCase):
+    def setUp(self):
+        self.pwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
     def tearDown(self):
         if hasattr(self, 'backup_file') and self.backup_file:
             os.remove(self.backup_file)
         sys.stdout = sys.__stdout__
+        os.chdir(self.pwd)
 
     def testOpenProjectWithFullPath(self):
         project = open_project({PROJECT_PLACEHOLDER: BASE_PROJECT_PATH})

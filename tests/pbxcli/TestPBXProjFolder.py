@@ -7,20 +7,23 @@ import pbxproj.pbxcli.pbxproj_folder as pbxproj_folder
 from pbxproj import PBXGenericObject
 from pbxproj.pbxcli import open_project, PROJECT_PLACEHOLDER, PATH_PLACEHOLDER
 from pbxproj.pbxextensions.ProjectFiles import TreeType
+from tests.pbxcli import BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH
 import pytest
-
-SAMPLE_PROJECT_PATH = 'samplescli/test.pbxproj'
-BASE_PROJECT_PATH = 'samplescli/project.pbxproj'
 
 
 class PBXProjFolderTest(unittest.TestCase):
+
     def setUp(self):
+        self.pwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
         # copy the project.pbxproj, into a file that can be used by the tests
         shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
         os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
+        os.chdir(self.pwd)
 
     def testRemoveFolderUnknown(self):
         args = {

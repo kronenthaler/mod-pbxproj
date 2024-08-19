@@ -10,12 +10,16 @@ from tests.pbxcli import SAMPLE_PROJECT_PATH, BASE_PROJECT_PATH
 
 class TestPBXProjFlag(unittest.TestCase):
     def setUp(self):
+        self.pwd = os.getcwd()
+        os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
         # copy the project.pbxproj, into a file that can be used by the tests
         shutil.copyfile(BASE_PROJECT_PATH, SAMPLE_PROJECT_PATH)
 
     def tearDown(self):
         os.remove(SAMPLE_PROJECT_PATH)
         sys.stdout = sys.__stdout__
+        os.chdir(self.pwd)
 
     def testAddFlags(self):
         args = {

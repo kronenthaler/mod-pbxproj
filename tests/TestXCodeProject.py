@@ -3,6 +3,7 @@ import shutil
 import unittest
 
 from pbxproj import XcodeProject
+from os.path import join
 import re
 
 
@@ -37,6 +38,9 @@ class XCodeProjectTest(unittest.TestCase):
             }
         }
 
+        self.pwd = os.getcwd()
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
         # create tmp directory for results
         if not os.path.exists("results"):
             os.mkdir("results")
@@ -44,6 +48,7 @@ class XCodeProjectTest(unittest.TestCase):
     def tearDown(self):
         # remove tmp directory
         shutil.rmtree('results')
+        os.chdir(self.pwd)
 
     def testSaveOnGivenPath(self):
         XcodeProject().save("results/sample")
@@ -112,4 +117,3 @@ class XCodeProjectTest(unittest.TestCase):
             saved = project.__repr__() + '\n'
 
             assert saved == original
-

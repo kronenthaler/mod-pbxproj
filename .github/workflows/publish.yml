@@ -27,5 +27,5 @@ jobs:
           python setup.py sdist bdist_wheel
           twine upload dist/*
         env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
