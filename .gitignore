@@ -14,3 +14,6 @@ coverage.xml
 .DS_Store
 tests/parent_group
 *.bak
+
+# VSCode files
+.vscode
