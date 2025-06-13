@@ -38,7 +38,7 @@ jobs:
         run: make coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@master
         if: github.event_name == 'pull_request' && matrix.python == '3.x' && github.event.pull_request.head.repo.full_name != github.repository
         with:
           args: >
@@ -62,7 +62,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@master
         if: github.event_name == 'push' && matrix.python == '3.x' && github.event.pull_request.head.repo.full_name != github.repository
         with:
           args: >
