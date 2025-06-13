@@ -50,7 +50,7 @@ jobs:
             -Dsonar.projectKey=kronenthaler_mod-pbxproj
             -Dsonar.projectName=mod-pbxproj
             -Dsonar.python.version=3
-            -Dsonar.python.coverage.reportPaths=tests/coverage.xml
+            -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.sources=pbxproj/
             -Dsonar.tests=tests/
             -Dsonar.verbose=true
