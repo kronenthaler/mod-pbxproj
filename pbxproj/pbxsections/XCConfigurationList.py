@@ -17,5 +17,5 @@ class XCConfigurationList(PBXGenericObject):
         projects = filter(lambda o: target_id in o.buildConfigurationList, objects.get_objects_in_section('PBXProject'))
         project = projects.__next__()
         target = objects[project.targets[0]]
-        name = target.name if hasattr(target, 'name') else target.productName
+        name = target.productName
         return project.isa, name
