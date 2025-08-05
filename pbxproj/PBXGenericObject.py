@@ -11,7 +11,7 @@ class PBXGenericObject(object):
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
     """
     # use negative look-ahead to avoid matching the newline character in multiline strings
-    _VALID_KEY_REGEX = re.compile(r'^[$a-zA-Z0-9\\._/]*(?!\n)$')
+    _VALID_KEY_REGEX = re.compile(r'^\$?[a-zA-Z0-9\\._/]*(?!\n)$')
     _ESCAPE_REPLACEMENTS = [
         ('\\', '\\\\'),
         ('\n', '\\n'),
