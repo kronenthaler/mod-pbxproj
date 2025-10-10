@@ -27,4 +27,4 @@ from pbxproj.PBXRootObject import rootObject
 from pbxproj.XcodeProject import XcodeProject
 from pbxproj.pbxsections import *
 
-__version__ = '4.3.1'
+__version__ = '4.3.2'

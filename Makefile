@@ -20,5 +20,7 @@ commit-bump-version:
 	git push
 
 tag-release:
+	git checkout master
+	git pull --rebase
 	git tag -f "$(shell python3 -c 'import pbxproj; print(pbxproj.__version__)')"
 	git push origin master --tags
