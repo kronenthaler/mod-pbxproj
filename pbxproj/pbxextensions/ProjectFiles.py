@@ -135,6 +135,7 @@ class ProjectFiles:
     _SPECIAL_FOLDERS = [
         '.bundle',
         '.framework',
+        '.xcframework',
         '.xcodeproj',
         '.xcassets',
         '.xcdatamodeld',
