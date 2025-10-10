@@ -1,0 +1,21 @@
+[project]
+name = "pbxproj"
+description = "XCode Project manipulation library for Python"
+dynamic = ["version"]
+readme = "README.rst"
+license = "MIT"
+authors = [
+    { name = "Ignacio Calderon" }
+]
+requires-python = ">= 3.10"
+
+dependencies = [
+    "docopt",
+    "openstep-parser>=2.0.2"
+]
+
+[project.scripts]
+pbxproj = "pbxproj.__main__:main"
+pbxproj-file = "pbxproj.pbxcli.pbxproj_file:main"
+pbxproj-flag = "pbxproj.pbxcli.pbxproj_flag:main"
+pbxproj-folder = "pbxproj.pbxcli.pbxproj_folder:main"

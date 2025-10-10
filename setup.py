@@ -28,19 +28,6 @@ def find_version(*file_paths):
 setup(name='pbxproj',
       author='Ignacio Calderon',
       description='XCode Project manipulation library for Python',
-      long_description=long_description,
-      long_description_content_type='text/x-rst',
-      entry_points={
-        "console_scripts": [
-            'pbxproj = pbxproj.__main__:main',
-            'pbxproj-file = pbxproj.pbxcli.pbxproj_file:main',
-            'pbxproj-flag = pbxproj.pbxcli.pbxproj_flag:main',
-            'pbxproj-folder = pbxproj.pbxcli.pbxproj_folder:main'
-        ]
-      },
       url="http://github.com/kronenthaler/mod-pbxproj",
       version=find_version("pbxproj", "__init__.py"),
-      license='MIT License',
-      install_requires=['openstep_parser>=1.5.1', 'docopt'],
-      python_requires='>=3.8',
       packages=find_packages(exclude=['tests']))
