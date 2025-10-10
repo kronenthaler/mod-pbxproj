@@ -129,7 +129,7 @@ class PBXProjFolderTest(unittest.TestCase):
 
         assert project.get_files_by_path(args[PATH_PLACEHOLDER]+'/path with spaces/testLibrary.a',
                                                    tree=TreeType.GROUP).__len__() == 0
-        assert result == 'Folder added to the project.\n6 PBXBuildFile sections created.'
+        assert result == 'Folder added to the project.\n12 PBXBuildFile sections created.'
 
     def testAddFolderSuccessRecursive(self):
         args = {
@@ -155,7 +155,7 @@ class PBXProjFolderTest(unittest.TestCase):
 
         assert project.get_files_by_path(args[PATH_PLACEHOLDER]+'/path with spaces/testLibrary.a',
                                                      tree=TreeType.GROUP).__len__() > 0
-        assert result == 'Folder added to the project.\n18 PBXBuildFile sections created.'
+        assert result == 'Folder added to the project.\n24 PBXBuildFile sections created.'
 
     def testAddFolderSuccessWithPublicHeaders(self):
         args = {
@@ -182,7 +182,7 @@ class PBXProjFolderTest(unittest.TestCase):
 
         assert project.get_files_by_path(args[PATH_PLACEHOLDER]+'/path with spaces/testLibrary.a',
                                                      tree=TreeType.GROUP).__len__() > 0
-        assert result == 'Folder added to the project.\n18 PBXBuildFile sections created.'
+        assert result == 'Folder added to the project.\n24 PBXBuildFile sections created.'
         file = project.get_files_by_name('fileB.h')
         build_file = project.get_build_files_for_file(file[0].get_id())
         assert build_file[0].settings.__repr__() == \
