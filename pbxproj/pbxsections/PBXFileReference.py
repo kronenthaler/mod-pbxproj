@@ -5,12 +5,12 @@ from pbxproj import PBXGenericObject
 
 class PBXFileReference(PBXGenericObject):
     @classmethod
-    def create(cls, path, tree='SOURCE_ROOT'):
+    def create(cls, path, name=None, tree='SOURCE_ROOT'):
         return cls().parse({
             '_id': cls._generate_id(),
             'isa': cls.__name__,
             'path': path,
-            'name': os.path.split(path)[1],
+            'name': name or os.path.split(path)[1],
             'sourceTree': tree
         })
 
@@ -48,7 +48,7 @@ class PBXFileReference(PBXGenericObject):
             build_file.remove(recursive)
 
         # search for each group that has a reference to the build file and remove it from it.
-        for group in parent.get_objects_in_section('PBXGroup'):
+        for group in parent.get_objects_in_section('PBXGroup', 'PBXVariantGroup'):
             if self.get_id() in group.children:
                 group.remove_child(self)
 
