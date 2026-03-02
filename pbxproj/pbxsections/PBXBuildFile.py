@@ -9,18 +9,18 @@ class PBXBuildFile(PBXGenericObject):
         self._section = None
 
     @classmethod
-    def create(cls, file_ref, attributes=None, compiler_flags=None, is_product=False):
+    def create(cls, file_ref, attributes=None, compiler_flags=None, is_product=False, asset_tags=None):
         ref_key = 'productRef' if is_product else 'fileRef'
         return cls().parse({
             '_id': cls._generate_id(),
             'isa': cls.__name__,
             ref_key: file_ref.get_id(),
-            'settings': cls._get_settings(attributes, compiler_flags)
+            'settings': cls._get_settings(attributes, compiler_flags, asset_tags)
         })
 
     @classmethod
-    def _get_settings(cls, attributes=None, compiler_flags=None):
-        if attributes is None and compiler_flags is None:
+    def _get_settings(cls, attributes=None, compiler_flags=None, asset_tags=None):
+        if attributes is None and compiler_flags is None and asset_tags is None:
             return None
 
         settings = {}
@@ -33,6 +33,11 @@ class PBXBuildFile(PBXGenericObject):
             if not isinstance(compiler_flags, list):
                 compiler_flags = [compiler_flags]
             settings['COMPILER_FLAGS'] = ' '.join(compiler_flags)
+
+        if asset_tags is not None:
+            if not isinstance(asset_tags, list):
+                asset_tags = [asset_tags]
+            settings['ASSET_TAGS'] = asset_tags
 
         return settings
 
@@ -70,6 +75,36 @@ class PBXBuildFile(PBXGenericObject):
             return None
 
         return self.settings['ATTRIBUTES']
+
+    def get_asset_tags(self):
+        if 'settings' not in self or 'ASSET_TAGS' not in self.settings:
+            return None
+
+        return self.settings['ASSET_TAGS']
+
+    def add_asset_tags(self, asset_tags):
+        if not isinstance(asset_tags, list):
+            asset_tags = [asset_tags]
+
+        if 'settings' not in self:
+            self['settings'] = PBXGenericObject()
+
+        if 'ASSET_TAGS' not in self.settings:
+            self.settings['ASSET_TAGS'] = PBXList()
+
+        self.settings.ASSET_TAGS += asset_tags
+
+    def remove_asset_tags(self, asset_tags):
+        if 'settings' not in self or 'ASSET_TAGS' not in self.settings:
+            return False
+
+        if not isinstance(asset_tags, list):
+            asset_tags = [asset_tags]
+
+        for tag in asset_tags:
+            self.settings.ASSET_TAGS.remove(tag)
+
+        return self._clean_up_settings()
 
     def get_compiler_flags(self):
         if 'settings' not in self or 'COMPILER_FLAGS' not in self.settings:
@@ -138,6 +173,10 @@ class PBXBuildFile(PBXGenericObject):
         # no flags remain, remove the element
         if 'COMPILER_FLAGS' in self.settings and self.settings.COMPILER_FLAGS.__len__() == 0:
             del self.settings['COMPILER_FLAGS']
+
+        # no asset tags remain, remove the element
+        if 'ASSET_TAGS' in self.settings and self.settings.ASSET_TAGS.__len__() == 0:
+            del self.settings['ASSET_TAGS']
 
         if self.settings.get_keys().__len__() == 0:
             del self['settings']

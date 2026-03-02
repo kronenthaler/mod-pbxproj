@@ -213,3 +213,81 @@ class PBXBuildFileTest(unittest.TestCase):
         dobj = PBXBuildFile.create(obj, is_product=True)
 
         assert hasattr(dobj, "productRef")
+
+    def testGetAssetTagsWithoutSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        assert dobj.get_asset_tags() is None
+
+    def testGetAssetTagsWithoutAssetTags(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), compiler_flags='x')
+
+        assert dobj.get_asset_tags() is None
+
+    def testGetAssetTagsWithAssetTags(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags='level1')
+
+        tags = dobj.get_asset_tags()
+
+        assert tags is not None
+        assert tags == ['level1']
+
+    def testCreateWithAssetTagsList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags=['level1', 'level2'])
+
+        tags = dobj.get_asset_tags()
+
+        assert tags is not None
+        assert tags == ['level1', 'level2']
+
+    def testAddAssetTagsWithoutSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        dobj.add_asset_tags('level1')
+
+        assert dobj.settings.ASSET_TAGS is not None
+        assert dobj.settings.ASSET_TAGS == ['level1']
+
+    def testAddAssetTagsList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        dobj.add_asset_tags(['level1', 'level2'])
+
+        assert dobj.settings.ASSET_TAGS is not None
+        assert dobj.settings.ASSET_TAGS == ['level1', 'level2']
+
+    def testAddAssetTagsWithExistingTags(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags='level1')
+
+        dobj.add_asset_tags('level2')
+
+        assert dobj.settings.ASSET_TAGS == ['level1', 'level2']
+
+    def testRemoveAssetTagsWithoutSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject())
+
+        dobj.remove_asset_tags('level1')
+
+        assert dobj['settings'] is None
+
+    def testRemoveAssetTagsList(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags=['level1', 'level2'])
+
+        dobj.remove_asset_tags(['level1', 'level2'])
+
+        assert dobj['settings'] is None
+
+    def testRemoveAssetTagsWithSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags=['level1'])
+
+        dobj.remove_asset_tags('level1')
+
+        assert dobj['settings'] is None
+
+    def testRemoveAssetTagsLeavesOtherSettings(self):
+        dobj = PBXBuildFile.create(PBXGenericObject(), asset_tags=['level1'], compiler_flags='-fno-arc')
+
+        dobj.remove_asset_tags('level1')
+
+        assert dobj['settings'] is not None
+        assert dobj.settings.COMPILER_FLAGS == '-fno-arc'
