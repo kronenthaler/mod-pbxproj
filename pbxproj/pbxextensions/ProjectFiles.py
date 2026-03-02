@@ -32,7 +32,7 @@ class FileOptions:
     Wrapper class for all file parameters required at the moment of adding a file to the project.
     """
     def __init__(self, create_build_files=True, weak=False, ignore_unknown_type=False, embed_framework=True,
-                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT, add_groups_relative=True):
+                 code_sign_on_copy=True, header_scope=HeaderScope.PROJECT, add_groups_relative=True, asset_tags=None):
         """
         Creates an object specifying options to be considered during the file creation into the project.
 
@@ -44,6 +44,8 @@ class FileOptions:
         :param header_scope: When adding a header file, adds the header as HeaderScope.PROJECT (default),
             HeaderScope.PRIVATE or HeaderScope.PUBLIC.
         :param add_groups_relative: Sets the group name to match the relative path is representing (default).
+        :param asset_tags: On-Demand Resource tags to assign to the file (list of strings or single string).
+            Tags are also registered in the project's KnownAssetTags.
         """
         self.create_build_files = create_build_files
         self.weak = weak
@@ -52,6 +54,7 @@ class FileOptions:
         self.code_sign_on_copy = code_sign_on_copy
         self.header_scope = header_scope
         self.add_groups_relative = add_groups_relative
+        self.asset_tags = asset_tags
 
     def get_attributes(self, file_ref, build_phase):
         if file_ref.get_file_type() not in ('wrapper.framework', 'wrapper.xcframework') and file_ref.get_file_type() != 'sourcecode.c.h':
@@ -612,11 +615,17 @@ class ProjectFiles:
 
             # create the build file and add it to the phase
             for target_build_phase in build_phases:
-                build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase))
+                build_file = PBXBuildFile.create(file_ref, file_options.get_attributes(file_ref, target_build_phase),
+                                                 asset_tags=file_options.asset_tags)
                 self.objects[build_file.get_id()] = build_file
                 target_build_phase.add_build_file(build_file)
 
                 results.append(build_file)
+
+        # register asset tags in the project's KnownAssetTags
+        if file_options.asset_tags is not None:
+            for project_obj in self.objects.get_objects_in_section('PBXProject'):
+                project_obj.add_known_asset_tags(file_options.asset_tags)
 
         return results
 

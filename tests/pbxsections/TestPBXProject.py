@@ -28,6 +28,60 @@ class PBXProjectTest(unittest.TestCase):
 
         assert obj.attributes.TargetAttributes[u'1'].ProvisioningStyle == PBXProvisioningTypes.AUTOMATIC
 
+    def testAddKnownAssetTag(self):
+        obj = PBXProject()
+
+        obj.add_known_asset_tags('level1')
+
+        assert obj.attributes.KnownAssetTags == ['level1']
+
+    def testAddKnownAssetTagList(self):
+        obj = PBXProject()
+
+        obj.add_known_asset_tags(['level1', 'level2'])
+
+        assert obj.attributes.KnownAssetTags == ['level1', 'level2']
+
+    def testAddKnownAssetTagsWithExistingTags(self):
+        obj = PBXProject()
+        obj.add_known_asset_tags('level1')
+
+        obj.add_known_asset_tags('level2')
+
+        assert obj.attributes.KnownAssetTags == ['level1', 'level2']
+
+    def testAddKnownAssetTagNoDuplicates(self):
+        obj = PBXProject()
+        obj.add_known_asset_tags('level1')
+
+        obj.add_known_asset_tags('level1')
+
+        assert obj.attributes.KnownAssetTags == ['level1']
+
+    def testRemoveKnownAssetTag(self):
+        obj = PBXProject()
+        obj.add_known_asset_tags(['level1', 'level2'])
+
+        obj.remove_known_asset_tags('level1')
+
+        assert obj.attributes.KnownAssetTags == ['level2']
+
+    def testRemoveKnownAssetTagList(self):
+        obj = PBXProject()
+        obj.add_known_asset_tags(['level1', 'level2'])
+
+        obj.remove_known_asset_tags(['level1', 'level2'])
+
+        assert obj['attributes'] is None or 'KnownAssetTags' not in obj.attributes
+
+    def testRemoveKnownAssetTagNotPresent(self):
+        obj = PBXProject()
+
+        # should not raise
+        obj.remove_known_asset_tags('level1')
+
+        assert obj['attributes'] is None
+
     def testRetainProjectReferences(self):
         obj = PBXProject().parse({'projectReferences': [
 				{

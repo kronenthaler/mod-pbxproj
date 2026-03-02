@@ -549,3 +549,52 @@ class ProjectFilesTest(unittest.TestCase):
 
         result = project.get_or_create_package_dependency('Some Product', '', {})
         assert result is not None
+
+    def testAddFileWithAssetTagsSetsAssetTagsOnBuildFile(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        references = project.add_file("image.png", file_options=FileOptions(asset_tags=['level1']))
+
+        assert references[0].settings.ASSET_TAGS == ['level1']
+
+    def testAddFileWithAssetTagsRegistersTagsOnProject(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        project.add_file("image.png", file_options=FileOptions(asset_tags=['level1', 'level2']))
+
+        project_obj = project.objects.get_objects_in_section('PBXProject')[0]
+        assert project_obj.attributes.KnownAssetTags == ['level1', 'level2']
+
+    def testAddFileWithoutAssetTagsDoesNotSetAssetTags(self):
+        project = XcodeProject({
+            'objects': {
+                '2': {'isa': 'PBXAggregateTarget', 'name': 'report', 'buildConfigurationList': '4',
+                      'buildPhases': []},
+                '4': {'isa': 'XCConfigurationList', 'buildConfigurations': ['7', '8']},
+                '7': {'isa': 'XCBuildConfiguration', 'name': 'Release', 'id': '7'},
+                '8': {'isa': 'XCBuildConfiguration', 'name': 'Debug', 'id': '8'},
+                'project': {'isa': 'PBXProject'}
+            }
+        })
+
+        references = project.add_file("image.png", file_options=FileOptions())
+
+        assert references[0]['settings'] is None
