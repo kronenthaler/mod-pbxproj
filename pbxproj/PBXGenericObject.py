@@ -11,7 +11,7 @@ class PBXGenericObject(object):
     Also, prints itself using the openstep format. Extensions might be required to insert comments on right places.
     """
     # use negative look-ahead to avoid matching the newline character in multiline strings
-    _VALID_KEY_REGEX = re.compile(r'^[a-zA-Z0-9\\._/]*(?!\n)$')
+    _VALID_KEY_REGEX = re.compile(r'^[a-zA-Z0-9\\._/$]*(?!\n)$')
     _ESCAPE_REPLACEMENTS = [
         ('\\', '\\\\'),
         ('\n', '\\n'),
@@ -46,7 +46,13 @@ class PBXGenericObject(object):
                 continue
 
             key = self._parse_string(key)
-            setattr(self, key, self._get_instance(key, value))
+            parsed_value = self._get_instance(key, value)
+
+            # Keep TestTargetID values as plain ids without synthetic inline comments.
+            if key == 'TestTargetID' and isinstance(parsed_value, PBXKey):
+                parsed_value._skip_comment = True
+
+            setattr(self, key, parsed_value)
 
         return self
 

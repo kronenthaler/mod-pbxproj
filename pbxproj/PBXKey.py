@@ -5,6 +5,9 @@ class PBXKey(str):
         return obj
 
     def __repr__(self):
+        if getattr(self, '_skip_comment', False):
+            return self.__str__()
+
         comment = self._get_comment()
         if comment is not None:
             comment = f' /* {comment} */'

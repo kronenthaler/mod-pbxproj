@@ -27,6 +27,7 @@ class PBXGenericObjectTest(unittest.TestCase):
 
     def testEscapeItem(self):
         assert PBXGenericObject._escape("/bin/sh") == "/bin/sh"
+        assert PBXGenericObject._escape("$BUILT_PRODUCTS_DIR/Headers") == "$BUILT_PRODUCTS_DIR/Headers"
         assert PBXGenericObject._escape("/bin/sh\n") == '"/bin/sh\\n"'
         assert PBXGenericObject._escape("abcdefghijklmnopqrstuvwyz0123456789") == \
                          "abcdefghijklmnopqrstuvwyz0123456789"
@@ -105,3 +106,36 @@ class PBXGenericObjectTest(unittest.TestCase):
         assert dobj._resolve_comment('a') == 'A'
         assert dobj._resolve_comment('b') == 'B'
         assert dobj._resolve_comment('c') == None
+
+    def testPrintObjectNoCommentForTestTargetId(self):
+        obj = {
+            "objects": {
+                "AAAAAAAAAAAAAAAAAAAAAAAA": {
+                    "isa": "PBXNativeTarget",
+                    "name": "TestTarget",
+                    "buildConfigurationList": "CCCCCCCCCCCCCCCCCCCCCCCC",
+                    "buildPhases": []
+                },
+                "BBBBBBBBBBBBBBBBBBBBBBBB": {
+                    "isa": "PBXProject",
+                    "attributes": {
+                        "TargetAttributes": {
+                            "DDDDDDDDDDDDDDDDDDDDDDDD": {
+                                "TestTargetID": "AAAAAAAAAAAAAAAAAAAAAAAA"
+                            }
+                        }
+                    },
+                    "buildConfigurationList": "CCCCCCCCCCCCCCCCCCCCCCCC",
+                    "targets": ["AAAAAAAAAAAAAAAAAAAAAAAA"]
+                },
+                "CCCCCCCCCCCCCCCCCCCCCCCC": {
+                    "isa": "XCConfigurationList",
+                    "buildConfigurations": []
+                }
+            }
+        }
+
+        dobj = PBXGenericObject().parse(obj)
+
+        assert "TestTargetID = AAAAAAAAAAAAAAAAAAAAAAAA;" in dobj.__repr__()
+        assert "TestTargetID = AAAAAAAAAAAAAAAAAAAAAAAA /* TestTarget */;" not in dobj.__repr__()
