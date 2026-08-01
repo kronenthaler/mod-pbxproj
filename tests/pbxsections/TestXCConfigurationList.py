@@ -47,8 +47,39 @@ class XCConfigurationListTest(unittest.TestCase):
                 "1": {
                     "isa": "PBXProject",
                     "buildConfigurationList": ['2'],
-                    "targets": ["1"],
-                    "productName": "the-target-name"
+                    "targets": ["3"],
+                },
+                "3": {
+                    "isa": "PBXNativeTarget",
+                    "name": "the-target-name",
+                    "productName": "the-product-name",
+                    "buildConfigurationList": ['4']
+                },
+                "4": {
+                    'isa': 'XCConfigurationList'
+                },
+                "2": {
+                    'isa': 'XCConfigurationList'
+                }
+            })
+        config = objs['2']
+        assert config._get_comment() == 'Build configuration list for PBXProject "the-product-name"'
+
+    def testGetSectionOnProjectFallbackToTargetName(self):
+        objs = objects(None).parse(
+            {
+                "1": {
+                    "isa": "PBXProject",
+                    "buildConfigurationList": ['2'],
+                    "targets": ["3"],
+                },
+                "3": {
+                    "isa": "PBXNativeTarget",
+                    "name": "the-target-name",
+                    "buildConfigurationList": ['4']
+                },
+                "4": {
+                    'isa': 'XCConfigurationList'
                 },
                 "2": {
                     'isa': 'XCConfigurationList'
