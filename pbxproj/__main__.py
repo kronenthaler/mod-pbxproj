@@ -15,6 +15,8 @@ commands:
 See pbxproj <command> --help, for more information about a specific command.
 """
 
+import sys
+
 from docopt import docopt
 
 import pbxproj
@@ -38,6 +40,10 @@ def main():
     elif cmd == 'show':
         import pbxproj.pbxcli.pbxproj_show as pbxproj_show
         command_parser(pbxproj_show.execute, auto_save=False)(docopt(pbxproj_show.__doc__, argv=argv))
+    else:
+        print(f'Unknown command: {cmd}', file=sys.stderr)
+        print(__doc__, file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
